@@ -1,0 +1,33 @@
+version: "3.6"
+
+services:
+  satisfactory-server:
+    build:
+      context: .
+      dockerfile: docker/satisfactory-server.Dockerfile
+      args:
+        USER_ID: 1000
+        GROUP_ID: 1000
+    restart: always
+    user: "1000:1000"
+    environment:
+      - "GAME_VERSION=public"
+      - "MAX_PLAYERS=16"
+      - "BIND_IP=0.0.0.0"
+      - "QUERY_PORT=15777"
+      - "GAME_PORT=7777"
+    ports:
+      - target: 15777
+        published: 15777
+        protocol: udp
+      - target: 15000
+        published: 15000
+        protocol: udp
+      - target: 7777
+        published: 7777
+        protocol: udp
+    volumes:
+      - ./SatisfactoryDedicatedServer:/home/steam/SatisfactoryDedicatedServer
+      - ./SatisfactorySaveGames:/home/steam/.config/Epic/FactoryGame/Saved/SaveGames
+    cap_drop:
+      - ALL

@@ -1,0 +1,19 @@
+///////////////////////////////////////////////////////////////////////
+// SteamCMD installation script for Satisfactory Dedicated Server
+///////////////////////////////////////////////////////////////////////
+
+// Do not shutdown on a failed command
+@ShutdownOnFailedCommand 0
+
+//No password as this is unattended
+@NoPromptForPassword 1
+
+// Set the game installation directory
+force_install_dir /home/steam/SatisfactoryDedicatedServer
+
+login anonymous
+
+// Install/Update the Satisfactory Dedicated Server
+app_update 380870 -beta GAME_VERSION validate
+
+quit
