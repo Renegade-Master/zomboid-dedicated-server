@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// SteamCMD installation script for Satisfactory Dedicated Server
+// SteamCMD installation script for Zomboid Dedicated Server
 ///////////////////////////////////////////////////////////////////////
 
 // Do not shutdown on a failed command
@@ -9,11 +9,11 @@
 @NoPromptForPassword 1
 
 // Set the game installation directory
-force_install_dir /home/steam/SatisfactoryDedicatedServer
+force_install_dir /home/steam/ZomboidDedicatedServer
 
 login anonymous
 
-// Install/Update the Satisfactory Dedicated Server
+// Install/Update the Zomboid Dedicated Server
 app_update 380870 -beta GAME_VERSION validate
 
 quit

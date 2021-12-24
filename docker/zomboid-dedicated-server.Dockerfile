@@ -11,9 +11,9 @@ ARG GROUP_ID=1000
 FROM renegademaster/steamcmd-minimal:1.0.0
 
 # Add metadata labels
-LABEL com.renegademaster.satisfactory-dedicated-server.authors="Renegade-Master" \
-    com.renegademaster.satisfactory-dedicated-server.source-repository="https://github.com/Renegade-Master/zomboid-dedicated-server" \
-    com.renegademaster.satisfactory-dedicated-server.image-repository="https://hub.docker.com/r/renegademaster/zomboid-dedicated-server"
+LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
+    com.renegademaster.zomboid-dedicated-server.source-repository="https://github.com/Renegade-Master/zomboid-dedicated-server" \
+    com.renegademaster.zomboid-dedicated-server.image-repository="https://hub.docker.com/renegademaster/zomboid-dedicated-server"
 
 # Copy the source files
 COPY src /home/steam/

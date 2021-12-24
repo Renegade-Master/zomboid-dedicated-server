@@ -2,7 +2,7 @@
 
 ## Disclaimer
 
-**Note:** This image is not officially supported by Valve, nor by Coffee Stain Studios
+**Note:** This image is not officially supported by Valve, nor by The Indie Stone.
 
 If issues are encountered, please report them on
 the [GitHub repository](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/new/choose)
@@ -21,7 +21,9 @@ Source:
 
 Resource links:
 
-- *None*
+- [Dedicated Server Wiki](https://pzwiki.net/wiki/Dedicated_Server)
+- [Steam DB Page](https://steamdb.info/app/380870/)
+
 ## Instructions
 
 ### Docker
@@ -43,31 +45,53 @@ The following are instructions for running the server using the Docker image.
       docker build -t renegademaster/zomboid-dedicated-server:<tag> -f docker/zomboid-dedicated-server.Dockerfile .
       ```
 
-2. Run the container:  
+2. Run the container interactively:  
    *Optional arguments table*:
 
    | Argument       | Description                           | Values                   | Default          |
    |----------------|---------------------------------------|--------------------------|------------------|
-   | `GAME_VERSION` | Game version to serve                 | `public`, `experimental` | `public`         |
-   | `MAX_PLAYERS`  | Max player count                      | 1-16+                    | 16               |
+   | `GAME_VERSION` | Game version to serve                 | `public`                 | `public`         |
    | `BIND_IP`      | IP to bind the server to              | 127.0.0.1                | 0.0.0.0 / \[::\] |
-   | `QUERY_PORT`   | Port for other players to connect to  | 1000-65535               | 15777            |
-   | `GAME_PORT`    | Port for sending game data to clients | 1000-65535               | 7777             |
+   | `QUERY_PORT`   | Port for other players to connect to  | 1000-65535               | 16261            |
+   | `GAME_PORT`    | Port for sending game data to clients | 1000-65535               | 8766             |
 
    ***Note**: Arguments inside square brackets are optional. If the default ports are to be overridden, then the
-   `published` ports below must also be changed*
+   `published` ports below must also be changed*  
+
+   ***Note 2**: It is currently not possible to automatically provide an admin password. This means that the game 
+   must be run INTERACTIVELY the first time in order to set the admin password, but can be run headless every time 
+   after that.* 
 
    ```shell
-   mkdir ZomboidDedicatedServer ZomboidSaveGames
+   mkdir ZomboidConfig ZomboidDedicatedServer
 
-   docker run --detach \
+   docker run -it \
        --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
-       --mount type=bind,source="$(pwd)/ZomboidSaveGames",target=/home/steam/.config/Epic/FactoryGame/Saved/SaveGames \
-       --publish 15777:15777/udp --publish 15000:15000/udp --publish 7777:777/udp \
-       --name satisfactory-server \
+       --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
+       --publish 16261:16261/udp --publish 8766:8766/udp \
+       --name zomboid-server \
        --user=$(id -u):$(id -g) \
        [--env=GAME_VERSION=<value>] \
-       [--env=MAX_PLAYERS=<value>] \
+       [--env=BIND_IP=<value>] \
+       [--env=QUERY_PORT=<value>] \
+       [--env=GAME_PORT=<value>] \
+       renegademaster/zomboid-dedicated-server[:<tagname>]
+   ```
+
+3. Wait to be prompted to enter the admin password. Set this to something that you will remember.
+
+4. Once you see `znet: Zomboid Server is VAC Secure` in the console press `CTRL + C` to stop the server.
+
+5. Run the container headless:
+
+   ```shell
+   docker run --detach \
+       --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
+       --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
+       --publish 16261:16261/udp --publish 8766:8766/udp \
+       --name zomboid-server \
+       --user=$(id -u):$(id -g) \
+       [--env=GAME_VERSION=<value>] \
        [--env=BIND_IP=<value>] \
        [--env=QUERY_PORT=<value>] \
        [--env=GAME_PORT=<value>] \
@@ -86,29 +110,38 @@ The following are instructions for running the server using Docker-Compose.
    ```
 
 2. Make any configuration changes you want to in the `docker-compose.yaml` file. In
-   the `services.satisfactory-server.environment` section, you can change values for:
+   the `services.zomboid-server.environment` section, you can change values for:
 
    | Argument       | Description                           | Values                   | Default          |
    |----------------|---------------------------------------|--------------------------|------------------|
-   | `GAME_VERSION` | Game version to serve                 | `public`, `experimental` | `public`         |
-   | `MAX_PLAYERS`  | Max player count                      | 1-16+                    | 16               |
+   | `GAME_VERSION` | Game version to serve                 | `public`                 | `public`         |
    | `BIND_IP`      | IP to bind the server to              | 127.0.0.1                | 0.0.0.0 / \[::\] |
-   | `QUERY_PORT`   | Port for other players to connect to  | 1000-65535               | 15777            |
-   | `GAME_PORT`    | Port for sending game data to clients | 1000-65535               | 7777             |
+   | `QUERY_PORT`   | Port for other players to connect to  | 1000-65535               | 16261            |
+   | `GAME_PORT`    | Port for sending game data to clients | 1000-65535               | 8766             |
 
    ***Note**: If the default ports are to be overridden, then the `published` ports must also be changed*
 
-4. In the `docker-compose.yaml` file, you must change the `service.satisfactory-server.user` values to match your local
-   user. To find your local user and group ids, run the following command:
+3. In the `docker-compose.yaml` file, you must change the `service.zomboid-server.user` values to match your local user.
+   To find your local user and group ids, run the following command:
 
    ```shell
    printf "UID: %s\nGID: %s\n" $(id -u) $(id -g)
    ```
 
-5. Run the following command:
+4. Run the following commands:
 
    ```shell
-   mkdir ZomboidDedicatedServer ZomboidSaveGames
+   mkdir ZomboidConfig ZomboidDedicatedServer
 
-   docker-compose up -d
+   docker-compose run zomboid-server /home/steam/ZomboidDedicatedServer/start-server.sh
+   ```
+
+5. Wait to be prompted to enter the admin password. Set this to something that you will remember.
+
+6. Once you see `znet: Zomboid Server is VAC Secure` in the console press `CTRL + C` to stop the server.
+
+7. Run the following command to start the server headless:
+
+   ```shell
+   docker-compose up --detach
    ```

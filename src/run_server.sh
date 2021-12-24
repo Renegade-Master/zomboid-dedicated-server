@@ -1,22 +1,18 @@
 #!/usr/bin/env bash
 #######################################################################
 #   Author: Renegade-Master
-#   Description: Install, update, and start a Dedicated Satisfactory
+#   Description: Install, update, and start a Dedicated Zomboid
 #       instance.
 #######################################################################
 
 # Set to `-x` for Debug logging
 set +x
 
-# Start the Satisfactory Server
-function start_satisfactory() {
-    printf "\n### Starting Satisfactory Server...\n"
+# Start the Server
+function start_server() {
+    printf "\n### Starting Zomboid Server...\n"
 
-    "$BASE_GAME_DIR"/FactoryServer.sh \
-        -multihome="$BIND_IP" \
-        -ServerQueryPort="$QUERY_PORT" \
-        -Port="$GAME_PORT"
-
+    "$BASE_GAME_DIR"/start-server.sh
 }
 
 function apply_postinstall_config() {
@@ -32,21 +28,21 @@ function apply_postinstall_config() {
     printf "\n### Post Install Configuration applied.\n"
 }
 
-# Update the Satisfactory server
-function update_satisfactory() {
-    printf "\n### Updating Satisfactory Server...\n"
+# Update the server
+function update_server() {
+    printf "\n### Updating Zomboid Server...\n"
 
-    $STEAM_PATH +runscript /home/steam/install_satisfactory.scmd
+    "$STEAM_PATH" +runscript /home/steam/install_server.scmd
 
-    printf "\n### Satisfactory Server updated.\n"
+    printf "\n### Zomboid Server updated.\n"
 }
 
-# Apply user configuration to the Satisfactory server
+# Apply user configuration to the server
 function apply_preinstall_config() {
     printf "\n### Applying Pre Install Configuration...\n"
 
     # Set the selected game version
-    sed -i "s/beta .* /beta $GAME_VERSION /g" /home/steam/install_satisfactory.scmd
+    sed -i "s/beta .* /beta $GAME_VERSION /g" /home/steam/install_server.scmd
 
     printf "\n### Pre Install Configuration applied.\n"
 }
@@ -55,8 +51,8 @@ function apply_preinstall_config() {
 function update_folder_permissions() {
     printf "\n### Updating Folder Permissions...\n"
 
-    chown -R "${USER}:${USER}" "$BASE_GAME_DIR"
-    chown -R "${USER}:${USER}" /home/steam/.config/Epic/FactoryGame/Saved/SaveGames
+    chown -R "$(id -u):$(id -g)" "$BASE_GAME_DIR"
+    chown -R "$(id -u):$(id -g)" "$CONFIG_DIR"
 
     printf "\n### Folder Permissions updated.\n"
 }
@@ -65,35 +61,26 @@ function update_folder_permissions() {
 function set_variables() {
     printf "\n### Setting variables...\n"
 
-    BASE_GAME_DIR="/home/steam/SatisfactoryDedicatedServer"
-    CONFIG_DIR="${BASE_GAME_DIR}/FactoryGame/Saved/Config/LinuxServer"
+    BASE_GAME_DIR="/home/steam/ZomboidDedicatedServer"
+    CONFIG_DIR="/home/steam/Zomboid/"
 
     # Set the game version variable
     GAME_VERSION=${GAME_VERSION:-"public"}
-
-    # Set the max players variable
-    MAX_PLAYERS=${MAX_PLAYERS:-"16"}
-
-    # Set the max players string variable
-    read -r -d '' MAX_PLAYER_STRING << EOF
-[/Script/Engine.GameSession]
-MaxPlayers=$MAX_PLAYERS
-EOF
 
     # Set the IP address variable
     BIND_IP=${BIND_IP:-"0.0.0.0"}
 
     # Set the IP Query Port variable
-    QUERY_PORT=${QUERY_PORT:-"15777"}
+    QUERY_PORT=${QUERY_PORT:-"16261"}
 
     # Set the IP Game Port variable
-    GAME_PORT=${GAME_PORT:-"7777"}
+    GAME_PORT=${GAME_PORT:-"8766"}
 }
 
 ## Main
 set_variables
 update_folder_permissions
 apply_preinstall_config
-update_satisfactory
-apply_postinstall_config
-start_satisfactory
+update_server
+#apply_postinstall_config
+start_server

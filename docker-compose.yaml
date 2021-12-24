@@ -1,33 +1,29 @@
 version: "3.6"
 
 services:
-  satisfactory-server:
+  zomboid-server:
     build:
       context: .
-      dockerfile: docker/satisfactory-server.Dockerfile
+      dockerfile: docker/zomboid-dedicated-server.Dockerfile
       args:
         USER_ID: 1000
         GROUP_ID: 1000
-    restart: always
+    restart: unless-stopped
     user: "1000:1000"
     environment:
       - "GAME_VERSION=public"
-      - "MAX_PLAYERS=16"
       - "BIND_IP=0.0.0.0"
-      - "QUERY_PORT=15777"
-      - "GAME_PORT=7777"
+      - "QUERY_PORT=16261"
+      - "GAME_PORT=8766"
     ports:
-      - target: 15777
-        published: 15777
+      - target: 8766
+        published: 8766
         protocol: udp
-      - target: 15000
-        published: 15000
-        protocol: udp
-      - target: 7777
-        published: 7777
+      - target: 16261
+        published: 16261
         protocol: udp
     volumes:
-      - ./SatisfactoryDedicatedServer:/home/steam/SatisfactoryDedicatedServer
-      - ./SatisfactorySaveGames:/home/steam/.config/Epic/FactoryGame/Saved/SaveGames
+      - ./ZomboidDedicatedServer:/home/steam/ZomboidDedicatedServer
+      - ./ZomboidConfig:/home/steam/Zomboid/
     cap_drop:
       - ALL
