@@ -22,6 +22,7 @@ Source:
 Resource links:
 
 - [Dedicated Server Wiki](https://pzwiki.net/wiki/Dedicated_Server)
+- [Dedicated Server Configuration](https://pzwiki.net/wiki/Server_Settings)
 - [Steam DB Page](https://steamdb.info/app/380870/)
 
 ## Instructions
@@ -48,12 +49,13 @@ The following are instructions for running the server using the Docker image.
 2. Run the container interactively:  
    *Optional arguments table*:
 
-   | Argument       | Description                           | Values                   | Default          |
-   |----------------|---------------------------------------|--------------------------|------------------|
-   | `GAME_VERSION` | Game version to serve                 | `public`                 | `public`         |
-   | `BIND_IP`      | IP to bind the server to              | 127.0.0.1                | 0.0.0.0 / \[::\] |
-   | `QUERY_PORT`   | Port for other players to connect to  | 1000-65535               | 16261            |
-   | `GAME_PORT`    | Port for sending game data to clients | 1000-65535               | 8766             |
+   | Argument       | Description                           | Values     | Default  |
+   |----------------|---------------------------------------|------------|----------|
+   | `GAME_VERSION` | Game version to serve                 | `public`   | `public` |
+   | `BIND_IP`      | IP to bind the server to              | 127.0.0.1  | 0.0.0.0  |
+   | `QUERY_PORT`   | Port for other players to connect to  | 1000-65535 | 16261    |
+   | `GAME_PORT`    | Port for sending game data to clients | 1000-65535 | 8766     |
+   | `MAX_RAM`      | Maximum amount of RAM to be used      | 2048m      | 4096m    |
 
    ***Note**: Arguments inside square brackets are optional. If the default ports are to be overridden, then the
    `published` ports below must also be changed*  
@@ -75,6 +77,7 @@ The following are instructions for running the server using the Docker image.
        [--env=BIND_IP=<value>] \
        [--env=QUERY_PORT=<value>] \
        [--env=GAME_PORT=<value>] \
+       [--env=MAX_RAM=<value>] \
        renegademaster/zomboid-dedicated-server[:<tagname>]
    ```
 
@@ -95,6 +98,7 @@ The following are instructions for running the server using the Docker image.
        [--env=BIND_IP=<value>] \
        [--env=QUERY_PORT=<value>] \
        [--env=GAME_PORT=<value>] \
+       [--env=MAX_RAM=<value>] \
        renegademaster/zomboid-dedicated-server[:<tagname>]
    ```
 
@@ -112,12 +116,13 @@ The following are instructions for running the server using Docker-Compose.
 2. Make any configuration changes you want to in the `docker-compose.yaml` file. In
    the `services.zomboid-server.environment` section, you can change values for:
 
-   | Argument       | Description                           | Values                   | Default          |
-   |----------------|---------------------------------------|--------------------------|------------------|
-   | `GAME_VERSION` | Game version to serve                 | `public`                 | `public`         |
-   | `BIND_IP`      | IP to bind the server to              | 127.0.0.1                | 0.0.0.0 / \[::\] |
-   | `QUERY_PORT`   | Port for other players to connect to  | 1000-65535               | 16261            |
-   | `GAME_PORT`    | Port for sending game data to clients | 1000-65535               | 8766             |
+   | Argument       | Description                           | Values     | Default  |
+   |----------------|---------------------------------------|------------|----------|
+   | `GAME_VERSION` | Game version to serve                 | `public`   | `public` |
+   | `BIND_IP`      | IP to bind the server to              | 127.0.0.1  | 0.0.0.0  |
+   | `QUERY_PORT`   | Port for other players to connect to  | 1000-65535 | 16261    |
+   | `GAME_PORT`    | Port for sending game data to clients | 1000-65535 | 8766     |
+   | `MAX_RAM`      | Maximum amount of RAM to be used      | 2048m      | 4096m    |
 
    ***Note**: If the default ports are to be overridden, then the `published` ports must also be changed*
 

@@ -18,12 +18,8 @@ function start_server() {
 function apply_postinstall_config() {
     printf "\n### Applying Post Install Configuration...\n"
 
-    # Set the maximum number of players if it hasn't been set already
-    if grep -q "MaxPlayers=" "$CONFIG_DIR/Game.ini"; then
-        sed -i "s/MaxPlayers=.*/MaxPlayers=$MAX_PLAYERS/g" "$CONFIG_DIR/Game.ini"
-    else
-        echo "$MAX_PLAYER_STRING" >> "$CONFIG_DIR/Game.ini"
-    fi
+    # Set the maximum amount of RAM for the JVM
+    sed -i "s/-Xmx.*/-Xmx$MAX_RAM \\\/g" "$BASE_GAME_DIR"/start-server.sh
 
     printf "\n### Post Install Configuration applied.\n"
 }
@@ -75,6 +71,9 @@ function set_variables() {
 
     # Set the IP Game Port variable
     GAME_PORT=${GAME_PORT:-"8766"}
+
+    # Set the Maximum RAM variable
+    MAX_RAM=${MAX_RAM:-"4096m"}
 }
 
 ## Main
@@ -82,5 +81,5 @@ set_variables
 update_folder_permissions
 apply_preinstall_config
 update_server
-#apply_postinstall_config
+apply_postinstall_config
 start_server

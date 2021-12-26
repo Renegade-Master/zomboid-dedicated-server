@@ -15,6 +15,7 @@ services:
       - "BIND_IP=0.0.0.0"
       - "QUERY_PORT=16261"
       - "GAME_PORT=8766"
+      - "MAX_RAM=4096m"
     ports:
       - target: 8766
         published: 8766
