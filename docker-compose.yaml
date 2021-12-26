@@ -11,11 +11,22 @@ services:
     restart: unless-stopped
     user: "1000:1000"
     environment:
-      - "GAME_VERSION=public"
       - "BIND_IP=0.0.0.0"
+      - "GAME_VERSION=legacy41_61"
       - "QUERY_PORT=16261"
       - "GAME_PORT=8766"
+      - "SERVER_NAME=ZomboidServer"
+      - "SERVER_PASSWORD="
+      - "AUTOSAVE_INTERVAL=15"
+      - "CAR_SPAWN_RATE=3"
+      - "MAX_PLAYERS=16"
       - "MAX_RAM=4096m"
+      - "PAUSE_ON_EMPTY=true"
+      - "PLAYER_SAFEHOUSE=true"
+      - "SAFEHOUSE_RESPAWN=true"
+      - "SLEEP_ALLOWED=true"
+      - "STARTER_KIT=true"
+      - "WEAPON_MULTI_HIT=true"
     ports:
       - target: 8766
         published: 8766

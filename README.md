@@ -49,13 +49,24 @@ The following are instructions for running the server using the Docker image.
 2. Run the container interactively:  
    *Optional arguments table*:
 
-   | Argument       | Description                           | Values     | Default  |
-   |----------------|---------------------------------------|------------|----------|
-   | `GAME_VERSION` | Game version to serve                 | `public`   | `public` |
-   | `BIND_IP`      | IP to bind the server to              | 127.0.0.1  | 0.0.0.0  |
-   | `QUERY_PORT`   | Port for other players to connect to  | 1000-65535 | 16261    |
-   | `GAME_PORT`    | Port for sending game data to clients | 1000-65535 | 8766     |
-   | `MAX_RAM`      | Maximum amount of RAM to be used      | 2048m      | 4096m    |
+   | Argument            | Description                                    | Values        | Default       |
+   |---------------------|------------------------------------------------|---------------|---------------|
+   | `BIND_IP`           | IP to bind the server to                       | 127.0.0.1     | 0.0.0.0       |
+   | `GAME_VERSION`      | Game version to serve                          | [a-zA-Z0-9_]+ | `public`      |
+   | `QUERY_PORT`        | Port for other players to connect to           | 1000 - 65535  | 16261         |
+   | `GAME_PORT`         | Port for sending game data to clients          | 1000 - 65535  | 8766          |
+   | `SERVER_NAME`       | Publicly visible Server Name                   | [a-zA-Z0-9]+  | ZomboidServer |
+   | `SERVER_Password`   | Server password                                | [a-zA-Z0-9]+  |               |
+   | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes          | [0-9]+        | 10m           |
+   | `CAR_SPAWN_RATE`    | Frequency of car spawns                        | 1 - 5         | 10m           |
+   | `MAX_PLAYERS`       | Maximum players allowed in the Server          | [0-9]+        | 16            |
+   | `MAX_RAM`           | Maximum amount of RAM to be used               | ([0-9]+)m     | 4096m         |
+   | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected | (true|false)  | true          |
+   | `PLAYER_SAFEHOUSE`  | Allow Players to claim Safehouses              | (true|false)  | true          |
+   | `SAFEHOUSE_RESPAWN` | Allow Players to respawn in their Safehouse    | (true|false)  | true          |
+   | `SLEEP_ALLOWED`     | Allow Players to sleep until morning           | (true|false)  | true          |
+   | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit    | (true|false)  | true          |
+   | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids   | (true|false)  | true          |
 
    ***Note**: Arguments inside square brackets are optional. If the default ports are to be overridden, then the
    `published` ports below must also be changed*  
@@ -73,11 +84,22 @@ The following are instructions for running the server using the Docker image.
        --publish 16261:16261/udp --publish 8766:8766/udp \
        --name zomboid-server \
        --user=$(id -u):$(id -g) \
-       [--env=GAME_VERSION=<value>] \
        [--env=BIND_IP=<value>] \
+       [--env=GAME_VERSION=<value>] \
        [--env=QUERY_PORT=<value>] \
        [--env=GAME_PORT=<value>] \
+       [--env=SERVER_NAME=<value>] \
+       [--env=SERVER_PASSWORD=<value>] \
+       [--env=AUTOSAVE_INTERVAL=<value>] \
+       [--env=CAR_SPAWN_RATE=<value>] \
+       [--env=MAX_PLAYERS=<value>] \
        [--env=MAX_RAM=<value>] \
+       [--env=PAUSE_ON_EMPTY=<value>] \
+       [--env=PLAYER_SAFEHOUSE=<value>] \
+       [--env=SAFEHOUSE_RESPAWN=<value>] \
+       [--env=SLEEP_ALLOWED=<value>] \
+       [--env=STARTER_KIT=<value>] \
+       [--env=WEAPON_MULTI_HIT=<value>] \
        renegademaster/zomboid-dedicated-server[:<tagname>]
    ```
 
@@ -94,11 +116,22 @@ The following are instructions for running the server using the Docker image.
        --publish 16261:16261/udp --publish 8766:8766/udp \
        --name zomboid-server \
        --user=$(id -u):$(id -g) \
-       [--env=GAME_VERSION=<value>] \
        [--env=BIND_IP=<value>] \
+       [--env=GAME_VERSION=<value>] \
        [--env=QUERY_PORT=<value>] \
        [--env=GAME_PORT=<value>] \
+       [--env=SERVER_NAME=<value>] \
+       [--env=SERVER_PASSWORD=<value>] \
+       [--env=AUTOSAVE_INTERVAL=<value>] \
+       [--env=CAR_SPAWN_RATE=<value>] \
+       [--env=MAX_PLAYERS=<value>] \
        [--env=MAX_RAM=<value>] \
+       [--env=PAUSE_ON_EMPTY=<value>] \
+       [--env=PLAYER_SAFEHOUSE=<value>] \
+       [--env=SAFEHOUSE_RESPAWN=<value>] \
+       [--env=SLEEP_ALLOWED=<value>] \
+       [--env=STARTER_KIT=<value>] \
+       [--env=WEAPON_MULTI_HIT=<value>] \
        renegademaster/zomboid-dedicated-server[:<tagname>]
    ```
 
@@ -116,13 +149,24 @@ The following are instructions for running the server using Docker-Compose.
 2. Make any configuration changes you want to in the `docker-compose.yaml` file. In
    the `services.zomboid-server.environment` section, you can change values for:
 
-   | Argument       | Description                           | Values     | Default  |
-   |----------------|---------------------------------------|------------|----------|
-   | `GAME_VERSION` | Game version to serve                 | `public`   | `public` |
-   | `BIND_IP`      | IP to bind the server to              | 127.0.0.1  | 0.0.0.0  |
-   | `QUERY_PORT`   | Port for other players to connect to  | 1000-65535 | 16261    |
-   | `GAME_PORT`    | Port for sending game data to clients | 1000-65535 | 8766     |
-   | `MAX_RAM`      | Maximum amount of RAM to be used      | 2048m      | 4096m    |
+   | Argument            | Description                                    | Values        | Default       |
+   |---------------------|------------------------------------------------|---------------|---------------|
+   | `BIND_IP`           | IP to bind the server to                       | 127.0.0.1     | 0.0.0.0       |
+   | `GAME_VERSION`      | Game version to serve                          | [a-zA-Z0-9_]+ | `public`      |
+   | `QUERY_PORT`        | Port for other players to connect to           | 1000 - 65535  | 16261         |
+   | `GAME_PORT`         | Port for sending game data to clients          | 1000 - 65535  | 8766          |
+   | `SERVER_NAME`       | Publicly visible Server Name                   | [a-zA-Z0-9]+  | ZomboidServer |
+   | `SERVER_Password`   | Server password                                | [a-zA-Z0-9]+  |               |
+   | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes          | [0-9]+        | 10m           |
+   | `CAR_SPAWN_RATE`    | Frequency of car spawns                        | 1 - 5         | 10m           |
+   | `MAX_PLAYERS`       | Maximum players allowed in the Server          | [0-9]+        | 16            |
+   | `MAX_RAM`           | Maximum amount of RAM to be used               | ([0-9]+)m     | 4096m         |
+   | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected | (true|false)  | true          |
+   | `PLAYER_SAFEHOUSE`  | Allow Players to claim Safehouses              | (true|false)  | true          |
+   | `SAFEHOUSE_RESPAWN` | Allow Players to respawn in their Safehouse    | (true|false)  | true          |
+   | `SLEEP_ALLOWED`     | Allow Players to sleep until morning           | (true|false)  | true          |
+   | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit    | (true|false)  | true          |
+   | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids   | (true|false)  | true          |
 
    ***Note**: If the default ports are to be overridden, then the `published` ports must also be changed*
 
