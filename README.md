@@ -61,12 +61,12 @@ The following are instructions for running the server using the Docker image.
    | `CAR_SPAWN_RATE`    | Frequency of car spawns                        | 1 - 5         | 10m           |
    | `MAX_PLAYERS`       | Maximum players allowed in the Server          | [0-9]+        | 16            |
    | `MAX_RAM`           | Maximum amount of RAM to be used               | ([0-9]+)m     | 4096m         |
-   | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected | (true|false)  | true          |
-   | `PLAYER_SAFEHOUSE`  | Allow Players to claim Safehouses              | (true|false)  | true          |
-   | `SAFEHOUSE_RESPAWN` | Allow Players to respawn in their Safehouse    | (true|false)  | true          |
-   | `SLEEP_ALLOWED`     | Allow Players to sleep until morning           | (true|false)  | true          |
-   | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit    | (true|false)  | true          |
-   | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids   | (true|false)  | true          |
+   | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected | (true\|false) | true          |
+   | `PLAYER_SAFEHOUSE`  | Allow Players to claim Safehouses              | (true\|false) | true          |
+   | `SAFEHOUSE_RESPAWN` | Allow Players to respawn in their Safehouse    | (true\|false) | true          |
+   | `SLEEP_ALLOWED`     | Allow Players to sleep until morning           | (true\|false) | true          |
+   | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit    | (true\|false) | true          |
+   | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids   | (true\|false) | true          |
 
    ***Note**: Arguments inside square brackets are optional. If the default ports are to be overridden, then the
    `published` ports below must also be changed*  
@@ -161,12 +161,12 @@ The following are instructions for running the server using Docker-Compose.
    | `CAR_SPAWN_RATE`    | Frequency of car spawns                        | 1 - 5         | 10m           |
    | `MAX_PLAYERS`       | Maximum players allowed in the Server          | [0-9]+        | 16            |
    | `MAX_RAM`           | Maximum amount of RAM to be used               | ([0-9]+)m     | 4096m         |
-   | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected | (true|false)  | true          |
-   | `PLAYER_SAFEHOUSE`  | Allow Players to claim Safehouses              | (true|false)  | true          |
-   | `SAFEHOUSE_RESPAWN` | Allow Players to respawn in their Safehouse    | (true|false)  | true          |
-   | `SLEEP_ALLOWED`     | Allow Players to sleep until morning           | (true|false)  | true          |
-   | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit    | (true|false)  | true          |
-   | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids   | (true|false)  | true          |
+   | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected | (true\|false) | true          |
+   | `PLAYER_SAFEHOUSE`  | Allow Players to claim Safehouses              | (true\|false) | true          |
+   | `SAFEHOUSE_RESPAWN` | Allow Players to respawn in their Safehouse    | (true\|false) | true          |
+   | `SLEEP_ALLOWED`     | Allow Players to sleep until morning           | (true\|false) | true          |
+   | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit    | (true\|false) | true          |
+   | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids   | (true\|false) | true          |
 
    ***Note**: If the default ports are to be overridden, then the `published` ports must also be changed*
 
