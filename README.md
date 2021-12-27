@@ -53,10 +53,11 @@ The following are instructions for running the server using the Docker image.
    |---------------------|------------------------------------------------|---------------|---------------|
    | `BIND_IP`           | IP to bind the server to                       | 127.0.0.1     | 0.0.0.0       |
    | `GAME_VERSION`      | Game version to serve                          | [a-zA-Z0-9_]+ | `public`      |
+   | `PUBLIC_SERVER`     | Is the server displayed Publicly               | (true\|false) | true          |
    | `QUERY_PORT`        | Port for other players to connect to           | 1000 - 65535  | 16261         |
    | `GAME_PORT`         | Port for sending game data to clients          | 1000 - 65535  | 8766          |
    | `SERVER_NAME`       | Publicly visible Server Name                   | [a-zA-Z0-9]+  | ZomboidServer |
-   | `SERVER_Password`   | Server password                                | [a-zA-Z0-9]+  |               |
+   | `SERVER_PASSWORD`   | Server password                                | [a-zA-Z0-9]+  |               |
    | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes          | [0-9]+        | 10m           |
    | `CAR_SPAWN_RATE`    | Frequency of car spawns                        | 1 - 5         | 10m           |
    | `MAX_PLAYERS`       | Maximum players allowed in the Server          | [0-9]+        | 16            |
@@ -153,10 +154,11 @@ The following are instructions for running the server using Docker-Compose.
    |---------------------|------------------------------------------------|---------------|---------------|
    | `BIND_IP`           | IP to bind the server to                       | 127.0.0.1     | 0.0.0.0       |
    | `GAME_VERSION`      | Game version to serve                          | [a-zA-Z0-9_]+ | `public`      |
+   | `PUBLIC_SERVER`     | Is the server displayed Publicly               | (true\|false) | true          |
    | `QUERY_PORT`        | Port for other players to connect to           | 1000 - 65535  | 16261         |
    | `GAME_PORT`         | Port for sending game data to clients          | 1000 - 65535  | 8766          |
    | `SERVER_NAME`       | Publicly visible Server Name                   | [a-zA-Z0-9]+  | ZomboidServer |
-   | `SERVER_Password`   | Server password                                | [a-zA-Z0-9]+  |               |
+   | `SERVER_PASSWORD`   | Server password                                | [a-zA-Z0-9]+  |               |
    | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes          | [0-9]+        | 10m           |
    | `CAR_SPAWN_RATE`    | Frequency of car spawns                        | 1 - 5         | 10m           |
    | `MAX_PLAYERS`       | Maximum players allowed in the Server          | [0-9]+        | 16            |

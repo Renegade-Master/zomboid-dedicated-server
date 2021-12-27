@@ -19,40 +19,47 @@ function apply_postinstall_config() {
     printf "\n### Applying Post Install Configuration...\n"
 
     # Set the Server Name
-    sed -i "s/PublicName=.*/PublicName=$SERVER_NAME/g" "$CONFIG_DIR/Server/servertest.ini"
+    sed -i "s/PublicName=.*/PublicName=$SERVER_NAME/g" "$SERVER_CONFIG"
+
+    # Set the Server Publicity status
+    sed -i "s/Open=.*/Open=$PUBLIC_SERVER/g" "$SERVER_CONFIG"
+
+    # Set the Server query Port
+    sed -i "s/DefaultPort=.*/DefaultPort=$QUERY_PORT/g" "$SERVER_CONFIG"
 
     # Set the Server Password
-    sed -i "s/Password=.*/Password=$SERVER_PASSWORD/g" "$CONFIG_DIR/Server/servertest.ini"
+    sed -i "s/Password=.*/Password=$SERVER_PASSWORD/g" "$SERVER_CONFIG"
 
     # Set the Autosave Interval
-    sed -i "s/SaveWorldEveryMinutes=.*/SaveWorldEveryMinutes=$AUTOSAVE_INTERVAL/g" "$CONFIG_DIR/Server/servertest.ini"
+    sed -i "s/SaveWorldEveryMinutes=.*/SaveWorldEveryMinutes=$AUTOSAVE_INTERVAL/g" "$SERVER_CONFIG"
 
     # Set the Car Spawn Rate
-    sed -i "s/CarSpawnRate = .*/CarSpawnRate = $CAR_SPAWN_RATE,/g" "$CONFIG_DIR/Server/servertest_SandboxVars.lua"
+    sed -i "s/CarSpawnRate = .*/CarSpawnRate = $CAR_SPAWN_RATE,/g" "$SERVER_RULES_CONFIG"
 
     # Set the Max Players
-    sed -i "s/MaxPlayers=.*/MaxPlayers=$MAX_PLAYERS/g" "$CONFIG_DIR/Server/servertest.ini"
+    sed -i "s/MaxPlayers=.*/MaxPlayers=$MAX_PLAYERS/g" "$SERVER_CONFIG"
 
     # Set the maximum amount of RAM for the JVM
     sed -i "s/-Xmx.*/-Xmx$MAX_RAM \\\/g" "$BASE_GAME_DIR/start-server.sh"
+    sed -i "s/-Xmx.*/-Xmx$MAX_RAM\",/g" "$SERVER_VM_CONFIG"
 
     # Set the Pause on Empty Server
-    sed -i "s/PauseEmpty=.*/PauseEmpty=$PAUSE_ON_EMPTY/g" "$CONFIG_DIR/Server/servertest.ini"
+    sed -i "s/PauseEmpty=.*/PauseEmpty=$PAUSE_ON_EMPTY/g" "$SERVER_CONFIG"
 
     # Set the Player Safehouse
-    sed -i "s/PlayerSafehouse=.*/PlayerSafehouse=$PLAYER_SAFEHOUSE/g" "$CONFIG_DIR/Server/servertest.ini"
+    sed -i "s/PlayerSafehouse=.*/PlayerSafehouse=$PLAYER_SAFEHOUSE/g" "$SERVER_CONFIG"
 
     # Set the Player Safehouse Respawn
-    sed -i "s/SafehouseAllowRespawn=.*/SafehouseAllowRespawn=$PLAYER_SAFEHOUSE/g" "$CONFIG_DIR/Server/servertest.ini"
+    sed -i "s/SafehouseAllowRespawn=.*/SafehouseAllowRespawn=$PLAYER_SAFEHOUSE/g" "$SERVER_CONFIG"
 
     # Set the Sleep Until Morning
-    sed -i "s/SleepAllowed=.*/SleepAllowed=$PLAYER_SAFEHOUSE/g" "$CONFIG_DIR/Server/servertest.ini"
+    sed -i "s/SleepAllowed=.*/SleepAllowed=$PLAYER_SAFEHOUSE/g" "$SERVER_CONFIG"
 
     # Set the Spawn with Starter Kit
-    sed -i "s/StarterKit = .*/StarterKit = $STARTER_KIT,/g" "$CONFIG_DIR/Server/servertest_SandboxVars.lua"
+    sed -i "s/StarterKit = .*/StarterKit = $STARTER_KIT,/g" "$SERVER_RULES_CONFIG"
 
     # Set the Weapon Multi Hit
-    sed -i "s/MultiHitZombies = .*/MultiHitZombies = $WEAPON_MULTI_HIT,/g" "$CONFIG_DIR/Server/servertest_SandboxVars.lua"
+    sed -i "s/MultiHitZombies = .*/MultiHitZombies = $WEAPON_MULTI_HIT,/g" "$SERVER_RULES_CONFIG"
 
     printf "\n### Post Install Configuration applied.\n"
 }
@@ -93,11 +100,18 @@ function set_variables() {
     BASE_GAME_DIR="/home/steam/ZomboidDedicatedServer"
     CONFIG_DIR="/home/steam/Zomboid/"
 
+    SERVER_CONFIG="$CONFIG_DIR/Server/servertest.ini"
+    SERVER_VM_CONFIG="$BASE_GAME_DIR/ProjectZomboid64.json"
+    SERVER_RULES_CONFIG="$CONFIG_DIR/Server/servertest_SandboxVars.lua"
+
     # Set the IP address variable
     BIND_IP=${BIND_IP:-"0.0.0.0"}
 
     # Set the game version variable
     GAME_VERSION=${GAME_VERSION:-"public"}
+
+    # Set the Server Publicity variable
+    PUBLIC_SERVER=${PUBLIC_SERVER:-"true"}
 
     # Set the IP Query Port variable
     QUERY_PORT=${QUERY_PORT:-"16261"}

@@ -12,7 +12,7 @@ services:
     user: "1000:1000"
     environment:
       - "BIND_IP=0.0.0.0"
-      - "GAME_VERSION=legacy41_61"
+      - "GAME_VERSION=public"
       - "QUERY_PORT=16261"
       - "GAME_PORT=8766"
       - "SERVER_NAME=ZomboidServer"
