@@ -1,4 +1,4 @@
-# Zomboid Dedicated Server
+# Project Zomboid Dedicated Server
 
 ## Disclaimer
 
@@ -9,8 +9,8 @@ the [GitHub repository](https://github.com/Renegade-Master/zomboid-dedicated-ser
 
 ## Description
 
-Dedicated Server for Zomboid using Docker, and optionally Docker-Compose.  
-Built almost from scratch to be the smallest Zomboid Dedicated Server around!
+Dedicated Server for Project Zomboid using Docker, and optionally Docker-Compose.  
+Built almost from scratch to be the smallest Project Zomboid Dedicated Server around!
 
 ## Links
 
@@ -26,6 +26,9 @@ Resource links:
 - [Steam DB Page](https://steamdb.info/app/380870/)
 
 ## Instructions
+
+The server can be run using plain Docker, or using Docker-Compose. The end-result is the same, but Docker-Compose is 
+recommended.
 
 ### Docker
 
@@ -51,13 +54,17 @@ The following are instructions for running the server using the Docker image.
 
    | Argument            | Description                                    | Values        | Default       |
    |---------------------|------------------------------------------------|---------------|---------------|
-   | `BIND_IP`           | IP to bind the server to                       | 127.0.0.1     | 0.0.0.0       |
+   | `BIND_IP`           | IP to bind the server to                       | 0.0.0.0       | 0.0.0.0       |
    | `GAME_VERSION`      | Game version to serve                          | [a-zA-Z0-9_]+ | `public`      |
    | `PUBLIC_SERVER`     | Is the server displayed Publicly               | (true\|false) | true          |
    | `QUERY_PORT`        | Port for other players to connect to           | 1000 - 65535  | 16261         |
    | `GAME_PORT`         | Port for sending game data to clients          | 1000 - 65535  | 8766          |
    | `SERVER_NAME`       | Publicly visible Server Name                   | [a-zA-Z0-9]+  | ZomboidServer |
    | `SERVER_PASSWORD`   | Server password                                | [a-zA-Z0-9]+  |               |
+   | `ADMIN_USERNAME`    | Server Admin account username                  | [a-zA-Z0-9]+  | superuser     |
+   | `ADMIN_PASSWORD`    | Server Admin account password                  | [a-zA-Z0-9]+  | changeme      |
+   | `USE_STEAM`         | Create a Steam Server, or a Non-Steam Server   | (true\|false) | true          |
+   | `STEAM_VAC`         | Use Steam VAC anti-cheat                       | (true\|false) | true          |
    | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes          | [0-9]+        | 10m           |
    | `CAR_SPAWN_RATE`    | Frequency of car spawns                        | 1 - 5         | 10m           |
    | `MAX_PLAYERS`       | Maximum players allowed in the Server          | [0-9]+        | 16            |
@@ -72,45 +79,9 @@ The following are instructions for running the server using the Docker image.
    ***Note**: Arguments inside square brackets are optional. If the default ports are to be overridden, then the
    `published` ports below must also be changed*  
 
-   ***Note 2**: It is currently not possible to automatically provide an admin password. This means that the game 
-   must be run INTERACTIVELY the first time in order to set the admin password, but can be run headless every time 
-   after that.* 
-
    ```shell
    mkdir ZomboidConfig ZomboidDedicatedServer
 
-   docker run -it \
-       --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
-       --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
-       --publish 16261:16261/udp --publish 8766:8766/udp \
-       --name zomboid-server \
-       --user=$(id -u):$(id -g) \
-       [--env=BIND_IP=<value>] \
-       [--env=GAME_VERSION=<value>] \
-       [--env=QUERY_PORT=<value>] \
-       [--env=GAME_PORT=<value>] \
-       [--env=SERVER_NAME=<value>] \
-       [--env=SERVER_PASSWORD=<value>] \
-       [--env=AUTOSAVE_INTERVAL=<value>] \
-       [--env=CAR_SPAWN_RATE=<value>] \
-       [--env=MAX_PLAYERS=<value>] \
-       [--env=MAX_RAM=<value>] \
-       [--env=PAUSE_ON_EMPTY=<value>] \
-       [--env=PLAYER_SAFEHOUSE=<value>] \
-       [--env=SAFEHOUSE_RESPAWN=<value>] \
-       [--env=SLEEP_ALLOWED=<value>] \
-       [--env=STARTER_KIT=<value>] \
-       [--env=WEAPON_MULTI_HIT=<value>] \
-       renegademaster/zomboid-dedicated-server[:<tagname>]
-   ```
-
-3. Wait to be prompted to enter the admin password. Set this to something that you will remember.
-
-4. Once you see `znet: Zomboid Server is VAC Secure` in the console press `CTRL + C` to stop the server.
-
-5. Run the container headless:
-
-   ```shell
    docker run --detach \
        --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
        --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
@@ -123,6 +94,10 @@ The following are instructions for running the server using the Docker image.
        [--env=GAME_PORT=<value>] \
        [--env=SERVER_NAME=<value>] \
        [--env=SERVER_PASSWORD=<value>] \
+       [--env=ADMIN_USERNAME=<value>] \
+       [--env=ADMIN_PASSWORD=<value>] \
+       [--env=USE_STEAM=<value>] \
+       [--env=STEAM_VAC=<value>] \
        [--env=AUTOSAVE_INTERVAL=<value>] \
        [--env=CAR_SPAWN_RATE=<value>] \
        [--env=MAX_PLAYERS=<value>] \
@@ -135,6 +110,8 @@ The following are instructions for running the server using the Docker image.
        [--env=WEAPON_MULTI_HIT=<value>] \
        renegademaster/zomboid-dedicated-server[:<tagname>]
    ```
+
+4. Once you see `LuaNet: Initialization [DONE]` in the console, people can start to join the server.
 
 ### Docker-Compose
 
@@ -152,13 +129,17 @@ The following are instructions for running the server using Docker-Compose.
 
    | Argument            | Description                                    | Values        | Default       |
    |---------------------|------------------------------------------------|---------------|---------------|
-   | `BIND_IP`           | IP to bind the server to                       | 127.0.0.1     | 0.0.0.0       |
+   | `BIND_IP`           | IP to bind the server to                       | 0.0.0.0       | 0.0.0.0       |
    | `GAME_VERSION`      | Game version to serve                          | [a-zA-Z0-9_]+ | `public`      |
    | `PUBLIC_SERVER`     | Is the server displayed Publicly               | (true\|false) | true          |
    | `QUERY_PORT`        | Port for other players to connect to           | 1000 - 65535  | 16261         |
    | `GAME_PORT`         | Port for sending game data to clients          | 1000 - 65535  | 8766          |
    | `SERVER_NAME`       | Publicly visible Server Name                   | [a-zA-Z0-9]+  | ZomboidServer |
    | `SERVER_PASSWORD`   | Server password                                | [a-zA-Z0-9]+  |               |
+   | `ADMIN_USERNAME`    | Server Admin account username                  | [a-zA-Z0-9]+  | superuser     |
+   | `ADMIN_PASSWORD`    | Server Admin account password                  | [a-zA-Z0-9]+  | changeme      |
+   | `USE_STEAM`         | Create a Steam Server, or a Non-Steam Server   | (true\|false) | true          |
+   | `STEAM_VAC`         | Use Steam VAC anti-cheat                       | (true\|false) | true          |
    | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes          | [0-9]+        | 10m           |
    | `CAR_SPAWN_RATE`    | Frequency of car spawns                        | 1 - 5         | 10m           |
    | `MAX_PLAYERS`       | Maximum players allowed in the Server          | [0-9]+        | 16            |
@@ -184,15 +165,7 @@ The following are instructions for running the server using Docker-Compose.
    ```shell
    mkdir ZomboidConfig ZomboidDedicatedServer
 
-   docker-compose run zomboid-server /home/steam/ZomboidDedicatedServer/start-server.sh
+   docker-compose up --build --detach
    ```
 
-5. Wait to be prompted to enter the admin password. Set this to something that you will remember.
-
-6. Once you see `znet: Zomboid Server is VAC Secure` in the console press `CTRL + C` to stop the server.
-
-7. Run the following command to start the server headless:
-
-   ```shell
-   docker-compose up --detach
-   ```
+6. Once you see `LuaNet: Initialization [DONE]` in the console, people can start to join the server.

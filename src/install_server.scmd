@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// SteamCMD installation script for Zomboid Dedicated Server
+// SteamCMD installation script for Project Zomboid Dedicated Server
 ///////////////////////////////////////////////////////////////////////
 
 // Do not shutdown on a failed command
@@ -13,7 +13,7 @@ force_install_dir /home/steam/ZomboidDedicatedServer
 
 login anonymous
 
-// Install/Update the Zomboid Dedicated Server
+// Install/Update the Project Zomboid Dedicated Server
 app_update 380870 -beta GAME_VERSION validate
 
 quit

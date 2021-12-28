@@ -1,6 +1,7 @@
 #######################################################################
 #   Author: Renegade-Master
-#   Description: Base image for running a Dedicated Zomboid server.
+#   Description: Base image for running a Dedicated Project Zomboid
+#       server.
 #   License: GNU General Public License v3.0 (see LICENSE)
 #######################################################################
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #######################################################################
 #   Author: Renegade-Master
-#   Description: Install, update, and start a Dedicated Zomboid
+#   Description: Install, update, and start a Dedicated Project Zomboid
 #       instance.
 #######################################################################
 
@@ -10,9 +10,14 @@ set +x
 
 # Start the Server
 function start_server() {
-    printf "\n### Starting Zomboid Server...\n"
+    printf "\n### Starting Project Zomboid Server...\n"
 
-    "$BASE_GAME_DIR"/start-server.sh
+    "$BASE_GAME_DIR"/start-server.sh \
+        -adminusername "$ADMIN_USERNAME" \
+        -adminpassword "$ADMIN_PASSWORD" \
+        -ip "$BIND_IP" -port "$QUERY_PORT" \
+        -servername "$SERVER_NAME" \
+        -steamvac "$STEAM_VAC" "$USE_STEAM"
 }
 
 function apply_postinstall_config() {
@@ -40,7 +45,6 @@ function apply_postinstall_config() {
     sed -i "s/MaxPlayers=.*/MaxPlayers=$MAX_PLAYERS/g" "$SERVER_CONFIG"
 
     # Set the maximum amount of RAM for the JVM
-    sed -i "s/-Xmx.*/-Xmx$MAX_RAM \\\/g" "$BASE_GAME_DIR/start-server.sh"
     sed -i "s/-Xmx.*/-Xmx$MAX_RAM\",/g" "$SERVER_VM_CONFIG"
 
     # Set the Pause on Empty Server
@@ -66,11 +70,11 @@ function apply_postinstall_config() {
 
 # Update the server
 function update_server() {
-    printf "\n### Updating Zomboid Server...\n"
+    printf "\n### Updating Project Zomboid Server...\n"
 
     "$STEAM_PATH" +runscript /home/steam/install_server.scmd
 
-    printf "\n### Zomboid Server updated.\n"
+    printf "\n### Project Zomboid Server updated.\n"
 }
 
 # Apply user configuration to the server
@@ -100,12 +104,14 @@ function set_variables() {
     BASE_GAME_DIR="/home/steam/ZomboidDedicatedServer"
     CONFIG_DIR="/home/steam/Zomboid/"
 
-    SERVER_CONFIG="$CONFIG_DIR/Server/servertest.ini"
-    SERVER_VM_CONFIG="$BASE_GAME_DIR/ProjectZomboid64.json"
-    SERVER_RULES_CONFIG="$CONFIG_DIR/Server/servertest_SandboxVars.lua"
-
     # Set the IP address variable
-    BIND_IP=${BIND_IP:-"0.0.0.0"}
+    # NOTE: Project Zomboid cannot handle the IN_ANY address
+    if [[ -z "$BIND_IP" ]] || [[ "$BIND_IP" == "0.0.0.0" ]]; then
+        BIND_IP=($(hostname -I))
+        BIND_IP="${BIND_IP[0]}"
+    else
+        BIND_IP="$BIND_IP"
+    fi
 
     # Set the game version variable
     GAME_VERSION=${GAME_VERSION:-"public"}
@@ -120,10 +126,26 @@ function set_variables() {
     GAME_PORT=${GAME_PORT:-"8766"}
 
     # Set the Server name variable
-    SERVER_NAME=${SERVER_NAME:-"Zomboid Server"}
+    SERVER_NAME=${SERVER_NAME:-"ZomboidServer"}
 
     # Set the Server Password variable
     SERVER_PASSWORD=${SERVER_PASSWORD:-""}
+
+    # Set the Server Admin Password variable
+    ADMIN_USERNAME=${ADMIN_USERNAME:-"admin"}
+
+    # Set the Server Admin Password variable
+    ADMIN_PASSWORD=${ADMIN_PASSWORD:-"changeme"}
+
+    # Set server type variable
+    if [[ -z "$USE_STEAM" ]] || [[ "$USE_STEAM" == "true" ]]; then
+        USE_STEAM=""
+    else
+        USE_STEAM="-nosteam"
+    fi
+
+    # Set Steam VAC Protection variable
+    STEAM_VAC=${STEAM_VAC:-"true"}
 
     # Set the Autosave Interval variable
     AUTOSAVE_INTERVAL=${AUTOSAVE_INTERVAL:-"15"}
@@ -154,6 +176,10 @@ function set_variables() {
 
     # Set the Weapon Multi-Hit variable
     WEAPON_MULTI_HIT=${WEAPON_MULTI_HIT:-"true"}
+
+    SERVER_CONFIG="$CONFIG_DIR/Server/$SERVER_NAME.ini"
+    SERVER_VM_CONFIG="$BASE_GAME_DIR/ProjectZomboid64.json"
+    SERVER_RULES_CONFIG="$CONFIG_DIR/Server/${SERVER_NAME}_SandboxVars.lua"
 }
 
 ## Main
