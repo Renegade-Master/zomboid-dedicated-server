@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 #######################################################################
 #   Author: Renegade-Master
+#	Contributor: JohnEarle
 #   Description: Install, update, and start a Dedicated Project Zomboid
 #       instance.
 #######################################################################
 
 # Set to `-x` for Debug logging
 set +x
-
-# Start the Server
-function start_server() {
+# Start the Server for the first time to generate configuration files for editing
+function start_server_initial() {
+	clear
     printf "\n### Starting Project Zomboid Server...\n"
-
-    "$BASE_GAME_DIR"/start-server.sh \
+    timeout 30 "$BASE_GAME_DIR"/start-server.sh \
         -adminusername "$ADMIN_USERNAME" \
         -adminpassword "$ADMIN_PASSWORD" \
         -ip "$BIND_IP" -port "$QUERY_PORT" \
@@ -20,8 +20,21 @@ function start_server() {
         -steamvac "$STEAM_VAC" "$USE_STEAM"
 }
 
+# Start the Server
+function start_server() {
+    printf "\n### Starting Project Zomboid Server...\n"
+    "$BASE_GAME_DIR"/start-server.sh \
+        -adminusername "$ADMIN_USERNAME" \
+        -adminpassword "$ADMIN_PASSWORD" \
+        -ip "$BIND_IP" -port "$QUERY_PORT" \
+        -servername "$SERVER_NAME" \
+        -steamvac "$STEAM_VAC" "$USE_STEAM"
+}
 function apply_postinstall_config() {
     printf "\n### Applying Post Install Configuration...\n"
+	
+	# Set the Server Name
+    sed -i "s/PVP=.*/PVP=$SERVER_PVP/g" "$SERVER_CONFIG"
 
     # Set the Server Name
     sed -i "s/PublicName=.*/PublicName=$SERVER_NAME/g" "$SERVER_CONFIG"
@@ -64,6 +77,12 @@ function apply_postinstall_config() {
 
     # Set the Weapon Multi Hit
     sed -i "s/MultiHitZombies = .*/MultiHitZombies = $WEAPON_MULTI_HIT,/g" "$SERVER_RULES_CONFIG"
+	
+	# Set the Mod names (delimited by ; | EG: ClaimNonResidential;MoreDescriptionForTraits)
+	sed -i "s/Mods=.*/Mods=$MOD_NAMES/g" "$SERVER_CONFIG"
+	
+	# Set the Mod Workshop IDs (delimited by ; | EG: 2160432461;2685168362)
+	sed -i "s/WorkshopItems=.*/WorkshopItems=$MOD_WORKSHOP_IDS/g" "$SERVER_CONFIG"
 
     printf "\n### Post Install Configuration applied.\n"
 }
@@ -97,12 +116,22 @@ function update_folder_permissions() {
     printf "\n### Folder Permissions updated.\n"
 }
 
+# start the server to generate configuration file - Prep for post install parameters [30 second start then kill]
+function first_start_config_ops()
+{
+	if[! -d "/root/Zomboid/"]
+	{
+		printf "\n### First Boot Detected - Burst Startup to create config files.\n"
+		start_server_initial
+		apply_postinstall_config
+	}
+}
 # Set variables for use in the script
 function set_variables() {
     printf "\n### Setting variables...\n"
 
     BASE_GAME_DIR="/home/steam/ZomboidDedicatedServer"
-    CONFIG_DIR="/home/steam/Zomboid/"
+    CONFIG_DIR="/root/Zomboid"
 
     # Set the IP address variable
     # NOTE: Project Zomboid cannot handle the IN_ANY address
@@ -112,7 +141,9 @@ function set_variables() {
     else
         BIND_IP="$BIND_IP"
     fi
-
+	
+	# Set PVP variable
+	SERVER_PVP=${SERVER_PVP:-"false"}
     # Set the game version variable
     GAME_VERSION=${GAME_VERSION:-"public"}
 
@@ -176,6 +207,10 @@ function set_variables() {
 
     # Set the Weapon Multi-Hit variable
     WEAPON_MULTI_HIT=${WEAPON_MULTI_HIT:-"true"}
+	
+	# Set the Mods to use from workshop
+	MOD_NAMES = ${MOD_NAMES:-""}
+	MOD_WORKSHOP_IDS = ${MOD_WORKSHOP_IDS:-""}
 
     SERVER_CONFIG="$CONFIG_DIR/Server/$SERVER_NAME.ini"
     SERVER_VM_CONFIG="$BASE_GAME_DIR/ProjectZomboid64.json"
@@ -187,5 +222,7 @@ set_variables
 update_folder_permissions
 apply_preinstall_config
 update_server
+first_start_config_ops
 apply_postinstall_config
 start_server
+	

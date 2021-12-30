@@ -75,6 +75,9 @@ The following are instructions for running the server using the Docker image.
    | `SLEEP_ALLOWED`     | Allow Players to sleep until morning           | (true\|false) | true          |
    | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit    | (true\|false) | true          |
    | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids   | (true\|false) | true          |
+   | `SERVER_PVP`        | Allow Player Vs Player                         | (true\|false) | false         |
+   | `MOD_NAMES`         | Add workshop mods - names                      | mod1;mod2;mod |               |
+   | `MOD_WORKSHOP_IDS`  | Add Steam workshop mods - ids                  | xxxxxx;xxxxx; |               |
 
    ***Note**: Arguments inside square brackets are optional. If the default ports are to be overridden, then the
    `published` ports below must also be changed*  
@@ -150,6 +153,9 @@ The following are instructions for running the server using Docker-Compose.
    | `SLEEP_ALLOWED`     | Allow Players to sleep until morning           | (true\|false) | true          |
    | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit    | (true\|false) | true          |
    | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids   | (true\|false) | true          |
+   | `SERVER_PVP`        | Allow Player Vs Player                         | (true\|false) | false         |
+   | `MOD_NAMES`         | Add workshop mods - names                      | mod1;mod2;mod |               |
+   | `MOD_WORKSHOP_IDS`  | Add Steam workshop mods - ids                  | xxxxxx;xxxxx; |               |
 
    ***Note**: If the default ports are to be overridden, then the `published` ports must also be changed*
 

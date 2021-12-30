@@ -31,6 +31,8 @@ services:
       - "SLEEP_ALLOWED=true"
       - "STARTER_KIT=true"
       - "WEAPON_MULTI_HIT=true"
+      - "MOD_NAMES="
+      - "MOD_WORKSHOP_IDS="
     ports:
       - target: 8766
         published: 8766
