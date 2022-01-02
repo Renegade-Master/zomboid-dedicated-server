@@ -54,10 +54,10 @@ function apply_postinstall_config() {
     sed -i "s/PlayerSafehouse=.*/PlayerSafehouse=$PLAYER_SAFEHOUSE/g" "$SERVER_CONFIG"
 
     # Set the Player Safehouse Respawn
-    sed -i "s/SafehouseAllowRespawn=.*/SafehouseAllowRespawn=$PLAYER_SAFEHOUSE/g" "$SERVER_CONFIG"
+    sed -i "s/SafehouseAllowRespawn=.*/SafehouseAllowRespawn=$SAFEHOUSE_RESPAWN/g" "$SERVER_CONFIG"
 
     # Set the Sleep Until Morning
-    sed -i "s/SleepAllowed=.*/SleepAllowed=$PLAYER_SAFEHOUSE/g" "$SERVER_CONFIG"
+    sed -i "s/SleepAllowed=.*/SleepAllowed=$SLEEP_ALLOWED/g" "$SERVER_CONFIG"
 
     # Set the Spawn with Starter Kit
     sed -i "s/StarterKit = .*/StarterKit = $STARTER_KIT,/g" "$SERVER_RULES_CONFIG"
