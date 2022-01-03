@@ -14,7 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the Docker image
-        run: docker build \
-          --file docker/zomboid-dedicated-server.Dockerfile \
-          --tag renegademaster/zomboid-dedicated-server:$(date +%s) \
+        run: |
+          docker build
+          --file docker/zomboid-dedicated-server.Dockerfile
+          --tag renegademaster/zomboid-dedicated-server:$(date +%s)
           .
