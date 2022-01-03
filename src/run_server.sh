@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #######################################################################
 #   Author: Renegade-Master
+#   Contributors: JohnEarle
 #   Description: Install, update, and start a Dedicated Project Zomboid
 #       instance.
 #######################################################################
@@ -11,8 +12,7 @@ set +x
 # Start the Server
 function start_server() {
     printf "\n### Starting Project Zomboid Server...\n"
-
-    "$BASE_GAME_DIR"/start-server.sh \
+    timeout "$TIMEOUT" "$BASE_GAME_DIR"/start-server.sh \
         -adminusername "$ADMIN_USERNAME" \
         -adminpassword "$ADMIN_PASSWORD" \
         -ip "$BIND_IP" -port "$QUERY_PORT" \
@@ -23,17 +23,29 @@ function start_server() {
 function apply_postinstall_config() {
     printf "\n### Applying Post Install Configuration...\n"
 
-    # Set the Server Name
-    sed -i "s/PublicName=.*/PublicName=$SERVER_NAME/g" "$SERVER_CONFIG"
-
     # Set the Server Publicity status
     sed -i "s/Open=.*/Open=$PUBLIC_SERVER/g" "$SERVER_CONFIG"
 
     # Set the Server query Port
     sed -i "s/DefaultPort=.*/DefaultPort=$QUERY_PORT/g" "$SERVER_CONFIG"
 
+    # Set the Server game Port
+    sed -i "s/SteamPort1=.*/SteamPort1=$GAME_PORT/g" "$SERVER_CONFIG"
+
+    # Set the Server Name
+    sed -i "s/PublicName=.*/PublicName=$SERVER_NAME/g" "$SERVER_CONFIG"
+
     # Set the Server Password
     sed -i "s/Password=.*/Password=$SERVER_PASSWORD/g" "$SERVER_CONFIG"
+
+    # Set the Mod names
+    sed -i "s/Mods=.*/Mods=$MOD_NAMES/g" "$SERVER_CONFIG"
+
+    # Set the Mod Workshop IDs
+    sed -i "s/WorkshopItems=.*/WorkshopItems=$MOD_WORKSHOP_IDS/g" "$SERVER_CONFIG"
+
+    # Set the Server PvP status
+    sed -i "s/PVP=.*/PVP=$SERVER_PVP/g" "$SERVER_CONFIG"
 
     # Set the Autosave Interval
     sed -i "s/SaveWorldEveryMinutes=.*/SaveWorldEveryMinutes=$AUTOSAVE_INTERVAL/g" "$SERVER_CONFIG"
@@ -66,6 +78,22 @@ function apply_postinstall_config() {
     sed -i "s/MultiHitZombies = .*/MultiHitZombies = $WEAPON_MULTI_HIT,/g" "$SERVER_RULES_CONFIG"
 
     printf "\n### Post Install Configuration applied.\n"
+}
+
+# Test if this is the the first time the server has run
+function test_first_run() {
+    printf "\n### Checking if this is the first run...\n"
+
+    if [[ ! -f "$SERVER_CONFIG" ]] || [[ ! -f "$SERVER_RULES_CONFIG" ]]; then
+        printf "\n### This is the first run.\nStarting server for %s seconds\n" "$TIMEOUT"
+        start_server
+        TIMEOUT=0
+    else
+        printf "\n### This is not the first run.\n"
+        TIMEOUT=0
+    fi
+
+    printf "\n### First run check complete.\n"
 }
 
 # Update the server
@@ -101,8 +129,9 @@ function update_folder_permissions() {
 function set_variables() {
     printf "\n### Setting variables...\n"
 
+    TIMEOUT="30"
     BASE_GAME_DIR="/home/steam/ZomboidDedicatedServer"
-    CONFIG_DIR="/home/steam/Zomboid/"
+    CONFIG_DIR="/home/steam/Zomboid"
 
     # Set the IP address variable
     # NOTE: Project Zomboid cannot handle the IN_ANY address
@@ -147,6 +176,13 @@ function set_variables() {
     # Set Steam VAC Protection variable
     STEAM_VAC=${STEAM_VAC:-"true"}
 
+    # Set the Mods to use from workshop
+    MOD_NAMES=${MOD_NAMES:-""}
+    MOD_WORKSHOP_IDS=${MOD_WORKSHOP_IDS:-""}
+
+    # Set PVP variable
+    SERVER_PVP=${SERVER_PVP:-"true"}
+
     # Set the Autosave Interval variable
     AUTOSAVE_INTERVAL=${AUTOSAVE_INTERVAL:-"15"}
 
@@ -187,5 +223,6 @@ set_variables
 update_folder_permissions
 apply_preinstall_config
 update_server
+test_first_run
 apply_postinstall_config
 start_server

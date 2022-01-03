@@ -52,29 +52,32 @@ The following are instructions for running the server using the Docker image.
 2. Run the container interactively:  
    *Optional arguments table*:
 
-   | Argument            | Description                                    | Values        | Default       |
-   |---------------------|------------------------------------------------|---------------|---------------|
-   | `BIND_IP`           | IP to bind the server to                       | 0.0.0.0       | 0.0.0.0       |
-   | `GAME_VERSION`      | Game version to serve                          | [a-zA-Z0-9_]+ | `public`      |
-   | `PUBLIC_SERVER`     | Is the server displayed Publicly               | (true\|false) | true          |
-   | `QUERY_PORT`        | Port for other players to connect to           | 1000 - 65535  | 16261         |
-   | `GAME_PORT`         | Port for sending game data to clients          | 1000 - 65535  | 8766          |
-   | `SERVER_NAME`       | Publicly visible Server Name                   | [a-zA-Z0-9]+  | ZomboidServer |
-   | `SERVER_PASSWORD`   | Server password                                | [a-zA-Z0-9]+  |               |
-   | `ADMIN_USERNAME`    | Server Admin account username                  | [a-zA-Z0-9]+  | superuser     |
-   | `ADMIN_PASSWORD`    | Server Admin account password                  | [a-zA-Z0-9]+  | changeme      |
-   | `USE_STEAM`         | Create a Steam Server, or a Non-Steam Server   | (true\|false) | true          |
-   | `STEAM_VAC`         | Use Steam VAC anti-cheat                       | (true\|false) | true          |
-   | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes          | [0-9]+        | 10m           |
-   | `CAR_SPAWN_RATE`    | Frequency of car spawns                        | 1 - 5         | 10m           |
-   | `MAX_PLAYERS`       | Maximum players allowed in the Server          | [0-9]+        | 16            |
-   | `MAX_RAM`           | Maximum amount of RAM to be used               | ([0-9]+)m     | 4096m         |
-   | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected | (true\|false) | true          |
-   | `PLAYER_SAFEHOUSE`  | Allow Players to claim Safehouses              | (true\|false) | true          |
-   | `SAFEHOUSE_RESPAWN` | Allow Players to respawn in their Safehouse    | (true\|false) | true          |
-   | `SLEEP_ALLOWED`     | Allow Players to sleep until morning           | (true\|false) | true          |
-   | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit    | (true\|false) | true          |
-   | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids   | (true\|false) | true          |
+   | Argument            | Description                                                            | Values        | Default       |
+   |---------------------|------------------------------------------------------------------------|---------------|---------------|
+   | `BIND_IP`           | IP to bind the server to                                               | 0.0.0.0       | 0.0.0.0       |
+   | `GAME_VERSION`      | Game version to serve                                                  | [a-zA-Z0-9_]+ | `public`      |
+   | `PUBLIC_SERVER`     | Is the server displayed Publicly                                       | (true\|false) | true          |
+   | `QUERY_PORT`        | Port for other players to connect to                                   | 1000 - 65535  | 16261         |
+   | `GAME_PORT`         | Port for sending game data to clients                                  | 1000 - 65535  | 8766          |
+   | `SERVER_NAME`       | Publicly visible Server Name                                           | [a-zA-Z0-9]+  | ZomboidServer |
+   | `SERVER_PASSWORD`   | Server password                                                        | [a-zA-Z0-9]+  |               |
+   | `ADMIN_USERNAME`    | Server Admin account username                                          | [a-zA-Z0-9]+  | superuser     |
+   | `ADMIN_PASSWORD`    | Server Admin account password                                          | [a-zA-Z0-9]+  | changeme      |
+   | `USE_STEAM`         | Create a Steam Server, or a Non-Steam Server                           | (true\|false) | true          |
+   | `STEAM_VAC`         | Use Steam VAC anti-cheat                                               | (true\|false) | true          |
+   | `MOD_NAMES`         | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits) | mod1;mod2;mod |               |
+   | `MOD_WORKSHOP_IDS`  | Workshop Mod IDs (e.g. 2160432461;2685168362)                          | xxxxxx;xxxxx; |               |
+   | `SERVER_PVP`        | Allow Player Vs Player                                                 | (true\|false) | false         |
+   | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes                                  | [0-9]+        | 10m           |
+   | `CAR_SPAWN_RATE`    | Frequency of car spawns                                                | 1 - 5         | 10m           |
+   | `MAX_PLAYERS`       | Maximum players allowed in the Server                                  | [0-9]+        | 16            |
+   | `MAX_RAM`           | Maximum amount of RAM to be used                                       | ([0-9]+)m     | 4096m         |
+   | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected                         | (true\|false) | true          |
+   | `PLAYER_SAFEHOUSE`  | Allow Players to claim Safehouses                                      | (true\|false) | true          |
+   | `SAFEHOUSE_RESPAWN` | Allow Players to respawn in their Safehouse                            | (true\|false) | true          |
+   | `SLEEP_ALLOWED`     | Allow Players to sleep until morning                                   | (true\|false) | true          |
+   | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit                            | (true\|false) | true          |
+   | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids                           | (true\|false) | true          |
 
    ***Note**: Arguments inside square brackets are optional. If the default ports are to be overridden, then the
    `published` ports below must also be changed*  
@@ -98,6 +101,9 @@ The following are instructions for running the server using the Docker image.
        [--env=ADMIN_PASSWORD=<value>] \
        [--env=USE_STEAM=<value>] \
        [--env=STEAM_VAC=<value>] \
+       [--env=MOD_NAMES=<value>] \
+       [--env=MOD_WORKSHOP_IDS=<value>] \
+       [--env=SERVER_PVP=<value>] \
        [--env=AUTOSAVE_INTERVAL=<value>] \
        [--env=CAR_SPAWN_RATE=<value>] \
        [--env=MAX_PLAYERS=<value>] \
@@ -127,29 +133,32 @@ The following are instructions for running the server using Docker-Compose.
 2. Make any configuration changes you want to in the `docker-compose.yaml` file. In
    the `services.zomboid-server.environment` section, you can change values for:
 
-   | Argument            | Description                                    | Values        | Default       |
-   |---------------------|------------------------------------------------|---------------|---------------|
-   | `BIND_IP`           | IP to bind the server to                       | 0.0.0.0       | 0.0.0.0       |
-   | `GAME_VERSION`      | Game version to serve                          | [a-zA-Z0-9_]+ | `public`      |
-   | `PUBLIC_SERVER`     | Is the server displayed Publicly               | (true\|false) | true          |
-   | `QUERY_PORT`        | Port for other players to connect to           | 1000 - 65535  | 16261         |
-   | `GAME_PORT`         | Port for sending game data to clients          | 1000 - 65535  | 8766          |
-   | `SERVER_NAME`       | Publicly visible Server Name                   | [a-zA-Z0-9]+  | ZomboidServer |
-   | `SERVER_PASSWORD`   | Server password                                | [a-zA-Z0-9]+  |               |
-   | `ADMIN_USERNAME`    | Server Admin account username                  | [a-zA-Z0-9]+  | superuser     |
-   | `ADMIN_PASSWORD`    | Server Admin account password                  | [a-zA-Z0-9]+  | changeme      |
-   | `USE_STEAM`         | Create a Steam Server, or a Non-Steam Server   | (true\|false) | true          |
-   | `STEAM_VAC`         | Use Steam VAC anti-cheat                       | (true\|false) | true          |
-   | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes          | [0-9]+        | 10m           |
-   | `CAR_SPAWN_RATE`    | Frequency of car spawns                        | 1 - 5         | 10m           |
-   | `MAX_PLAYERS`       | Maximum players allowed in the Server          | [0-9]+        | 16            |
-   | `MAX_RAM`           | Maximum amount of RAM to be used               | ([0-9]+)m     | 4096m         |
-   | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected | (true\|false) | true          |
-   | `PLAYER_SAFEHOUSE`  | Allow Players to claim Safehouses              | (true\|false) | true          |
-   | `SAFEHOUSE_RESPAWN` | Allow Players to respawn in their Safehouse    | (true\|false) | true          |
-   | `SLEEP_ALLOWED`     | Allow Players to sleep until morning           | (true\|false) | true          |
-   | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit    | (true\|false) | true          |
-   | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids   | (true\|false) | true          |
+   | Argument            | Description                                                            | Values        | Default       |
+   |---------------------|------------------------------------------------------------------------|---------------|---------------|
+   | `BIND_IP`           | IP to bind the server to                                               | 0.0.0.0       | 0.0.0.0       |
+   | `GAME_VERSION`      | Game version to serve                                                  | [a-zA-Z0-9_]+ | `public`      |
+   | `PUBLIC_SERVER`     | Is the server displayed Publicly                                       | (true\|false) | true          |
+   | `QUERY_PORT`        | Port for other players to connect to                                   | 1000 - 65535  | 16261         |
+   | `GAME_PORT`         | Port for sending game data to clients                                  | 1000 - 65535  | 8766          |
+   | `SERVER_NAME`       | Publicly visible Server Name                                           | [a-zA-Z0-9]+  | ZomboidServer |
+   | `SERVER_PASSWORD`   | Server password                                                        | [a-zA-Z0-9]+  |               |
+   | `ADMIN_USERNAME`    | Server Admin account username                                          | [a-zA-Z0-9]+  | superuser     |
+   | `ADMIN_PASSWORD`    | Server Admin account password                                          | [a-zA-Z0-9]+  | changeme      |
+   | `USE_STEAM`         | Create a Steam Server, or a Non-Steam Server                           | (true\|false) | true          |
+   | `STEAM_VAC`         | Use Steam VAC anti-cheat                                               | (true\|false) | true          |
+   | `MOD_NAMES`         | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits) | mod1;mod2;mod |               |
+   | `MOD_WORKSHOP_IDS`  | Workshop Mod IDs (e.g. 2160432461;2685168362)                          | xxxxxx;xxxxx; |               |
+   | `SERVER_PVP`        | Allow Player Vs Player                                                 | (true\|false) | false         |
+   | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes                                  | [0-9]+        | 10m           |
+   | `CAR_SPAWN_RATE`    | Frequency of car spawns                                                | 1 - 5         | 10m           |
+   | `MAX_PLAYERS`       | Maximum players allowed in the Server                                  | [0-9]+        | 16            |
+   | `MAX_RAM`           | Maximum amount of RAM to be used                                       | ([0-9]+)m     | 4096m         |
+   | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected                         | (true\|false) | true          |
+   | `PLAYER_SAFEHOUSE`  | Allow Players to claim Safehouses                                      | (true\|false) | true          |
+   | `SAFEHOUSE_RESPAWN` | Allow Players to respawn in their Safehouse                            | (true\|false) | true          |
+   | `SLEEP_ALLOWED`     | Allow Players to sleep until morning                                   | (true\|false) | true          |
+   | `STARTER_KIT`       | Allow Players to respawn with a Starter Kit                            | (true\|false) | true          |
+   | `WEAPON_MULTI_HIT`  | Allow large weapons to hit multiple Zomboids                           | (true\|false) | true          |
 
    ***Note**: If the default ports are to be overridden, then the `published` ports must also be changed*
 
