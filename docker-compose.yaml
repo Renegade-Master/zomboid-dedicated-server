@@ -21,6 +21,9 @@ services:
       - "ADMIN_PASSWORD=changeme"
       - "USE_STEAM=true"
       - "STEAM_VAC=true"
+      - "MOD_NAMES="
+      - "MOD_WORKSHOP_IDS="
+      - "SERVER_PVP=true"
       - "AUTOSAVE_INTERVAL=15"
       - "CAR_SPAWN_RATE=3"
       - "MAX_PLAYERS=16"
@@ -31,8 +34,6 @@ services:
       - "SLEEP_ALLOWED=true"
       - "STARTER_KIT=true"
       - "WEAPON_MULTI_HIT=true"
-      - "MOD_NAMES="
-      - "MOD_WORKSHOP_IDS="
     ports:
       - target: 8766
         published: 8766
