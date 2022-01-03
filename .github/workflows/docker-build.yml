@@ -17,7 +17,9 @@ jobs:
 
       - name: Set Variables
         id: variables
-        run: echo "::set-output name=datetime::$(date +%Y%m%dT%H%M%SZ)"
+        run: |
+          echo "::set-output name=datetime::$(date +%Y%m%dT%H%M%SZ)"
+          printf "UID: %s\nGID: %s\n" $(id -u) $(id -g)
 
       - name: Make Directories
         run: mkdir ZomboidConfig ZomboidDedicatedServer
