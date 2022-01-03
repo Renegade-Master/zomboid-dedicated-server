@@ -12,10 +12,28 @@ jobs:
     name: Docker Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Build the Docker image
+      - name: Make Directories
+        uses: actions/checkout@v2
+        run: mkdir ZomboidConfig ZomboidDedicatedServer
+
+      - name: Build the Docker Image
+        if: ${{ success() }}
         run: |
           docker build \
           --file docker/zomboid-dedicated-server.Dockerfile \
           --tag renegademaster/zomboid-dedicated-server:$(date +%s) \
+          --build-arg USER_ID=$(id -u) \
+          --build-arg GROUP_ID=$(id -g) \
           .
+
+      - name: Test Run the Docker Image
+        if: ${{ success() }}
+        timeout-minutes: 2
+        run: |
+          docker run \
+          --rm \
+          --name zomboid-dedicated-server \
+          --user $(id -u):$(id -g) \
+          --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
+          --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
+          renegademaster/zomboid-dedicated-server:$(date +%s) 
