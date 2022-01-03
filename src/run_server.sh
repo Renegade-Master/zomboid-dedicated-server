@@ -7,7 +7,7 @@
 #######################################################################
 
 # Set to `-x` for Debug logging
-set -x
+set +x
 
 # Start the Server
 function start_server() {
@@ -23,20 +23,29 @@ function start_server() {
 function apply_postinstall_config() {
     printf "\n### Applying Post Install Configuration...\n"
 
-    # Set the Server PvP status
-    sed -i "s/PVP=.*/PVP=$SERVER_PVP/g" "$SERVER_CONFIG"
-
-    # Set the Server Name
-    sed -i "s/PublicName=.*/PublicName=$SERVER_NAME/g" "$SERVER_CONFIG"
-
     # Set the Server Publicity status
     sed -i "s/Open=.*/Open=$PUBLIC_SERVER/g" "$SERVER_CONFIG"
 
     # Set the Server query Port
     sed -i "s/DefaultPort=.*/DefaultPort=$QUERY_PORT/g" "$SERVER_CONFIG"
 
+    # Set the Server game Port
+    sed -i "s/SteamPort1=.*/SteamPort1=$GAME_PORT/g" "$SERVER_CONFIG"
+
+    # Set the Server Name
+    sed -i "s/PublicName=.*/PublicName=$SERVER_NAME/g" "$SERVER_CONFIG"
+
     # Set the Server Password
     sed -i "s/Password=.*/Password=$SERVER_PASSWORD/g" "$SERVER_CONFIG"
+
+    # Set the Mod names
+    sed -i "s/Mods=.*/Mods=$MOD_NAMES/g" "$SERVER_CONFIG"
+
+    # Set the Mod Workshop IDs
+    sed -i "s/WorkshopItems=.*/WorkshopItems=$MOD_WORKSHOP_IDS/g" "$SERVER_CONFIG"
+
+    # Set the Server PvP status
+    sed -i "s/PVP=.*/PVP=$SERVER_PVP/g" "$SERVER_CONFIG"
 
     # Set the Autosave Interval
     sed -i "s/SaveWorldEveryMinutes=.*/SaveWorldEveryMinutes=$AUTOSAVE_INTERVAL/g" "$SERVER_CONFIG"
@@ -67,12 +76,6 @@ function apply_postinstall_config() {
 
     # Set the Weapon Multi Hit
     sed -i "s/MultiHitZombies = .*/MultiHitZombies = $WEAPON_MULTI_HIT,/g" "$SERVER_RULES_CONFIG"
-
-    # Set the Mod names
-    sed -i "s/Mods=.*/Mods=$MOD_NAMES/g" "$SERVER_CONFIG"
-
-    # Set the Mod Workshop IDs
-    sed -i "s/WorkshopItems=.*/WorkshopItems=$MOD_WORKSHOP_IDS/g" "$SERVER_CONFIG"
 
     printf "\n### Post Install Configuration applied.\n"
 }

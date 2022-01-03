@@ -13,6 +13,7 @@ services:
     environment:
       - "BIND_IP=0.0.0.0"
       - "GAME_VERSION=public"
+      - "PUBLIC_SERVER=true"
       - "QUERY_PORT=16261"
       - "GAME_PORT=8766"
       - "SERVER_NAME=ZomboidServer"
