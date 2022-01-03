@@ -10,6 +10,8 @@ ARG USER_ID=1000
 ARG GROUP_ID=1000
 
 FROM renegademaster/steamcmd-minimal:1.0.0
+ARG USER_ID
+ARG GROUP_ID
 
 # Add metadata labels
 LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
