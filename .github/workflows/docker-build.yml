@@ -15,6 +15,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
+      - name: Set Variables
+        id: variables
+        run: echo "::set-output name=datetime::$(date +%Y%m%dT%H%M%SZ)"
+
       - name: Make Directories
         run: mkdir ZomboidConfig ZomboidDedicatedServer
 
@@ -23,7 +27,7 @@ jobs:
         run: |
           docker build \
           --file docker/zomboid-dedicated-server.Dockerfile \
-          --tag renegademaster/zomboid-dedicated-server:$(date +%s) \
+          --tag renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
           --build-arg USER_ID=$(id -u) \
           --build-arg GROUP_ID=$(id -g) \
           .
@@ -38,4 +42,4 @@ jobs:
           --user $(id -u):$(id -g) \
           --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
           --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
-          renegademaster/zomboid-dedicated-server:$(date +%s) 
+          renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} 
