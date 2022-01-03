@@ -119,8 +119,8 @@ function apply_preinstall_config() {
 function update_folder_permissions() {
     printf "\n### Updating Folder Permissions...\n"
 
-    chown "$(id -u):$(id -g)" "$STEAM_PATH"
-    chown "$(id -u):$(id -g)" "$STEAM_INSTALL_FILE"
+    chmod 700 "$STEAM_PATH"
+    chmod 700 "$STEAM_INSTALL_FILE"
     chown -R "$(id -u):$(id -g)" "$BASE_GAME_DIR"
     chown -R "$(id -u):$(id -g)" "$CONFIG_DIR"
 
