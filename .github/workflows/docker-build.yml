@@ -12,8 +12,10 @@ jobs:
     name: Docker Build
     runs-on: ubuntu-latest
     steps:
-      - name: Make Directories
+      - name: Checkout Repository
         uses: actions/checkout@v2
+
+      - name: Make Directories
         run: mkdir ZomboidConfig ZomboidDedicatedServer
 
       - name: Build the Docker Image
