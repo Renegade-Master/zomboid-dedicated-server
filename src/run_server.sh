@@ -13,6 +13,7 @@ set +x
 function start_server() {
     printf "\n### Starting Project Zomboid Server...\n"
     timeout "$TIMEOUT" "$BASE_GAME_DIR"/start-server.sh \
+        -cachedir="$CONFIG_DIR" \
         -adminusername "$ADMIN_USERNAME" \
         -adminpassword "$ADMIN_PASSWORD" \
         -ip "$BIND_IP" -port "$QUERY_PORT" \
