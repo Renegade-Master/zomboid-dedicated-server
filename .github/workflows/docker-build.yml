@@ -49,8 +49,8 @@ jobs:
           --rm \
           --name zomboid-dedicated-server \
           --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
-          --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
-          --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
+          --volume "$(pwd)/ZomboidDedicatedServer":"/home/steam/ZomboidDedicatedServer" \
+          --volume "$(pwd)/ZomboidConfig":"home/steam/Zomboid" \
           renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
           2>&1 | tee ./docker-log.log
 
@@ -68,9 +68,9 @@ jobs:
           echo ''
           ls -lAuhFn ./ZomboidConfig/
           echo ''
-          tree ./ZomboidDedicatedServer/
+          tree -aL 4 ./ZomboidDedicatedServer/
           echo ''
-          tree ./ZomboidConfig/
+          tree -aL 4 ./ZomboidConfig/
 
       - name: Upload artifacts
         if: ${{ always() }}
