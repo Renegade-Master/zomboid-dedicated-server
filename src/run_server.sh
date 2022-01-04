@@ -221,9 +221,10 @@ function set_variables() {
 
 ## Main
 set_variables
-update_folder_permissions
 apply_preinstall_config
 update_server
+update_folder_permissions
 test_first_run
+update_folder_permissions
 apply_postinstall_config
 start_server

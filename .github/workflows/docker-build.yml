@@ -57,12 +57,12 @@ jobs:
       - name: Test if Test Run was Successful
         run: |
           grep -q -iE "LuaNet: Initialization \[DONE\]" ./docker-log.log
-          ! grep -q -iE "sed: can't read" ./docker-logs.log
+          ! grep -q -iE "sed: can't read" ./docker-log.log
 
       - name: Upload artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: docker-logs
+          name: docker-logs-${{ steps.variables.outputs.datetime }}
           path: |
             docker-log.log
