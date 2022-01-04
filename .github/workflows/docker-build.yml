@@ -60,6 +60,7 @@ jobs:
           ! grep -q -iE "sed: can't read" ./docker-log.log
 
       - name: Investigate file structure
+        if: ${{ always() }}
         run: |
           ls -lAuhFn ./ZomboidDedicatedServer/
           echo ''
