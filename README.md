@@ -7,6 +7,14 @@
 If issues are encountered, please report them on
 the [GitHub repository](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/new/choose)
 
+## Badges
+
+[![Build and Test Server Image](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/workflows/docker-build.yml/badge.svg?branch=main)](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/workflows/docker-build.yml)  
+
+![Docker Image Version (latest by date)](https://img.shields.io/docker/v/renegademaster/zomboid-dedicated-server?label=Latest%20Version)
+![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/renegademaster/zomboid-dedicated-server?label=Image%20Size)
+![Docker Pulls](https://img.shields.io/docker/pulls/renegademaster/zomboid-dedicated-server?label=Docker%20Pull%20Count)
+
 ## Description
 
 Dedicated Server for Project Zomboid using Docker, and optionally Docker-Compose.  

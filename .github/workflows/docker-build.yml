@@ -107,7 +107,7 @@ jobs:
 
       - name: Test - Sed Command Completed
         run: |
-          ! grep -q -iE "sed: can't read" ./docker-log.log
+          ! grep -q -iE "sed: can't read" "./docker-log.log"
 
       - name: Test - Server JVM Configuration Applied
         run: |
