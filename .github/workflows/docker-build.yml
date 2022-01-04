@@ -59,6 +59,16 @@ jobs:
           grep -q -iE "LuaNet: Initialization \[DONE\]" ./docker-log.log
           ! grep -q -iE "sed: can't read" ./docker-log.log
 
+      - name: Investigate file structure
+        run: |
+          ls -lAuhFn ./ZomboidDedicatedServer/
+          echo ''
+          ls -lAuhFn ./ZomboidConfig/
+          echo ''
+          tree ./ZomboidDedicatedServer/
+          echo ''
+          tree ./ZomboidConfig/
+
       - name: Upload artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
