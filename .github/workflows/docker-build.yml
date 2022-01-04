@@ -1,4 +1,4 @@
-name: Docker Image Build
+name: Build and Test Server Image
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
 
 jobs:
 
-  build:
-    name: Docker Build
+  build-and-run:
+    name: Build and Run Server
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -21,13 +21,11 @@ jobs:
           echo "::set-output name=datetime::$(date +%Y%m%dT%H%M%SZ)"
           echo "::set-output name=userid::$(id -u)"
           echo "::set-output name=groupid::$(id -g)"
-          printf "UID: %s\nGID: %s\n" $(id -u) $(id -g)
 
       - name: Set Permissions on Executable Scripts
         run: |
           chmod +x src/install_server.scmd
           chmod +x src/run_server.sh
-          ls -lAuhFn src/
 
       - name: Make Directories
         run: mkdir ZomboidConfig ZomboidDedicatedServer
@@ -54,16 +52,71 @@ jobs:
           --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
           --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
           renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
-          | tee ./docker-log.log
+          2>&1 | tee ./docker-log.log
 
-      - name: Test if Test Run was Successful
+      - name: Investigate File Structure on Failure
+        if: ${{ failure() }}
         run: |
-          grep -q -iE "LuaNet: Initialization \[DONE\]" ./docker-log.log
+          pwd
+          echo ''
+          ls -lAuhFn ./ZomboidDedicatedServer/
+          echo ''
+          ls -lAuhFn ./ZomboidConfig/
+          echo ''
+          tree -aL 4 ./ZomboidDedicatedServer/
+          echo ''
+          tree -aL 4 ./ZomboidConfig/
 
-      - name: Upload artifacts
+      - name: Upload Docker Logs
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: docker-logs
           path: |
             docker-log.log
+
+      - name: Upload Server Configuration
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: server-configs
+          path: |
+            ZomboidConfig/Server/ZomboidServer.ini
+            ZomboidConfig/Server/ZomboidServer_SandboxVars.lua
+            ZomboidDedicatedServer/ProjectZomboid64.json
+
+  test:
+    name: Test Server
+    runs-on: ubuntu-latest
+    needs:
+      - build-and-run
+    steps:
+      - name: Download Docker Logs
+        uses: actions/download-artifact@v2
+        with:
+          name: docker-logs
+
+      - name: Download Server Configs
+        uses: actions/download-artifact@v2
+        with:
+          name: server-configs
+
+      - name: Test - Server Started
+        run: |
+          grep -q -iE "LuaNet: Initialization \[DONE\]" "./docker-log.log"
+
+      - name: Test - Sed Command Completed
+        run: |
+          ! grep -q -iE "sed: can't read" "./docker-log.log"
+
+      - name: Test - Server JVM Configuration Applied
+        run: |
+          grep -q -iE "\-Xmx4096m" "./ZomboidDedicatedServer/ProjectZomboid64.json"
+
+      - name: Test - Server Configuration Applied
+        run: |
+          grep -q -iE "Open=true" "./ZomboidConfig/Server/ZomboidServer.ini"
+
+      - name: Test - Server Game Rules Configuration Applied
+        run: |
+          grep -q -iE "CarSpawnRate = 3" "./ZomboidConfig/Server/ZomboidServer_SandboxVars.lua"

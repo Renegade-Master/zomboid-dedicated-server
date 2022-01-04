@@ -13,6 +13,7 @@ set +x
 function start_server() {
     printf "\n### Starting Project Zomboid Server...\n"
     timeout "$TIMEOUT" "$BASE_GAME_DIR"/start-server.sh \
+        -cachedir="$CONFIG_DIR" \
         -adminusername "$ADMIN_USERNAME" \
         -adminpassword "$ADMIN_PASSWORD" \
         -ip "$BIND_IP" -port "$QUERY_PORT" \
@@ -129,7 +130,7 @@ function update_folder_permissions() {
 function set_variables() {
     printf "\n### Setting variables...\n"
 
-    TIMEOUT="30"
+    TIMEOUT="60"
     STEAM_INSTALL_FILE="/home/steam/install_server.scmd"
     BASE_GAME_DIR="/home/steam/ZomboidDedicatedServer"
     CONFIG_DIR="/home/steam/Zomboid"
