@@ -42,18 +42,6 @@ jobs:
           --build-arg GROUP_ID=${{ steps.variables.outputs.groupid }} \
           .
 
-      - name: Test Docker Container User
-        if: ${{ success() }}
-        run: |
-          docker run \
-          --rm \
-          --name zomboid-dedicated-server \
-          --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
-          --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
-          --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
-          renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \ 
-          printf "UID: %s\nGID: %s\n" $(id -u) $(id -g) && ls -lAuhFn /home/steam/
-
       - name: Test Run the Docker Image
         if: ${{ success() }}
         timeout-minutes: 2
