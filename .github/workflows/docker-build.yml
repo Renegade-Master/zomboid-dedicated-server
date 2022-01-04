@@ -111,7 +111,7 @@ jobs:
 
       - name: Test - Server JVM Configuration Applied
         run: |
-          grep -q -iE "-Xmx4096m" "./ZomboidDedicatedServer/ProjectZomboid64.json"
+          grep -q -iE "\-Xmx4096m" "./ZomboidDedicatedServer/ProjectZomboid64.json"
 
       - name: Test - Server Configuration Applied
         run: |
