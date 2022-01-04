@@ -22,6 +22,10 @@ LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
 # Copy the source files
 COPY src /home/steam/
 
+# Temporarily login as root to modify ownership
+USER 0:0
+RUN chown -R ${USER_ID}:${GROUP_ID} "/home/steam"
+
 # Switch to the Steam User
 USER ${USER_ID}:${GROUP_ID}
 
