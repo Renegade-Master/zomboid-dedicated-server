@@ -129,7 +129,7 @@ function update_folder_permissions() {
 function set_variables() {
     printf "\n### Setting variables...\n"
 
-    TIMEOUT="30"
+    TIMEOUT="60"
     STEAM_INSTALL_FILE="/home/steam/install_server.scmd"
     BASE_GAME_DIR="/home/steam/ZomboidDedicatedServer"
     CONFIG_DIR="/home/steam/Zomboid"
