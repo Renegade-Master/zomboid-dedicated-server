@@ -44,7 +44,7 @@ jobs:
 
       - name: Test Run the Docker Image
         if: ${{ success() }}
-        timeout-minutes: 2
+        timeout-minutes: 3
         run: |
           docker run \
           --rm \
