@@ -50,7 +50,7 @@ jobs:
           --name zomboid-dedicated-server \
           --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
           --volume "$(pwd)/ZomboidDedicatedServer":"/home/steam/ZomboidDedicatedServer" \
-          --volume "$(pwd)/ZomboidConfig":"home/steam/Zomboid" \
+          --volume "$(pwd)/ZomboidConfig":"/home/steam/Zomboid" \
           renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
           2>&1 | tee ./docker-log.log
 
