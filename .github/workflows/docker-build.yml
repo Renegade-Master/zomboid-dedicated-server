@@ -54,13 +54,14 @@ jobs:
           --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
           --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
           renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
-          > ./docker-log.log
+          | tee ./docker-log.log
 
       - name: Test if Test Run was Successful
         run: |
           grep -q -iE "LuaNet: Initialization \[DONE\]" ./docker-log.log
 
       - name: Upload artifacts
+        if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: docker-logs
