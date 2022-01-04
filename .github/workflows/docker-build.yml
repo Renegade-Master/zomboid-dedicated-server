@@ -52,7 +52,7 @@ jobs:
           --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
           --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
           renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
-          | tee ./docker-log.log
+          2>&1 | tee ./docker-log.log
 
       - name: Test if Test Run was Successful
         run: |
