@@ -1,0 +1,69 @@
+name: Docker Image Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set Variables
+        id: variables
+        run: |
+          echo "::set-output name=datetime::$(date +%Y%m%dT%H%M%SZ)"
+          echo "::set-output name=userid::$(id -u)"
+          echo "::set-output name=groupid::$(id -g)"
+          printf "UID: %s\nGID: %s\n" $(id -u) $(id -g)
+
+      - name: Set Permissions on Executable Scripts
+        run: |
+          chmod +x src/install_server.scmd
+          chmod +x src/run_server.sh
+          ls -lAuhFn src/
+
+      - name: Make Directories
+        run: mkdir ZomboidConfig ZomboidDedicatedServer
+
+      - name: Build the Docker Image
+        if: ${{ success() }}
+        run: |
+          docker build \
+          --file docker/zomboid-dedicated-server.Dockerfile \
+          --tag renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+          --build-arg USER_ID=${{ steps.variables.outputs.userid }} \
+          --build-arg GROUP_ID=${{ steps.variables.outputs.groupid }} \
+          .
+
+      - name: Test Run the Docker Image
+        if: ${{ success() }}
+        continue-on-error: true
+        timeout-minutes: 5
+        run: |
+          docker run \
+          --rm \
+          --name zomboid-dedicated-server \
+          --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
+          --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
+          --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
+          renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+          | tee ./docker-log.log
+
+      - name: Test if Test Run was Successful
+        run: |
+          grep -q -iE "LuaNet: Initialization \[DONE\]" ./docker-log.log
+
+      - name: Upload artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-logs
+          path: |
+            docker-log.log

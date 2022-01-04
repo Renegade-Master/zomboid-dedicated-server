@@ -100,7 +100,7 @@ function test_first_run() {
 function update_server() {
     printf "\n### Updating Project Zomboid Server...\n"
 
-    "$STEAM_PATH" +runscript /home/steam/install_server.scmd
+    "$STEAM_PATH" +runscript "$STEAM_INSTALL_FILE"
 
     printf "\n### Project Zomboid Server updated.\n"
 }
@@ -110,7 +110,7 @@ function apply_preinstall_config() {
     printf "\n### Applying Pre Install Configuration...\n"
 
     # Set the selected game version
-    sed -i "s/beta .* /beta $GAME_VERSION /g" /home/steam/install_server.scmd
+    sed -i "s/beta .* /beta $GAME_VERSION /g" "$STEAM_INSTALL_FILE"
 
     printf "\n### Pre Install Configuration applied.\n"
 }
@@ -130,6 +130,7 @@ function set_variables() {
     printf "\n### Setting variables...\n"
 
     TIMEOUT="30"
+    STEAM_INSTALL_FILE="/home/steam/install_server.scmd"
     BASE_GAME_DIR="/home/steam/ZomboidDedicatedServer"
     CONFIG_DIR="/home/steam/Zomboid"
 
