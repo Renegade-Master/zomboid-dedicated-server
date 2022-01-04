@@ -44,6 +44,7 @@ jobs:
 
       - name: Test Run the Docker Image
         if: ${{ success() }}
+        continue-on-error: true
         timeout-minutes: 3
         run: |
           docker run \
@@ -52,4 +53,9 @@ jobs:
           --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
           --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
           --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
-          renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} 
+          renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+          > ./docker-log.log
+
+      - name: Test if Test Run was Successful
+        run: |
+          grep -q -iE "LuaNet: Initialization \[DONE\]" ./docker-log.log
