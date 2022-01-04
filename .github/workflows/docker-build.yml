@@ -60,8 +60,10 @@ jobs:
           ! grep -q -iE "sed: can't read" ./docker-log.log
 
       - name: Investigate file structure
-        if: ${{ always() }}
+        if: ${{ failure() }}
         run: |
+          pwd
+          echo ''
           ls -lAuhFn ./ZomboidDedicatedServer/
           echo ''
           ls -lAuhFn ./ZomboidConfig/
