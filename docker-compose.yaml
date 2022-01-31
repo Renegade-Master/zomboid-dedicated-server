@@ -24,17 +24,10 @@ services:
       - "STEAM_VAC=true"
       - "MOD_NAMES="
       - "MOD_WORKSHOP_IDS="
-      - "SERVER_PVP=true"
       - "AUTOSAVE_INTERVAL=15"
-      - "CAR_SPAWN_RATE=3"
       - "MAX_PLAYERS=16"
       - "MAX_RAM=4096m"
       - "PAUSE_ON_EMPTY=true"
-      - "PLAYER_SAFEHOUSE=true"
-      - "SAFEHOUSE_RESPAWN=true"
-      - "SLEEP_ALLOWED=true"
-      - "STARTER_KIT=true"
-      - "WEAPON_MULTI_HIT=true"
     ports:
       - target: 8766
         published: 8766

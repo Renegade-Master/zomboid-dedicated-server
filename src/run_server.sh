@@ -45,14 +45,8 @@ function apply_postinstall_config() {
     # Set the Mod Workshop IDs
     sed -i "s/WorkshopItems=.*/WorkshopItems=$MOD_WORKSHOP_IDS/g" "$SERVER_CONFIG"
 
-    # Set the Server PvP status
-    sed -i "s/PVP=.*/PVP=$SERVER_PVP/g" "$SERVER_CONFIG"
-
     # Set the Autosave Interval
     sed -i "s/SaveWorldEveryMinutes=.*/SaveWorldEveryMinutes=$AUTOSAVE_INTERVAL/g" "$SERVER_CONFIG"
-
-    # Set the Car Spawn Rate
-    sed -i "s/CarSpawnRate = .*/CarSpawnRate = $CAR_SPAWN_RATE,/g" "$SERVER_RULES_CONFIG"
 
     # Set the Max Players
     sed -i "s/MaxPlayers=.*/MaxPlayers=$MAX_PLAYERS/g" "$SERVER_CONFIG"
@@ -62,21 +56,6 @@ function apply_postinstall_config() {
 
     # Set the Pause on Empty Server
     sed -i "s/PauseEmpty=.*/PauseEmpty=$PAUSE_ON_EMPTY/g" "$SERVER_CONFIG"
-
-    # Set the Player Safehouse
-    sed -i "s/PlayerSafehouse=.*/PlayerSafehouse=$PLAYER_SAFEHOUSE/g" "$SERVER_CONFIG"
-
-    # Set the Player Safehouse Respawn
-    sed -i "s/SafehouseAllowRespawn=.*/SafehouseAllowRespawn=$SAFEHOUSE_RESPAWN/g" "$SERVER_CONFIG"
-
-    # Set the Sleep Until Morning
-    sed -i "s/SleepAllowed=.*/SleepAllowed=$SLEEP_ALLOWED/g" "$SERVER_CONFIG"
-
-    # Set the Spawn with Starter Kit
-    sed -i "s/StarterKit = .*/StarterKit = $STARTER_KIT,/g" "$SERVER_RULES_CONFIG"
-
-    # Set the Weapon Multi Hit
-    sed -i "s/MultiHitZombies = .*/MultiHitZombies = $WEAPON_MULTI_HIT,/g" "$SERVER_RULES_CONFIG"
 
     printf "\n### Post Install Configuration applied.\n"
 }
@@ -188,9 +167,6 @@ function set_variables() {
     # Set the Autosave Interval variable
     AUTOSAVE_INTERVAL=${AUTOSAVE_INTERVAL:-"15"}
 
-    # Set the Car Spawn rate variable
-    CAR_SPAWN_RATE=${CAR_SPAWN_RATE:-"3"}
-
     # Set the Max Players variable
     MAX_PLAYERS=${MAX_PLAYERS:-"16"}
 
@@ -199,21 +175,6 @@ function set_variables() {
 
     # Set the Pause on Empty variable
     PAUSE_ON_EMPTY=${PAUSE_ON_EMPTY:-"true"}
-
-    # Set Player Safehouse variable
-    PLAYER_SAFEHOUSE=${PLAYER_SAFEHOUSE:-"true"}
-
-    # Set the Player Safehouse Respawn variable
-    SAFEHOUSE_RESPAWN=${SAFEHOUSE_RESPAWN:-"true"}
-
-    # Set the Sleep until morning variable
-    SLEEP_ALLOWED=${SLEEP_ALLOWED:-"true"}
-
-    # Set the Starter Kit variable
-    STARTER_KIT=${STARTER_KIT:-"true"}
-
-    # Set the Weapon Multi-Hit variable
-    WEAPON_MULTI_HIT=${WEAPON_MULTI_HIT:-"true"}
 
     SERVER_CONFIG="$CONFIG_DIR/Server/$SERVER_NAME.ini"
     SERVER_VM_CONFIG="$BASE_GAME_DIR/ProjectZomboid64.json"
