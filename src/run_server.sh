@@ -24,29 +24,11 @@ function start_server() {
 function apply_postinstall_config() {
     printf "\n### Applying Post Install Configuration...\n"
 
-    # Set the Server Publicity status
-    sed -i "s/Open=.*/Open=$PUBLIC_SERVER/g" "$SERVER_CONFIG"
-
-    # Set the Server query Port
-    sed -i "s/DefaultPort=.*/DefaultPort=$QUERY_PORT/g" "$SERVER_CONFIG"
+    # Set the Autosave Interval
+    sed -i "s/SaveWorldEveryMinutes=.*/SaveWorldEveryMinutes=$AUTOSAVE_INTERVAL/g" "$SERVER_CONFIG"
 
     # Set the Server game Port
     sed -i "s/SteamPort1=.*/SteamPort1=$GAME_PORT/g" "$SERVER_CONFIG"
-
-    # Set the Server Name
-    sed -i "s/PublicName=.*/PublicName=$SERVER_NAME/g" "$SERVER_CONFIG"
-
-    # Set the Server Password
-    sed -i "s/Password=.*/Password=$SERVER_PASSWORD/g" "$SERVER_CONFIG"
-
-    # Set the Mod names
-    sed -i "s/Mods=.*/Mods=$MOD_NAMES/g" "$SERVER_CONFIG"
-
-    # Set the Mod Workshop IDs
-    sed -i "s/WorkshopItems=.*/WorkshopItems=$MOD_WORKSHOP_IDS/g" "$SERVER_CONFIG"
-
-    # Set the Autosave Interval
-    sed -i "s/SaveWorldEveryMinutes=.*/SaveWorldEveryMinutes=$AUTOSAVE_INTERVAL/g" "$SERVER_CONFIG"
 
     # Set the Max Players
     sed -i "s/MaxPlayers=.*/MaxPlayers=$MAX_PLAYERS/g" "$SERVER_CONFIG"
@@ -54,8 +36,26 @@ function apply_postinstall_config() {
     # Set the maximum amount of RAM for the JVM
     sed -i "s/-Xmx.*/-Xmx$MAX_RAM\",/g" "$SERVER_VM_CONFIG"
 
+    # Set the Mod names
+    sed -i "s/Mods=.*/Mods=$MOD_NAMES/g" "$SERVER_CONFIG"
+
+    # Set the Mod Workshop IDs
+    sed -i "s/WorkshopItems=.*/WorkshopItems=$MOD_WORKSHOP_IDS/g" "$SERVER_CONFIG"
+
     # Set the Pause on Empty Server
     sed -i "s/PauseEmpty=.*/PauseEmpty=$PAUSE_ON_EMPTY/g" "$SERVER_CONFIG"
+
+    # Set the Server Publicity status
+    sed -i "s/Open=.*/Open=$PUBLIC_SERVER/g" "$SERVER_CONFIG"
+
+    # Set the Server query Port
+    sed -i "s/DefaultPort=.*/DefaultPort=$QUERY_PORT/g" "$SERVER_CONFIG"
+
+    # Set the Server Name
+    sed -i "s/PublicName=.*/PublicName=$SERVER_NAME/g" "$SERVER_CONFIG"
+
+    # Set the Server Password
+    sed -i "s/Password=.*/Password=$SERVER_PASSWORD/g" "$SERVER_CONFIG"
 
     printf "\n### Post Install Configuration applied.\n"
 }
@@ -114,6 +114,15 @@ function set_variables() {
     BASE_GAME_DIR="/home/steam/ZomboidDedicatedServer"
     CONFIG_DIR="/home/steam/Zomboid"
 
+    # Set the Server Admin Password variable
+    ADMIN_USERNAME=${ADMIN_USERNAME:-"admin"}
+
+    # Set the Server Admin Password variable
+    ADMIN_PASSWORD=${ADMIN_PASSWORD:-"changeme"}
+
+    # Set the Autosave Interval variable
+    AUTOSAVE_INTERVAL=${AUTOSAVE_INTERVAL:-"15"}
+
     # Set the IP address variable
     # NOTE: Project Zomboid cannot handle the IN_ANY address
     if [[ -z "$BIND_IP" ]] || [[ "$BIND_IP" == "0.0.0.0" ]]; then
@@ -123,49 +132,11 @@ function set_variables() {
         BIND_IP="$BIND_IP"
     fi
 
-    # Set the game version variable
-    GAME_VERSION=${GAME_VERSION:-"public"}
-
-    # Set the Server Publicity variable
-    PUBLIC_SERVER=${PUBLIC_SERVER:-"true"}
-
-    # Set the IP Query Port variable
-    QUERY_PORT=${QUERY_PORT:-"16261"}
-
     # Set the IP Game Port variable
     GAME_PORT=${GAME_PORT:-"8766"}
 
-    # Set the Server name variable
-    SERVER_NAME=${SERVER_NAME:-"ZomboidServer"}
-
-    # Set the Server Password variable
-    SERVER_PASSWORD=${SERVER_PASSWORD:-""}
-
-    # Set the Server Admin Password variable
-    ADMIN_USERNAME=${ADMIN_USERNAME:-"admin"}
-
-    # Set the Server Admin Password variable
-    ADMIN_PASSWORD=${ADMIN_PASSWORD:-"changeme"}
-
-    # Set server type variable
-    if [[ -z "$USE_STEAM" ]] || [[ "$USE_STEAM" == "true" ]]; then
-        USE_STEAM=""
-    else
-        USE_STEAM="-nosteam"
-    fi
-
-    # Set Steam VAC Protection variable
-    STEAM_VAC=${STEAM_VAC:-"true"}
-
-    # Set the Mods to use from workshop
-    MOD_NAMES=${MOD_NAMES:-""}
-    MOD_WORKSHOP_IDS=${MOD_WORKSHOP_IDS:-""}
-
-    # Set PVP variable
-    SERVER_PVP=${SERVER_PVP:-"true"}
-
-    # Set the Autosave Interval variable
-    AUTOSAVE_INTERVAL=${AUTOSAVE_INTERVAL:-"15"}
+    # Set the game version variable
+    GAME_VERSION=${GAME_VERSION:-"public"}
 
     # Set the Max Players variable
     MAX_PLAYERS=${MAX_PLAYERS:-"16"}
@@ -173,8 +144,34 @@ function set_variables() {
     # Set the Maximum RAM variable
     MAX_RAM=${MAX_RAM:-"4096m"}
 
+    # Set the Mods to use from workshop
+    MOD_NAMES=${MOD_NAMES:-""}
+    MOD_WORKSHOP_IDS=${MOD_WORKSHOP_IDS:-""}
+
     # Set the Pause on Empty variable
     PAUSE_ON_EMPTY=${PAUSE_ON_EMPTY:-"true"}
+
+    # Set the Server Publicity variable
+    PUBLIC_SERVER=${PUBLIC_SERVER:-"true"}
+
+    # Set the IP Query Port variable
+    QUERY_PORT=${QUERY_PORT:-"16261"}
+
+    # Set the Server name variable
+    SERVER_NAME=${SERVER_NAME:-"ZomboidServer"}
+
+    # Set the Server Password variable
+    SERVER_PASSWORD=${SERVER_PASSWORD:-""}
+
+    # Set Steam VAC Protection variable
+    STEAM_VAC=${STEAM_VAC:-"true"}
+
+    # Set server type variable
+    if [[ -z "$USE_STEAM" ]] || [[ "$USE_STEAM" == "true" ]]; then
+        USE_STEAM=""
+    else
+        USE_STEAM="-nosteam"
+    fi
 
     SERVER_CONFIG="$CONFIG_DIR/Server/$SERVER_NAME.ini"
     SERVER_VM_CONFIG="$BASE_GAME_DIR/ProjectZomboid64.json"

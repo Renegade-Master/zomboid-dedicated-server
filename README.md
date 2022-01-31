@@ -42,23 +42,23 @@ recommended.
 
 | Argument            | Description                                                            | Values            | Default       |
 |---------------------|------------------------------------------------------------------------|-------------------|---------------|
-| `BIND_IP`           | IP to bind the server to                                               | 0.0.0.0           | 0.0.0.0       |
-| `GAME_VERSION`      | Game version to serve                                                  | [a-zA-Z0-9_]+     | `public`      |
-| `PUBLIC_SERVER`     | Is the server displayed Publicly                                       | (true&vert;false) | true          |
-| `QUERY_PORT`        | Port for other players to connect to                                   | 1000 - 65535      | 16261         |
-| `GAME_PORT`         | Port for sending game data to clients                                  | 1000 - 65535      | 8766          |
-| `SERVER_NAME`       | Publicly visible Server Name                                           | [a-zA-Z0-9]+      | ZomboidServer |
-| `SERVER_PASSWORD`   | Server password                                                        | [a-zA-Z0-9]+      |               |
-| `ADMIN_USERNAME`    | Server Admin account username                                          | [a-zA-Z0-9]+      | superuser     |
 | `ADMIN_PASSWORD`    | Server Admin account password                                          | [a-zA-Z0-9]+      | changeme      |
-| `USE_STEAM`         | Create a Steam Server, or a Non-Steam Server                           | (true&vert;false) | true          |
-| `STEAM_VAC`         | Use Steam VAC anti-cheat                                               | (true&vert;false) | true          |
-| `MOD_NAMES`         | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits) | mod1;mod2;mod     |               |
-| `MOD_WORKSHOP_IDS`  | Workshop Mod IDs (e.g. 2160432461;2685168362)                          | xxxxxx;xxxxx;     |               |
+| `ADMIN_USERNAME`    | Server Admin account username                                          | [a-zA-Z0-9]+      | superuser     |
 | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes                                  | [0-9]+            | 10m           |
+| `BIND_IP`           | IP to bind the server to                                               | 0.0.0.0           | 0.0.0.0       |
+| `GAME_PORT`         | Port for sending game data to clients                                  | 1000 - 65535      | 8766          |
+| `GAME_VERSION`      | Game version to serve                                                  | [a-zA-Z0-9_]+     | `public`      |
 | `MAX_PLAYERS`       | Maximum players allowed in the Server                                  | [0-9]+            | 16            |
 | `MAX_RAM`           | Maximum amount of RAM to be used                                       | ([0-9]+)m         | 4096m         |
+| `MOD_NAMES`         | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits) | mod1;mod2;mod     |               |
+| `MOD_WORKSHOP_IDS`  | Workshop Mod IDs (e.g. 2160432461;2685168362)                          | xxxxxx;xxxxx;     |               |
 | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected                         | (true&vert;false) | true          |
+| `PUBLIC_SERVER`     | Is the server displayed Publicly                                       | (true&vert;false) | true          |
+| `QUERY_PORT`        | Port for other players to connect to                                   | 1000 - 65535      | 16261         |
+| `SERVER_NAME`       | Publicly visible Server Name                                           | [a-zA-Z0-9]+      | ZomboidServer |
+| `SERVER_PASSWORD`   | Server password                                                        | [a-zA-Z0-9]+      |               |
+| `STEAM_VAC`         | Use Steam VAC anti-cheat                                               | (true&vert;false) | true          |
+| `USE_STEAM`         | Create a Steam Server, or a Non-Steam Server                           | (true&vert;false) | true          |
 
 ### Docker
 
@@ -93,22 +93,23 @@ The following are instructions for running the server using the Docker image.
        --publish 16261:16261/udp --publish 8766:8766/udp \
        --name zomboid-server \
        --user=$(id -u):$(id -g) \
-       [--env=BIND_IP=<value>] \
-       [--env=GAME_VERSION=<value>] \
-       [--env=QUERY_PORT=<value>] \
-       [--env=GAME_PORT=<value>] \
-       [--env=SERVER_NAME=<value>] \
-       [--env=SERVER_PASSWORD=<value>] \
-       [--env=ADMIN_USERNAME=<value>] \
        [--env=ADMIN_PASSWORD=<value>] \
-       [--env=USE_STEAM=<value>] \
-       [--env=STEAM_VAC=<value>] \
-       [--env=MOD_NAMES=<value>] \
-       [--env=MOD_WORKSHOP_IDS=<value>] \
+       [--env=ADMIN_USERNAME=<value>] \
        [--env=AUTOSAVE_INTERVAL=<value>] \
+       [--env=BIND_IP=<value>] \
+       [--env=GAME_PORT=<value>] \
+       [--env=GAME_VERSION=<value>] \
        [--env=MAX_PLAYERS=<value>] \
        [--env=MAX_RAM=<value>] \
+       [--env=MOD_NAMES=<value>] \
+       [--env=MOD_WORKSHOP_IDS=<value>] \
        [--env=PAUSE_ON_EMPTY=<value>] \
+       [--env=PUBLIC_SERVER=<value>] \
+       [--env=QUERY_PORT=<value>] \
+       [--env=SERVER_NAME=<value>] \
+       [--env=SERVER_PASSWORD=<value>] \
+       [--env=STEAM_VAC=<value>] \
+       [--env=USE_STEAM=<value>] \
        renegademaster/zomboid-dedicated-server[:<tagname>]
    ```
 
