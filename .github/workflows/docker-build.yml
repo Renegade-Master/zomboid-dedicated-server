@@ -115,7 +115,7 @@ jobs:
 
       - name: Test - Server Started
         run: |
-          check_for_config2() {
+          check_for_config() {
             if ! grep -q -iE "$1" "./docker-log.log"; then
               printf "Could not find %s in %s\n" "$1" "./docker-log.log"
               exit 1
