@@ -115,22 +115,18 @@ jobs:
 
       - name: Test - Server Started
         run: |
-          set -x
           grep -q -iE "LuaNet: Initialization \[DONE\]" "./docker-log.log"
 
       - name: Test - Sed Command Completed
         run: |
-          set -x
           ! grep -q -iE "sed: can't read" "./docker-log.log"
 
       - name: Test - Server JVM Configuration Applied
         run: |
-          set -x
           grep -q -iE "\-Xmx6144m" "./ZomboidDedicatedServer/ProjectZomboid64.json"
 
       - name: Test - Server Configuration Applied
         run: |
-          set -x
           check_for_config() {
             if ! grep -q -iE "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"; then
               printf "Could not find %s in %s\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
