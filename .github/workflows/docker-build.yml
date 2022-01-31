@@ -57,7 +57,7 @@ jobs:
           --env=MAX_RAM="6144m"
           --env=PAUSE_ON_EMPTY="true"
           --env=PUBLIC_SERVER="false"
-          --env=SERVER_NAME="GitHub Action Test Server Name"
+          --env=SERVER_NAME="GitHubActionTest"
           --env=SERVER_PASSWORD="github_action_test_password"
           renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
           2>&1 | tee ./docker-log.log
@@ -89,8 +89,8 @@ jobs:
         with:
           name: server-configs
           path: |
-            ZomboidConfig/Server/*.ini
-            ZomboidConfig/Server/*_SandboxVars.lua
+            ZomboidConfig/Server/GitHubActionTest.ini
+            ZomboidConfig/Server/GitHubActionTest_SandboxVars.lua
             ZomboidDedicatedServer/ProjectZomboid64.json
 
   test:
@@ -123,10 +123,10 @@ jobs:
 
       - name: Test - Server Configuration Applied
         run: |
-          grep -q -iE "SaveWorldEveryMinutes=16" "./ZomboidConfig/Server/*.ini"
-          grep -q -iE "SteamPort1=25496" "./ZomboidConfig/Server/*.ini"
-          grep -q -iE "MaxPlayers=14" "./ZomboidConfig/Server/*.ini"
-          grep -q -iE "PauseEmpty=true" "./ZomboidConfig/Server/*.ini"
-          grep -q -iE "Open=false" "./ZomboidConfig/Server/*.ini"
-          grep -q -iE "PublicName=GitHub Action Test Server Name" "./ZomboidConfig/Server/*.ini"
-          grep -q -iE "Password=github_action_test_password" "./ZomboidConfig/Server/*.ini"
+          grep -q -iE "SaveWorldEveryMinutes=16" "./ZomboidConfig/Server/GitHubActionTest.ini"
+          grep -q -iE "SteamPort1=25496" "./ZomboidConfig/Server/GitHubActionTest.ini"
+          grep -q -iE "MaxPlayers=14" "./ZomboidConfig/Server/GitHubActionTest.ini"
+          grep -q -iE "PauseEmpty=true" "./ZomboidConfig/Server/GitHubActionTest.ini"
+          grep -q -iE "Open=false" "./ZomboidConfig/Server/GitHubActionTest.ini"
+          grep -q -iE "PublicName=GitHub Action Test Server Name" "./ZomboidConfig/Server/GitHubActionTest.ini"
+          grep -q -iE "Password=github_action_test_password" "./ZomboidConfig/Server/GitHubActionTest.ini"
