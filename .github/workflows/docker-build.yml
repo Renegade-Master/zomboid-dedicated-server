@@ -134,6 +134,7 @@ jobs:
           check_for_config() {
             if ! grep -q -iE "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"; then
               printf "Could not find %s in %s\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
+              exit 1
             fi
           }
 
@@ -142,5 +143,5 @@ jobs:
           check_for_config "MaxPlayers=14"
           check_for_config "PauseEmpty=true"
           check_for_config "Open=false"
-          check_for_config "PublicName=GitHub Action Test Server Name"
+          check_for_config "PublicName=GitHubActionTest"
           check_for_config "Password=github_action_test_password"
