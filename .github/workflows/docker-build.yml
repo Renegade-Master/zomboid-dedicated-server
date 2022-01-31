@@ -169,4 +169,4 @@ jobs:
           check_for_config "PauseEmpty=true"
           check_for_config "Open=false"
           check_for_config "PublicName=GitHubActionTest"
-          check_for_config "Password=github_action_test_passwords"
+          check_for_config "Password=github_action_test_password"
