@@ -111,18 +111,22 @@ jobs:
 
       - name: Test - Server Started
         run: |
+          set -x
           grep -q -iE "LuaNet: Initialization \[DONE\]" "./docker-log.log"
 
       - name: Test - Sed Command Completed
         run: |
+          set -x
           ! grep -q -iE "sed: can't read" "./docker-log.log"
 
       - name: Test - Server JVM Configuration Applied
         run: |
+          set -x
           grep -q -iE "\-Xmx6144m" "./ZomboidDedicatedServer/ProjectZomboid64.json"
 
       - name: Test - Server Configuration Applied
         run: |
+          set -x
           grep -q -iE "SaveWorldEveryMinutes=16" "./ZomboidConfig/Server/GitHubActionTest.ini"
           grep -q -iE "SteamPort1=25496" "./ZomboidConfig/Server/GitHubActionTest.ini"
           grep -q -iE "MaxPlayers=14" "./ZomboidConfig/Server/GitHubActionTest.ini"
