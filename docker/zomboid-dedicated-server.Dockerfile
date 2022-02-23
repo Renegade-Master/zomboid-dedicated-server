@@ -25,6 +25,8 @@
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
+FROM outdead/rcon:0.10.1 AS rcon
+
 FROM renegademaster/steamcmd-minimal:1.0.0
 ARG USER_ID
 ARG GROUP_ID
@@ -34,6 +36,8 @@ LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
     com.renegademaster.zomboid-dedicated-server.contributors="JohnEarle, ramielrowe" \
     com.renegademaster.zomboid-dedicated-server.source-repository="https://github.com/Renegade-Master/zomboid-dedicated-server" \
     com.renegademaster.zomboid-dedicated-server.image-repository="https://hub.docker.com/renegademaster/zomboid-dedicated-server"
+
+COPY --from=rcon /rcon /bin/rcon
 
 # Copy the source files
 COPY src /home/steam/

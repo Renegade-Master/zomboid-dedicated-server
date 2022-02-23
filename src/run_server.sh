@@ -28,6 +28,30 @@
 # Set to `-x` for Debug logging
 set +x -o pipefail
 
+# Retrieves a setting from the server config
+function get_server_config_value() {
+    key=$1
+    sed -rn "s/^$key=(.*)$/\1/p" "$SERVER_CONFIG"
+}
+
+# Handle shutting down the server, with optional RCON quit for graceful shutdown
+function shutdown() {
+    rcon_port=$(get_server_config_value RCONPort)
+    rcon_password=$(get_server_config_value RCONPassword)
+    if [[ -n "$RCON_SHUTDOWN" ]] && \
+            [[ "$RCON_SHUTDOWN" != "false" ]] && \
+            [[ -n "$rcon_port" ]] && \
+            [[ -n "$rcon_password" ]]; then
+        printf "\n### Sending RCON quit command\n"
+        rcon --address "$BIND_IP:$rcon_port" --password $rcon_password quit
+    else
+        printf "\n### RCON not enabled, can't issue quit command, sending SIGTERM \n"
+        pkill -P $$
+    fi
+}
+
+trap shutdown SIGTERM SIGINT
+
 # Start the Server
 function start_server() {
     printf "\n### Starting Project Zomboid Server...\n"
@@ -37,7 +61,14 @@ function start_server() {
         -adminpassword "$ADMIN_PASSWORD" \
         -ip "$BIND_IP" -port "$QUERY_PORT" \
         -servername "$SERVER_NAME" \
-        -steamvac "$STEAM_VAC" "$USE_STEAM"
+        -steamvac "$STEAM_VAC" "$USE_STEAM" &
+    server_pid=$!
+    wait $server_pid
+    # NOTE(ramielrowe): Apparently the first wait will return immediately after
+    #   the trap handler returns. The server can take a couple seconds to fully
+    #   shutdown after the `quit` command. So, call wait once more to ensure 
+    #   the server is fully stopped.
+    wait $server_pid
 }
 
 function apply_postinstall_config() {

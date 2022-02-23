@@ -57,6 +57,7 @@ recommended.
 | `PAUSE_ON_EMPTY`      | Pause the Server when no Players are connected                           | (true&vert;false) | true          |
 | `PUBLIC_SERVER`       | Is the server displayed Publicly                                         | (true&vert;false) | true          |
 | `QUERY_PORT`          | Port for other players to connect to                                     | 1000 - 65535      | 16261         |
+| `RCON_SHUTDOWN`       | Send RCON quit command to gracefully shutdown server on SIGTERM/SIGINT   | (true&vert;false) | false          |
 | `SERVER_NAME`         | Publicly visible Server Name                                             | [a-zA-Z0-9]+      | ZomboidServer |
 | `SERVER_PASSWORD`     | Server password                                                          | [a-zA-Z0-9]+      |               |
 | `STEAM_VAC`           | Use Steam VAC anti-cheat                                                 | (true&vert;false) | true          |
