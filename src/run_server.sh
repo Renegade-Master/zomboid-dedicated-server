@@ -99,8 +99,13 @@ function apply_preinstall_config() {
 function update_folder_permissions() {
     printf "\n### Updating Folder Permissions...\n"
 
-    chown -R "$(id -u):$(id -g)" "$BASE_GAME_DIR"
-    chown -R "$(id -u):$(id -g)" "$CONFIG_DIR"
+    if [[ -z "$NO_CHOWN_GAME_DIR" ]] || [[ "$NO_CHOWN_GAME_DIR" == "false" ]]; then
+        chown -R "$(id -u):$(id -g)" "$BASE_GAME_DIR"
+    fi
+
+    if [[ -z "$NO_CHOWN_CONFIG_DIR" ]] || [[ "$NO_CHOWN_CONFIG_DIR" == "false" ]]; then
+        chown -R "$(id -u):$(id -g)" "$CONFIG_DIR"
+    fi
 
     printf "\n### Folder Permissions updated.\n"
 }

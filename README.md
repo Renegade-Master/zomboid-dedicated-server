@@ -40,25 +40,27 @@ recommended.
 
 *Optional arguments table*:
 
-| Argument            | Description                                                            | Values            | Default       |
-|---------------------|------------------------------------------------------------------------|-------------------|---------------|
-| `ADMIN_PASSWORD`    | Server Admin account password                                          | [a-zA-Z0-9]+      | changeme      |
-| `ADMIN_USERNAME`    | Server Admin account username                                          | [a-zA-Z0-9]+      | superuser     |
-| `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes                                  | [0-9]+            | 10m           |
-| `BIND_IP`           | IP to bind the server to                                               | 0.0.0.0           | 0.0.0.0       |
-| `GAME_PORT`         | Port for sending game data to clients                                  | 1000 - 65535      | 8766          |
-| `GAME_VERSION`      | Game version to serve                                                  | [a-zA-Z0-9_]+     | `public`      |
-| `MAX_PLAYERS`       | Maximum players allowed in the Server                                  | [0-9]+            | 16            |
-| `MAX_RAM`           | Maximum amount of RAM to be used                                       | ([0-9]+)m         | 4096m         |
-| `MOD_NAMES`         | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits) | mod1;mod2;mod     |               |
-| `MOD_WORKSHOP_IDS`  | Workshop Mod IDs (e.g. 2160432461;2685168362)                          | xxxxxx;xxxxx;     |               |
-| `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected                         | (true&vert;false) | true          |
-| `PUBLIC_SERVER`     | Is the server displayed Publicly                                       | (true&vert;false) | true          |
-| `QUERY_PORT`        | Port for other players to connect to                                   | 1000 - 65535      | 16261         |
-| `SERVER_NAME`       | Publicly visible Server Name                                           | [a-zA-Z0-9]+      | ZomboidServer |
-| `SERVER_PASSWORD`   | Server password                                                        | [a-zA-Z0-9]+      |               |
-| `STEAM_VAC`         | Use Steam VAC anti-cheat                                               | (true&vert;false) | true          |
-| `USE_STEAM`         | Create a Steam Server, or a Non-Steam Server                           | (true&vert;false) | true          |
+| Argument              | Description                                                              | Values            | Default       |
+|-----------------------|--------------------------------------------------------------------------|-------------------|---------------|
+| `ADMIN_PASSWORD`      | Server Admin account password                                            | [a-zA-Z0-9]+      | changeme      |
+| `ADMIN_USERNAME`      | Server Admin account username                                            | [a-zA-Z0-9]+      | superuser     |
+| `AUTOSAVE_INTERVAL`   | Interval between autosaves in minutes                                    | [0-9]+            | 10m           |
+| `BIND_IP`             | IP to bind the server to                                                 | 0.0.0.0           | 0.0.0.0       |
+| `GAME_PORT`           | Port for sending game data to clients                                    | 1000 - 65535      | 8766          |
+| `GAME_VERSION`        | Game version to serve                                                    | [a-zA-Z0-9_]+     | `public`      |
+| `MAX_PLAYERS`         | Maximum players allowed in the Server                                    | [0-9]+            | 16            |
+| `MAX_RAM`             | Maximum amount of RAM to be used                                         | ([0-9]+)m         | 4096m         |
+| `MOD_NAMES`           | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits)   | mod1;mod2;mod     |               |
+| `MOD_WORKSHOP_IDS`    | Workshop Mod IDs (e.g. 2160432461;2685168362)                            | xxxxxx;xxxxx;     |               |
+| `PAUSE_ON_EMPTY`      | Pause the Server when no Players are connected                           | (true&vert;false) | true          |
+| `PUBLIC_SERVER`       | Is the server displayed Publicly                                         | (true&vert;false) | true          |
+| `QUERY_PORT`          | Port for other players to connect to                                     | 1000 - 65535      | 16261         |
+| `SERVER_NAME`         | Publicly visible Server Name                                             | [a-zA-Z0-9]+      | ZomboidServer |
+| `SERVER_PASSWORD`     | Server password                                                          | [a-zA-Z0-9]+      |               |
+| `STEAM_VAC`           | Use Steam VAC anti-cheat                                                 | (true&vert;false) | true          |
+| `USE_STEAM`           | Create a Steam Server, or a Non-Steam Server                             | (true&vert;false) | true          |
+| `NO_CHOWN_GAME_DIR`   | Disables automatic filesystem permissions management on game directory   | (true&vert;false) | false          |
+| `NO_CHOWN_CONFIG_DIR` | Disables automatic filesystem permissions management on config directory | (true&vert;false) | false          |
 
 ### Docker
 
