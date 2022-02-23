@@ -26,7 +26,7 @@
 #######################################################################
 
 # Set to `-x` for Debug logging
-set +x -u -o pipefail
+set +x -o pipefail
 
 # Start the Server
 function start_server() {
