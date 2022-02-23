@@ -1,5 +1,8 @@
 ///////////////////////////////////////////////////////////////////////
-// SteamCMD installation script for Project Zomboid Dedicated Server
+// Author: Renegade-Master
+// Description: SteamCMD installation script for Project Zomboid
+//   Dedicated Server
+// License: GNU General Public License v3.0 (see LICENSE)
 ///////////////////////////////////////////////////////////////////////
 
 // Do not shutdown on a failed command
