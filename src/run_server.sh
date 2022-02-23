@@ -20,7 +20,7 @@
 
 #######################################################################
 #   Author: Renegade-Master
-#   Contributors: JohnEarle
+#   Contributors: JohnEarle, ramielrowe
 #   Description: Install, update, and start a Dedicated Project Zomboid
 #       instance.
 #######################################################################

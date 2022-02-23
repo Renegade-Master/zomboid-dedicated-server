@@ -31,7 +31,7 @@ ARG GROUP_ID
 
 # Add metadata labels
 LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
-    com.renegademaster.zomboid-dedicated-server.contributors="JohnEarle" \
+    com.renegademaster.zomboid-dedicated-server.contributors="JohnEarle, ramielrowe" \
     com.renegademaster.zomboid-dedicated-server.source-repository="https://github.com/Renegade-Master/zomboid-dedicated-server" \
     com.renegademaster.zomboid-dedicated-server.image-repository="https://hub.docker.com/renegademaster/zomboid-dedicated-server"
 
