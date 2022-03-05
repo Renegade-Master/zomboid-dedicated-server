@@ -44,7 +44,7 @@ services:
       - "PAUSE_ON_EMPTY=true"
       - "PUBLIC_SERVER=true"
       - "QUERY_PORT=16261"
-      - "RCON_PASSWORD=changeme_rcon1"
+      - "RCON_PASSWORD=changeme_rcon"
       - "RCON_PORT=27015"
       - "SERVER_NAME=ZomboidServer"
       - "SERVER_PASSWORD="
