@@ -67,22 +67,30 @@ jobs:
         continue-on-error: true
         timeout-minutes: 5
         run: |
+          # Start a timed shutdown signal
+          (sleep 270 && docker exec \
+            zomboid-dedicated-server bash -c \
+              "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+
+          # Run the Docker Image
           docker run \
-          --rm \
-          --name zomboid-dedicated-server \
-          --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
-          --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
-          --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
-          --env=AUTOSAVE_INTERVAL="16" \
-          --env=GAME_PORT="25496" \
-          --env=MAX_PLAYERS="14" \
-          --env=MAX_RAM="6144m" \
-          --env=PAUSE_ON_EMPTY="true" \
-          --env=PUBLIC_SERVER="false" \
-          --env=SERVER_NAME="GitHubActionTest" \
-          --env=SERVER_PASSWORD="github_action_test_password" \
-          renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
-          2>&1 | tee ./docker-log.log
+            --rm \
+            --name zomboid-dedicated-server \
+            --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
+            --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
+            --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
+            --env=AUTOSAVE_INTERVAL="16" \
+            --env=GAME_PORT="25496" \
+            --env=MAX_PLAYERS="14" \
+            --env=MAX_RAM="6144m" \
+            --env=PAUSE_ON_EMPTY="true" \
+            --env=PUBLIC_SERVER="false" \
+            --env=SERVER_NAME="GitHubActionTest" \
+            --env=SERVER_PASSWORD="github_action_test_password" \
+            --env=RCON_PASSWORD="github_action_test_rcon_password" \
+            --env=RCON_PORT="27025" \
+            renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+            2>&1 | tee ./docker-log.log
 
       - name: Investigate File Structure on Failure
         if: ${{ failure() }}
@@ -121,6 +129,9 @@ jobs:
     needs:
       - build-and-run
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
       - name: Download Docker Logs
         uses: actions/download-artifact@v2
         with:
@@ -141,8 +152,21 @@ jobs:
               printf "Found %s in %s\n" "$1" "./docker-log.log"
             fi
           }
-          
+
           check_for_config "LuaNet: Initialization \[DONE\]"
+
+      - name: Test - Server Stopped Gracefully
+        run: |
+          check_for_config() {
+            if ! grep -q -iE "$1" "./docker-log.log"; then
+              printf "Could not find %s in %s\n" "$1" "./docker-log.log"
+              exit 1
+            else
+              printf "Found %s in %s\n" "$1" "./docker-log.log"
+            fi
+          }
+
+          check_for_config "znet: Java_zombie_core_znet_SteamUtils_n_1Shutdown"
 
       - name: Test - Sed Command Completed
         run: |
@@ -154,7 +178,7 @@ jobs:
               exit 1
             fi
           }
-          
+
           check_for_config "sed: can't read"
 
       - name: Test - Server JVM Configuration Applied
@@ -167,7 +191,7 @@ jobs:
               printf "Found %s in %s\n" "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"
             fi
           }
-          
+
           check_for_config "\-Xmx6144m"
 
       - name: Test - Server Configuration Applied
@@ -188,3 +212,5 @@ jobs:
           check_for_config "Open=false"
           check_for_config "PublicName=GitHubActionTest"
           check_for_config "Password=github_action_test_password"
+          check_for_config "RCONPassword=github_action_test_rcon_password"
+          check_for_config "RCONPort=27025"

@@ -26,7 +26,7 @@ services:
       args:
         USER_ID: 1000
         GROUP_ID: 1000
-    restart: unless-stopped
+    restart: "no"
     user: "1000:1000"
     environment:
       - "ADMIN_PASSWORD=changeme"
@@ -44,6 +44,8 @@ services:
       - "PAUSE_ON_EMPTY=true"
       - "PUBLIC_SERVER=true"
       - "QUERY_PORT=16261"
+      - "RCON_PASSWORD=changeme_rcon1"
+      - "RCON_PORT=27015"
       - "SERVER_NAME=ZomboidServer"
       - "SERVER_PASSWORD="
       - "STEAM_VAC=true"
@@ -55,6 +57,9 @@ services:
       - target: 16261
         published: 16261
         protocol: udp
+      - target: 27015
+        published: 27015
+        protocol: tcp
     volumes:
       - ./ZomboidDedicatedServer:/home/steam/ZomboidDedicatedServer
       - ./ZomboidConfig:/home/steam/Zomboid/
