@@ -35,12 +35,18 @@ LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
     com.renegademaster.zomboid-dedicated-server.source-repository="https://github.com/Renegade-Master/zomboid-dedicated-server" \
     com.renegademaster.zomboid-dedicated-server.image-repository="https://hub.docker.com/renegademaster/zomboid-dedicated-server"
 
+COPY --from=outdead/rcon:0.10.1 /rcon /bin/rcon
+
 # Copy the source files
 COPY src /home/steam/
 
 # Temporarily login as root to modify ownership
 USER 0:0
-RUN chown -R ${USER_ID}:${GROUP_ID} "/home/steam"
+RUN apt-get update && apt-get autoremove -y \
+    && apt-get install -y --no-install-recommends \
+        python3-minimal \
+    && rm -rf /var/lib/apt/lists/* \
+    && chown -R ${USER_ID}:${GROUP_ID} "/home/steam"
 
 # Switch to the Steam User
 USER ${USER_ID}:${GROUP_ID}

@@ -28,6 +28,17 @@
 # Set to `-x` for Debug logging
 set +x -o pipefail
 
+# Handle shutting down the server, with optional RCON quit for graceful shutdown
+function shutdown() {
+    if [[ "$RCON_ENABLED" == "true" ]]; then
+        printf "\n### Sending RCON quit command\n"
+        rcon --address "$BIND_IP:$RCON_PORT" --password "$RCON_PASSWORD" quit
+    else
+        printf "\n### RCON not enabled: cannot issue quit command.\nSending SIGTERM...\n"
+        pkill -P $$
+    fi
+}
+
 # Start the Server
 function start_server() {
     printf "\n### Starting Project Zomboid Server...\n"
@@ -37,44 +48,61 @@ function start_server() {
         -adminpassword "$ADMIN_PASSWORD" \
         -ip "$BIND_IP" -port "$QUERY_PORT" \
         -servername "$SERVER_NAME" \
-        -steamvac "$STEAM_VAC" "$USE_STEAM"
+        -steamvac "$STEAM_VAC" "$USE_STEAM" &
+
+    server_pid=$!
+    wait $server_pid
+
+    # NOTE(ramielrowe): Apparently the first wait will return immediately after
+    #   the trap handler returns. The server can take a couple seconds to fully
+    #   shutdown after the `quit` command. So, call wait once more to ensure
+    #   the server is fully stopped.
+    wait $server_pid
+
+    printf "\n### Project Zomboid Server stopped.\n"
 }
 
 function apply_postinstall_config() {
     printf "\n### Applying Post Install Configuration...\n"
 
     # Set the Autosave Interval
-    sed -i "s/SaveWorldEveryMinutes=.*/SaveWorldEveryMinutes=$AUTOSAVE_INTERVAL/g" "$SERVER_CONFIG"
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "SaveWorldEveryMinutes" "$AUTOSAVE_INTERVAL"
 
     # Set the Server game Port
-    sed -i "s/SteamPort1=.*/SteamPort1=$GAME_PORT/g" "$SERVER_CONFIG"
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "SteamPort1" "$GAME_PORT"
 
     # Set the Max Players
-    sed -i "s/MaxPlayers=.*/MaxPlayers=$MAX_PLAYERS/g" "$SERVER_CONFIG"
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "MaxPlayers" "$MAX_PLAYERS"
+
+    # Set the Mod names
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "Mods" "$MOD_NAMES"
+
+    # Set the Mod Workshop IDs
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "WorkshopItems" "$MOD_WORKSHOP_IDS"
+
+    # Set the Pause on Empty Server
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "PauseEmpty" "$PAUSE_ON_EMPTY"
+
+    # Set the Server Publicity status
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "Open" "$PUBLIC_SERVER"
+
+    # Set the Server query Port
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "DefaultPort" "$QUERY_PORT"
+
+    # Set the Server RCON Password
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "RCONPassword" "$RCON_PASSWORD"
+
+    # Set the Server RCON Port
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "RCONPort" "$RCON_PORT"
+
+    # Set the Server Name
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "PublicName" "$SERVER_NAME"
+
+    # Set the Server Password
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "Password" "$SERVER_PASSWORD"
 
     # Set the maximum amount of RAM for the JVM
     sed -i "s/-Xmx.*/-Xmx$MAX_RAM\",/g" "$SERVER_VM_CONFIG"
-
-    # Set the Mod names
-    sed -i "s/Mods=.*/Mods=$MOD_NAMES/g" "$SERVER_CONFIG"
-
-    # Set the Mod Workshop IDs
-    sed -i "s/WorkshopItems=.*/WorkshopItems=$MOD_WORKSHOP_IDS/g" "$SERVER_CONFIG"
-
-    # Set the Pause on Empty Server
-    sed -i "s/PauseEmpty=.*/PauseEmpty=$PAUSE_ON_EMPTY/g" "$SERVER_CONFIG"
-
-    # Set the Server Publicity status
-    sed -i "s/Open=.*/Open=$PUBLIC_SERVER/g" "$SERVER_CONFIG"
-
-    # Set the Server query Port
-    sed -i "s/DefaultPort=.*/DefaultPort=$QUERY_PORT/g" "$SERVER_CONFIG"
-
-    # Set the Server Name
-    sed -i "s/PublicName=.*/PublicName=$SERVER_NAME/g" "$SERVER_CONFIG"
-
-    # Set the Server Password
-    sed -i "s/Password=.*/Password=$SERVER_PASSWORD/g" "$SERVER_CONFIG"
 
     printf "\n### Post Install Configuration applied.\n"
 }
@@ -134,6 +162,7 @@ function set_variables() {
     printf "\n### Setting variables...\n"
 
     TIMEOUT="60"
+    EDIT_CONFIG="/home/steam/edit_server_config.py"
     STEAM_INSTALL_FILE="/home/steam/install_server.scmd"
     BASE_GAME_DIR="/home/steam/ZomboidDedicatedServer"
     CONFIG_DIR="/home/steam/Zomboid"
@@ -155,6 +184,7 @@ function set_variables() {
     else
         BIND_IP="$BIND_IP"
     fi
+    echo "$BIND_IP" > "$CONFIG_DIR/ip.txt"
 
     # Set the IP Game Port variable
     GAME_PORT=${GAME_PORT:-"8766"}
@@ -197,6 +227,15 @@ function set_variables() {
         USE_STEAM="-nosteam"
     fi
 
+    # Set RCON configuration
+    if [[ -z "$RCON_PORT" ]] || [[ "$RCON_PORT" == "0" ]]; then
+        RCON_ENABLED="false"
+    else
+        RCON_ENABLED="true"
+        RCON_PORT=${RCON_PORT:-"27015"}
+        RCON_PASSWORD=${RCON_PASSWORD:-"changeme_rcon"}
+    fi
+
     SERVER_CONFIG="$CONFIG_DIR/Server/$SERVER_NAME.ini"
     SERVER_VM_CONFIG="$BASE_GAME_DIR/ProjectZomboid64.json"
     SERVER_RULES_CONFIG="$CONFIG_DIR/Server/${SERVER_NAME}_SandboxVars.lua"
@@ -209,4 +248,8 @@ apply_preinstall_config
 update_server
 test_first_run
 apply_postinstall_config
+
+# Intercept termination signals to stop the server gracefully
+trap shutdown SIGTERM SIGINT
+
 start_server

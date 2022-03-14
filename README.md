@@ -57,6 +57,8 @@ recommended.
 | `PAUSE_ON_EMPTY`      | Pause the Server when no Players are connected                           | (true&vert;false) | true          |
 | `PUBLIC_SERVER`       | Is the server displayed Publicly                                         | (true&vert;false) | true          |
 | `QUERY_PORT`          | Port for other players to connect to                                     | 1000 - 65535      | 16261         |
+| `RCON_PASSWORD`       | Password for authenticating incoming RCON commands                       | [a-zA-Z0-9]+      | changeme_rcon |
+| `RCON_PORT`           | Port to listen on for RCON commands                                      | (true&vert;false) | 27015         |
 | `SERVER_NAME`         | Publicly visible Server Name                                             | [a-zA-Z0-9]+      | ZomboidServer |
 | `SERVER_PASSWORD`     | Server password                                                          | [a-zA-Z0-9]+      |               |
 | `STEAM_VAC`           | Use Steam VAC anti-cheat                                                 | (true&vert;false) | true          |
@@ -92,7 +94,7 @@ The following are instructions for running the server using the Docker image.
    docker run --detach \
        --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
        --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
-       --publish 16261:16261/udp --publish 8766:8766/udp \
+       --publish 16261:16261/udp --publish 8766:8766/udp [--publish 27015:27015/tcp] \
        --name zomboid-server \
        --user=$(id -u):$(id -g) \
        [--env=ADMIN_PASSWORD=<value>] \
@@ -110,6 +112,8 @@ The following are instructions for running the server using the Docker image.
        [--env=PAUSE_ON_EMPTY=<value>] \
        [--env=PUBLIC_SERVER=<value>] \
        [--env=QUERY_PORT=<value>] \
+       [--env=RCON_PASSWORD=<value>] \
+       [--env=RCON_PORT=<value>] \
        [--env=SERVER_NAME=<value>] \
        [--env=SERVER_PASSWORD=<value>] \
        [--env=STEAM_VAC=<value>] \
