@@ -21,8 +21,10 @@ the [GitHub repository](https://github.com/Renegade-Master/zomboid-dedicated-ser
 Dedicated Server for Project Zomboid using Docker, and optionally Docker-Compose.  
 Built almost from scratch to be the smallest Project Zomboid Dedicated Server around!
 
-This Image is "rootless", and therefore should not be run as the `root` user. Attempting to do so will prevent the
-server from starting.
+**Note:** This Image is "rootless", and therefore should not be run as the `root` user.  
+Attempting to do so will prevent the server from starting (
+see [#8](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/8)
+, [#14](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/14)).
 
 Bare-Minimum instructions to get a server running:
 
@@ -45,11 +47,11 @@ docker run --detach \
 
 ### Assurance / Testing
 
-For every commit, the server is built, and started briefly using GitHub Actions. This is to ensure that the server
-always works, and makes it less likely that there will be a version released that does not function. The main
-configurations are changed and checked after starting the server to verify that it is possible for a user to configure
-their instance. Custom Ports and Remote RCON commands are also used during the validation to ensure that the user can
-host the server using any Port combination of their choice. You can view the previous Action
+For every commit, the server is built and started briefly using GitHub Actions. This is to ensure that the server always
+works, and makes it less likely that there will be a version released that does not function. The main configurations
+are changed and checked after starting the server to verify that it is possible for a user to configure their instance.
+Custom Ports and Remote RCON commands are also used during the validation to ensure that the user can host the server
+using any Port combination of their choice. You can view the previous Action
 runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/workflows/docker-build.yml).
 
 ## Links
@@ -60,10 +62,10 @@ runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/
 
 ### Images:
 
-| Provider                                                                                                               | Image                                      | Pull Command                                                                                                                                                                                                            |
-|------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Provider                                                                                                               | Image                                      | Pull Command                                                                                                                                   |
+|------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
 | [GitHub Packages](https://github.com/Renegade-Master/zomboid-dedicated-server/pkgs/container/zomboid-dedicated-server) | `renegade-master/zomboid-dedicated-server` | `docker pull ghcr.io/renegade-master/zomboid-dedicated-server:x.y.z`<br/>`docker pull ghcr.io/renegade-master/zomboid-dedicated-server:latest` |
-| [DockerHub](https://hub.docker.com/r/renegademaster/zomboid-dedicated-server)                                          | `renegademaster/zomboid-dedicated-server`  | `docker pull renegademaster/zomboid-dedicated-server:x.y.z`<br/>`docker pull renegademaster/zomboid-dedicated-server:latest`                            |
+| [DockerHub](https://hub.docker.com/r/renegademaster/zomboid-dedicated-server)                                          | `renegademaster/zomboid-dedicated-server`  | `docker pull renegademaster/zomboid-dedicated-server:x.y.z`<br/>`docker pull renegademaster/zomboid-dedicated-server:latest`                   |
 | [Red Hat Quay](https://quay.io/repository/renegade_master/zomboid-dedicated-server)                                    | `renegade_master/zomboid-dedicated-server` | `docker pull quay.io/renegade_master/zomboid-dedicated-server:x.y.z`<br/>`docker pull quay.io/renegade_master/zomboid-dedicated-server:latest` |
 
 ### External Resources:
@@ -109,9 +111,9 @@ There are a total of three ports that can be utilised by the server, but only tw
 
 | Name         | Default Port | Description                                                      | Required |
 |--------------|--------------|------------------------------------------------------------------|----------|
-| `QUERY_PORT` | `16261`      | Port used by the server to listen for connections.               | true     |
-| `GAME_PORT`  | `8766`       | Port used by the server to communicate with connected clients.   | true     |
-| `RCON_PORT`  | `27015`      | Port used by the server to listen for RCON connections/commands. | false    |
+| `QUERY_PORT` | `16261`      | Port used by the server to listen for connections.               | `true`   |
+| `GAME_PORT`  | `8766`       | Port used by the server to communicate with connected clients.   | `true`   |
+| `RCON_PORT`  | `27015`      | Port used by the server to listen for RCON connections/commands. | `false`  |
 
 All Ports are configurable to use different Port numbers, however you must be aware that by changing a Port in the game
 configuration files, that you must also expose the changed (or default) Port in the Docker run command `--publish ...`
