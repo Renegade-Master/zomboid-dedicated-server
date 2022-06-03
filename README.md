@@ -18,10 +18,10 @@ the [GitHub repository](https://github.com/Renegade-Master/zomboid-dedicated-ser
 
 ## Description
 
-Dedicated Server for Project Zomboid using Docker, and optionally Docker-Compose.  
+Dedicated Server for Project Zomboid using Docker, and optionally Docker-Compose.
 Built almost from scratch to be the smallest Project Zomboid Dedicated Server around!
 
-**Note:** This Image is "rootless", and therefore should not be run as the `root` user.  
+**Note:** This Image is "rootless", and therefore should not be run as the `root` user.
 Attempting to do so will prevent the server from starting (
 see [#8](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/8)
 , [#14](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/14)).
@@ -144,7 +144,7 @@ recommended for ease of configuration.
 |-----------------------|--------------------------------------------------------------------------|-------------------|---------------|
 | `ADMIN_PASSWORD`      | Server Admin account password                                            | [a-zA-Z0-9]+      | changeme      |
 | `ADMIN_USERNAME`      | Server Admin account username                                            | [a-zA-Z0-9]+      | superuser     |
-| `AUTOSAVE_INTERVAL`   | Interval between autosaves in minutes                                    | [0-9]+            | 10m           |
+| `AUTOSAVE_INTERVAL`   | Interval between autosaves in minutes                                    | [0-9]+            | 15m           |
 | `BIND_IP`             | IP to bind the server to                                                 | 0.0.0.0           | 0.0.0.0       |
 | `GAME_PORT`           | Port for sending game data to clients                                    | 1000 - 65535      | 8766          |
 | `GAME_VERSION`        | Game version to serve                                                    | [a-zA-Z0-9_]+     | `public`      |
