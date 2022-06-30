@@ -44,7 +44,7 @@ COPY src /home/steam/
 USER 0:0
 RUN apt-get update && apt-get autoremove -y \
     && apt-get install -y --no-install-recommends \
-        python3-minimal \
+        python3-minimal curl jq \
     && rm -rf /var/lib/apt/lists/* \
     && chown -R ${USER_ID}:${GROUP_ID} "/home/steam"
 

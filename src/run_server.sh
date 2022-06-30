@@ -179,8 +179,12 @@ function set_variables() {
     # Set the IP address variable
     # NOTE: Project Zomboid cannot handle the IN_ANY address
     if [[ -z "$BIND_IP" ]] || [[ "$BIND_IP" == "0.0.0.0" ]]; then
-        BIND_IP=($(hostname -I))
-        BIND_IP="${BIND_IP[0]}"
+        if [[ ! -z "$ECS_CONTAINER_METADATA_URI" ]]; then
+            BIND_IP=$(curl -s $ECS_CONTAINER_METADATA_URI | jq -r '.Networks[0].IPv4Addresses[0]')
+        else
+            BIND_IP=($(hostname -I))
+            BIND_IP="${BIND_IP[0]}"
+        fi
     else
         BIND_IP="$BIND_IP"
     fi
