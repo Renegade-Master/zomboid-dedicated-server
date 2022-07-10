@@ -17,6 +17,6 @@ force_install_dir /home/steam/ZomboidDedicatedServer
 login anonymous
 
 // Install/Update the Project Zomboid Dedicated Server
-app_update 380870 -beta GAME_VERSION validate
+app_update 380870 GAME_VERSION validate
 
 quit
