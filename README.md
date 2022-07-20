@@ -155,7 +155,7 @@ recommended for ease of configuration.
 | `NO_CHOWN_CONFIG_DIR` | Disables automatic filesystem permissions management on config directory | (true&vert;false) | false         |
 | `NO_CHOWN_GAME_DIR`   | Disables automatic filesystem permissions management on game directory   | (true&vert;false) | false         |
 | `PAUSE_ON_EMPTY`      | Pause the Server when no Players are connected                           | (true&vert;false) | true          |
-| `PUBLIC_SERVER`       | Is the server displayed Publicly                                         | (true&vert;false) | true          |
+| `PUBLIC_SERVER`       | If set to `true` only Pre-Approved/Allowed players can join the server   | (true&vert;false) | true          |
 | `QUERY_PORT`          | Port for other players to connect to                                     | 1000 - 65535      | 16261         |
 | `RCON_PASSWORD`       | Password for authenticating incoming RCON commands                       | [a-zA-Z0-9]+      | changeme_rcon |
 | `RCON_PORT`           | Port to listen on for RCON commands                                      | (true&vert;false) | 27015         |
