@@ -22,8 +22,7 @@
 #######################################################################
 
 # Base Image
-#ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:1.1.1"
-ARG BASE_IMAGE="ghcr.io/renegademaster/steamcmd-minimal:test"
+ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:1.1.1"
 
 FROM ${BASE_IMAGE}
 
