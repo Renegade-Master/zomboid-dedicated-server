@@ -21,13 +21,11 @@
 #   License: GNU General Public License v3.0 (see LICENSE)
 #######################################################################
 
-# Set the User and Group IDs
-ARG USER_ID=1000
-ARG GROUP_ID=1000
+# Base Image
+#ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:1.1.1"
+ARG BASE_IMAGE="ghcr.io/renegademaster/steamcmd-minimal:test"
 
-FROM renegademaster/steamcmd-minimal:1.0.0
-ARG USER_ID
-ARG GROUP_ID
+FROM ${BASE_IMAGE}
 
 # Add metadata labels
 LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
@@ -35,21 +33,14 @@ LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
     com.renegademaster.zomboid-dedicated-server.source-repository="https://github.com/Renegade-Master/zomboid-dedicated-server" \
     com.renegademaster.zomboid-dedicated-server.image-repository="https://hub.docker.com/renegademaster/zomboid-dedicated-server"
 
-COPY --from=outdead/rcon:0.10.1 /rcon /bin/rcon
-
 # Copy the source files
 COPY src /home/steam/
 
-# Temporarily login as root to modify ownership
-USER 0:0
-RUN apt-get update && apt-get autoremove -y \
-    && apt-get install -y --no-install-recommends \
+# Temporarily login as root to install Python
+RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-minimal \
-    && rm -rf /var/lib/apt/lists/* \
-    && chown -R ${USER_ID}:${GROUP_ID} "/home/steam"
-
-# Switch to the Steam User
-USER ${USER_ID}:${GROUP_ID}
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 # Run the setup script
 ENTRYPOINT ["/bin/bash", "/home/steam/run_server.sh"]
