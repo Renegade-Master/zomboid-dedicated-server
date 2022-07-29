@@ -163,6 +163,7 @@ recommended for ease of configuration.
 | `SERVER_PASSWORD`     | Server password                                                          | [a-zA-Z0-9]+      |               |
 | `STEAM_VAC`           | Use Steam VAC anti-cheat                                                 | (true&vert;false) | true          |
 | `USE_STEAM`           | Create a Steam Server, or a Non-Steam Server                             | (true&vert;false) | true          |
+| `BETA`                | Use beta version                                                         | (true&vert;false) | false         |
 
 ### Docker
 

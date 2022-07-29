@@ -136,8 +136,15 @@ function update_server() {
 function apply_preinstall_config() {
     printf "\n### Applying Pre Install Configuration...\n"
 
-    # Set the selected game version
-    sed -i "s/beta .* /beta $GAME_VERSION /g" "$STEAM_INSTALL_FILE"
+    # Set the beta flag and the selected game version
+    if [[ "$BETA" == "true" ]]; then
+        CURRENT_VERSION="-beta $GAME_VERSION"
+    else
+        CURRENT_VERSION="$GAME_VERSION"
+    fi
+
+    # Set the selected game version in file
+    sed -i "s/380870 .* /380870 $CURRENT_VERSION /g" "$STEAM_INSTALL_FILE"
 
     printf "\n### Pre Install Configuration applied.\n"
 }
@@ -219,6 +226,9 @@ function set_variables() {
 
     # Set Steam VAC Protection variable
     STEAM_VAC=${STEAM_VAC:-"true"}
+
+    # Set Beta variable
+    BETA=${BETA:-"false"}
 
     # Set server type variable
     if [[ -z "$USE_STEAM" ]] || [[ "$USE_STEAM" == "true" ]]; then
