@@ -51,9 +51,9 @@ jobs:
       - name: Set Variables
         id: variables
         run: |
-          echo "::set-output name=dkimagepath::renegademaster/steamcmd-minimal"
-          echo "::set-output name=ghimagepath::renegade-master/steamcmd-minimal"
-          echo "::set-output name=qyimagepath::renegade_master/steamcmd-minimal"
+          echo "::set-output name=dkimagepath::renegademaster/zomboid-dedicated-server"
+          echo "::set-output name=ghimagepath::renegade-master/zomboid-dedicated-server"
+          echo "::set-output name=qyimagepath::renegade_master/zomboid-dedicated-server"
           echo "::set-output name=datetime::$(date +%Y%m%dT%H%M%SZ)"
 
       - name: Login to Image Repositories
@@ -69,12 +69,12 @@ jobs:
         run: |
           if [[ ${{ github.event.inputs.builder }} == "buildah" ]]; then
             buildah bud \
-              --file docker/steamcmd-minimal.Dockerfile \
+              --file docker/zomboid-dedicated-server.Dockerfile \
               --tag localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
               .
           elif [[ ${{ github.event.inputs.builder }} == "docker" ]]; then
             docker build \
-              --file docker/steamcmd-minimal.Dockerfile \
+              --file docker/zomboid-dedicated-server.Dockerfile \
               --tag localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
               .
           fi
