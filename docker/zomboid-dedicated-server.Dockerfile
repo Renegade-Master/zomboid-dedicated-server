@@ -35,11 +35,12 @@ LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
 # Copy the source files
 COPY src /home/steam/
 
-# Temporarily login as root to install Python
+# Install Python, and take ownership of rcon binary
 RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-minimal \
     && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && chown $USER:$USER /bin/rcon
 
 # Run the setup script
 ENTRYPOINT ["/bin/bash", "/home/steam/run_server.sh"]

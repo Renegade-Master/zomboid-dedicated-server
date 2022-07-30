@@ -12,6 +12,14 @@ on:
         required: true
         type: boolean
         default: true
+      builder:
+        description: "The builder to use for the new Tag"
+        required: true
+        type: choice
+        options:
+          - buildah
+          - docker
+        default: "buildah"
 
 defaults:
   run:
@@ -43,9 +51,9 @@ jobs:
       - name: Set Variables
         id: variables
         run: |
-          echo "::set-output name=dkimagepath::renegademaster/zomboid-dedicated-server"
-          echo "::set-output name=ghimagepath::renegade-master/zomboid-dedicated-server"
-          echo "::set-output name=qyimagepath::renegade_master/zomboid-dedicated-server"
+          echo "::set-output name=dkimagepath::renegademaster/steamcmd-minimal"
+          echo "::set-output name=ghimagepath::renegade-master/steamcmd-minimal"
+          echo "::set-output name=qyimagepath::renegade_master/steamcmd-minimal"
           echo "::set-output name=datetime::$(date +%Y%m%dT%H%M%SZ)"
 
       - name: Login to Image Repositories
@@ -54,45 +62,93 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }} docker.io
           docker login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_TOKEN }} quay.io
 
-      - name: Buildah Build
+      - name: Start Local Container Registry
+        run: podman run --rm --detach --publish 5000:5000 --name registry docker.io/registry
+
+      - name: Build the Image
         run: |
-          buildah bud \
-          --file docker/zomboid-dedicated-server.Dockerfile \
-          --tag ghcr.io/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
-          .
+          if [[ ${{ github.event.inputs.builder }} == "buildah" ]]; then
+            buildah bud \
+              --file docker/steamcmd-minimal.Dockerfile \
+              --tag localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+              .
+          elif [[ ${{ github.event.inputs.builder }} == "docker" ]]; then
+            docker build \
+              --file docker/steamcmd-minimal.Dockerfile \
+              --tag localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+              .
+          fi
 
-      - name: ReTag Image
+      - name: Push the Image to Local Container Registry
         run: |
-          buildah tag ghcr.io/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} ghcr.io/${{ steps.variables.outputs.ghimagepath }}:latest
+          if [[ ${{ github.event.inputs.builder }} == "buildah" ]]; then
+            buildah push localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }}
+          elif [[ ${{ github.event.inputs.builder }} == "docker" ]]; then
+            docker push localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }}
+          fi
 
-          buildah tag ghcr.io/${{ steps.variables.outputs.ghimagepath }}:latest docker.io/${{ steps.variables.outputs.dkimagepath }}:${{ github.event.inputs.tag }}
-          buildah tag ghcr.io/${{ steps.variables.outputs.ghimagepath }}:latest quay.io/${{ steps.variables.outputs.qyimagepath }}:${{ github.event.inputs.tag }}
-
-          buildah tag ghcr.io/${{ steps.variables.outputs.ghimagepath }}:latest docker.io/${{ steps.variables.outputs.dkimagepath }}:latest
-          buildah tag ghcr.io/${{ steps.variables.outputs.ghimagepath }}:latest quay.io/${{ steps.variables.outputs.qyimagepath }}:latest
+      - name: Inspect the Image
+        run: skopeo inspect --tls-verify=false docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }}
 
       - name: Push new Image Tags
         run: |
           if [[ "${{ github.event.inputs.dryrun }}" == "false" ]]; then
             printf "Pushing Image Tags\n"
 
-            buildah push ghcr.io/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }}
-            buildah push ghcr.io/${{ steps.variables.outputs.ghimagepath }}:latest
+            printf "Pushing GitHub Image...\n"
+            skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.GH_USER }}:${{ secrets.GITHUB_TOKEN }} \
+              docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+              docker://ghcr.io/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }}
+            skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.GH_USER }}:${{ secrets.GITHUB_TOKEN }} \
+              docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+              docker://ghcr.io/${{ steps.variables.outputs.ghimagepath }}:latest
 
-            buildah push docker.io/${{ steps.variables.outputs.dkimagepath }}:${{ github.event.inputs.tag }}
-            buildah push docker.io/${{ steps.variables.outputs.dkimagepath }}:latest
+            printf "Pushing DockerHub Image...\n"
+            skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_TOKEN }} \
+              docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+              docker://docker.io/${{ steps.variables.outputs.dkimagepath }}:${{ github.event.inputs.tag }}
+            skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_TOKEN }} \
+              docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+              docker://docker.io/${{ steps.variables.outputs.dkimagepath }}:latest
 
-            buildah push quay.io/${{ steps.variables.outputs.qyimagepath }}:${{ github.event.inputs.tag }}
-            buildah push quay.io/${{ steps.variables.outputs.qyimagepath }}:latest
+            printf "Pushing Quay Image...\n"
+            skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.QUAY_USER }}:${{ secrets.QUAY_TOKEN }} \
+              docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+              docker://quay.io/${{ steps.variables.outputs.qyimagepath }}:${{ github.event.inputs.tag }}
+            skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.QUAY_USER }}:${{ secrets.QUAY_TOKEN }} \
+              docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}}:${{ github.event.inputs.tag }} \
+              docker://quay.io/${{ steps.variables.outputs.qyimagepath }}:latest
           else
-            printf "DryRun. Not pushing Git Tags. Printing commands...\n"          
+            printf "DryRun. Not pushing Git Tags. Printing commands...\n"
 
-            printf "buildah push ghcr.io/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }}\n"
-            printf "buildah push ghcr.io/${{ steps.variables.outputs.ghimagepath }}:latest\n"
+            command=$(cat << EOF
+          skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.GH_USER }}:${{ secrets.GITHUB_TOKEN }} \
+            docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+            docker://ghcr.io/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }}
+          skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.GH_USER }}:${{ secrets.GITHUB_TOKEN }} \
+            docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+            docker://ghcr.io/${{ steps.variables.outputs.ghimagepath }}:latest
 
-            printf "buildah push docker.io/${{ steps.variables.outputs.dkimagepath }}:${{ github.event.inputs.tag }}\n"
-            printf "buildah push docker.io/${{ steps.variables.outputs.dkimagepath }}:latest\n"
+          printf "Pushing DockerHub Image...\n"
+          skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_TOKEN }} \
+            docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+            docker://docker.io/${{ steps.variables.outputs.dkimagepath }}:${{ github.event.inputs.tag }}
+          skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_TOKEN }} \
+            docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+            docker://docker.io/${{ steps.variables.outputs.dkimagepath }}:latest
 
-            printf "buildah push quay.io/${{ steps.variables.outputs.qyimagepath }}:${{ github.event.inputs.tag }}\n"
-            printf "buildah push quay.io/${{ steps.variables.outputs.qyimagepath }}:latest\n"
+          printf "Pushing Quay Image...\n"
+          skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.QUAY_USER }}:${{ secrets.QUAY_TOKEN }} \
+            docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+            docker://quay.io/${{ steps.variables.outputs.qyimagepath }}:${{ github.event.inputs.tag }}
+          skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.QUAY_USER }}:${{ secrets.QUAY_TOKEN }} \
+            docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
+            docker://quay.io/${{ steps.variables.outputs.qyimagepath }}:latest
+          EOF
+          )
+
+            printf "%s\n" "${command}"
           fi
+
+      - name: Stop the Local Container Registry
+        run: podman stop registry
