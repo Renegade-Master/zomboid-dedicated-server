@@ -95,7 +95,7 @@ jobs:
           if [[ "${{ github.event.inputs.dryrun }}" == "false" ]]; then
             printf "Pushing Image Tags\n"
 
-            printf "Pushing GitHub Image...\n"
+            printf "\nPushing GitHub Image...\n"
             skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.GH_USER }}:${{ secrets.GITHUB_TOKEN }} \
               docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
               docker://ghcr.io/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }}
@@ -103,7 +103,7 @@ jobs:
               docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
               docker://ghcr.io/${{ steps.variables.outputs.ghimagepath }}:latest
 
-            printf "Pushing DockerHub Image...\n"
+            printf "\nPushing DockerHub Image...\n"
             skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_TOKEN }} \
               docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
               docker://docker.io/${{ steps.variables.outputs.dkimagepath }}:${{ github.event.inputs.tag }}
@@ -111,17 +111,18 @@ jobs:
               docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
               docker://docker.io/${{ steps.variables.outputs.dkimagepath }}:latest
 
-            printf "Pushing Quay Image...\n"
+            printf "\nPushing Quay Image...\n"
             skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.QUAY_USER }}:${{ secrets.QUAY_TOKEN }} \
               docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
               docker://quay.io/${{ steps.variables.outputs.qyimagepath }}:${{ github.event.inputs.tag }}
             skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.QUAY_USER }}:${{ secrets.QUAY_TOKEN }} \
-              docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}}:${{ github.event.inputs.tag }} \
+              docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
               docker://quay.io/${{ steps.variables.outputs.qyimagepath }}:latest
           else
             printf "DryRun. Not pushing Git Tags. Printing commands...\n"
 
             command=$(cat << EOF
+          printf "\nPushing GitHub Image...\n"
           skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.GH_USER }}:${{ secrets.GITHUB_TOKEN }} \
             docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
             docker://ghcr.io/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }}
@@ -129,7 +130,7 @@ jobs:
             docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
             docker://ghcr.io/${{ steps.variables.outputs.ghimagepath }}:latest
 
-          printf "Pushing DockerHub Image...\n"
+          printf "\nPushing DockerHub Image...\n"
           skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_TOKEN }} \
             docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
             docker://docker.io/${{ steps.variables.outputs.dkimagepath }}:${{ github.event.inputs.tag }}
@@ -137,7 +138,7 @@ jobs:
             docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
             docker://docker.io/${{ steps.variables.outputs.dkimagepath }}:latest
 
-          printf "Pushing Quay Image...\n"
+          printf "\nPushing Quay Image...\n"
           skopeo copy --src-tls-verify=false --dest-creds ${{ secrets.QUAY_USER }}:${{ secrets.QUAY_TOKEN }} \
             docker://localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
             docker://quay.io/${{ steps.variables.outputs.qyimagepath }}:${{ github.event.inputs.tag }}
