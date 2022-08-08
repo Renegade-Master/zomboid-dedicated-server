@@ -152,6 +152,7 @@ recommended for ease of configuration.
 | `MAX_RAM`             | Maximum amount of RAM to be used                                         | ([0-9]+)m         | 4096m         |
 | `MOD_NAMES`           | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits)   | mod1;mod2;mod     |               |
 | `MOD_WORKSHOP_IDS`    | Workshop Mod IDs (e.g. 2160432461;2685168362)                            | xxxxxx;xxxxx;     |               |
+| `MAP_NAMES`           | Map Names (e.g. North;South)                                             | map1;map2;map3    | Muldraugh, Ky |
 | `NO_CHOWN_CONFIG_DIR` | Disables automatic filesystem permissions management on config directory | (true&vert;false) | false         |
 | `NO_CHOWN_GAME_DIR`   | Disables automatic filesystem permissions management on game directory   | (true&vert;false) | false         |
 | `PAUSE_ON_EMPTY`      | Pause the Server when no Players are connected                           | (true&vert;false) | true          |
