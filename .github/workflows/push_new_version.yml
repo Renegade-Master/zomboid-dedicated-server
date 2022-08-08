@@ -68,7 +68,7 @@ jobs:
       - name: Build the Image
         run: |
           if [[ ${{ github.event.inputs.builder }} == "buildah" ]]; then
-            buildah bud \
+            BUILDAH_LAYERS=true buildah bud \
               --file docker/zomboid-dedicated-server.Dockerfile \
               --tag localhost:5000/${{ steps.variables.outputs.ghimagepath }}:${{ github.event.inputs.tag }} \
               .

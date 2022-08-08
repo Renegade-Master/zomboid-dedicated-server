@@ -57,7 +57,7 @@ jobs:
         run: |
           docker build \
           --file docker/zomboid-dedicated-server.Dockerfile \
-          --tag renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+          --tag docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
           .
 
       - name: Test Run the Docker Image
@@ -86,7 +86,7 @@ jobs:
             --env=SERVER_PASSWORD="github_action_test_password" \
             --env=RCON_PASSWORD="github_action_test_rcon_password" \
             --env=RCON_PORT="27025" \
-            renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+            docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
             2>&1 | tee ./docker-log.log
 
       - name: Investigate File Structure on Failure

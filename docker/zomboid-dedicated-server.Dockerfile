@@ -22,7 +22,7 @@
 #######################################################################
 
 # Base Image
-ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:1.1.1"
+ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:1.1.2"
 
 FROM ${BASE_IMAGE}
 
@@ -34,7 +34,6 @@ LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
 
 # Copy the source files
 COPY src /home/steam/
-COPY --from=docker.io/renegademaster/steamcmd-minimal:1.1.1 /bin/rcon /usr/bin/rcon
 
 # Install Python, and take ownership of rcon binary
 RUN apt-get update && apt-get install -y --no-install-recommends \
