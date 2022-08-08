@@ -34,13 +34,13 @@ LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
 
 # Copy the source files
 COPY src /home/steam/
+COPY --from=docker.io/renegademaster/steamcmd-minimal:1.1.1 /bin/rcon /usr/bin/rcon
 
 # Install Python, and take ownership of rcon binary
 RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-minimal \
     && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/* \
-    && chown $USER:$USER /bin/rcon
+    && rm -rf /var/lib/apt/lists/*
 
 # Run the setup script
 ENTRYPOINT ["/bin/bash", "/home/steam/run_server.sh"]
