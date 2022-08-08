@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Variables
         id: variables
@@ -57,9 +57,7 @@ jobs:
         run: |
           docker build \
           --file docker/zomboid-dedicated-server.Dockerfile \
-          --tag renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
-          --build-arg USER_ID=${{ steps.variables.outputs.userid }} \
-          --build-arg GROUP_ID=${{ steps.variables.outputs.groupid }} \
+          --tag docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
           .
 
       - name: Test Run the Docker Image
@@ -76,7 +74,6 @@ jobs:
           docker run \
             --rm \
             --name zomboid-dedicated-server \
-            --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
             --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
@@ -89,7 +86,7 @@ jobs:
             --env=SERVER_PASSWORD="github_action_test_password" \
             --env=RCON_PASSWORD="github_action_test_rcon_password" \
             --env=RCON_PORT="27025" \
-            renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+            docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
             2>&1 | tee ./docker-log.log
 
       - name: Investigate File Structure on Failure
@@ -130,7 +127,7 @@ jobs:
       - build-and-run
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Download Docker Logs
         uses: actions/download-artifact@v2
