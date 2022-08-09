@@ -191,7 +191,7 @@ function set_variables() {
     MOD_WORKSHOP_IDS=${MOD_WORKSHOP_IDS:-""}
 
     # Set the Maps to use
-    MAP_NAMES=${MAP_NAMES:-""}
+    MAP_NAMES=${MAP_NAMES:-"Muldraugh, KY"}
 
     # Set the Pause on Empty variable
     PAUSE_ON_EMPTY=${PAUSE_ON_EMPTY:-"true"}
