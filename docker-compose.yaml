@@ -19,7 +19,7 @@
 version: "3.8"
 
 services:
-  zomboid-dedicated-server:
+  zomboid-server:
     build:
       context: .
       dockerfile: docker/zomboid-dedicated-server.Dockerfile
@@ -36,8 +36,6 @@ services:
       - "MAX_RAM=4096m"
       - "MOD_NAMES="
       - "MOD_WORKSHOP_IDS="
-      - "NO_CHOWN_CONFIG_DIR=false"
-      - "NO_CHOWN_GAME_DIR=false"
       - "PAUSE_ON_EMPTY=true"
       - "PUBLIC_SERVER=true"
       - "QUERY_PORT=16261"

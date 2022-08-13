@@ -151,8 +151,6 @@ recommended for ease of configuration.
 | `MAX_RAM`             | Maximum amount of RAM to be used                                         | ([0-9]+)m         | 4096m         |
 | `MOD_NAMES`           | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits)   | mod1;mod2;mod     |               |
 | `MOD_WORKSHOP_IDS`    | Workshop Mod IDs (e.g. 2160432461;2685168362)                            | xxxxxx;xxxxx;     |               |
-| `NO_CHOWN_CONFIG_DIR` | Disables automatic filesystem permissions management on config directory | (true&vert;false) | false         |
-| `NO_CHOWN_GAME_DIR`   | Disables automatic filesystem permissions management on game directory   | (true&vert;false) | false         |
 | `PAUSE_ON_EMPTY`      | Pause the Server when no Players are connected                           | (true&vert;false) | true          |
 | `PUBLIC_SERVER`       | If set to `true` only Pre-Approved/Allowed players can join the server   | (true&vert;false) | true          |
 | `QUERY_PORT`          | Port for other players to connect to                                     | 1000 - 65535      | 16261         |
@@ -205,8 +203,6 @@ The following are instructions for running the server using the Docker image.
        [--env=MAX_RAM=<value>] \
        [--env=MOD_NAMES=<value>] \
        [--env=MOD_WORKSHOP_IDS=<value>] \
-       [--env=NO_CHOWN_CONFIG_DIR=<value>] \
-       [--env=NO_CHOWN_GAME_DIR=<value>] \
        [--env=PAUSE_ON_EMPTY=<value>] \
        [--env=PUBLIC_SERVER=<value>] \
        [--env=QUERY_PORT=<value>] \
