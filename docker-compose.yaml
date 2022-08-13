@@ -19,15 +19,12 @@
 version: "3.8"
 
 services:
-  zomboid-server:
+  zomboid-dedicated-server:
     build:
       context: .
       dockerfile: docker/zomboid-dedicated-server.Dockerfile
-      args:
-        USER_ID: 1000
-        GROUP_ID: 1000
+    image: "docker.io/renegademaster/zomboid-dedicated-server:latest"
     restart: "no"
-    user: "1000:1000"
     environment:
       - "ADMIN_PASSWORD=changeme"
       - "ADMIN_USERNAME=superuser"
