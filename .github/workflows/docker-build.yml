@@ -59,7 +59,7 @@ jobs:
       # Docker Build System #
       #######################
       - name: Build the Docker Image
-        if: ${{ success() && matrix.system == docker }}
+        if: ${{ success() && matrix.system == 'docker' }}
         run: |
           docker build \
           --file docker/zomboid-dedicated-server.Dockerfile \
@@ -67,7 +67,7 @@ jobs:
           .
 
       - name: Test Run the Docker Image
-        if: ${{ success() && matrix.system == docker }}
+        if: ${{ success() && matrix.system == 'docker' }}
         continue-on-error: true
         timeout-minutes: 5
         run: |
@@ -99,7 +99,7 @@ jobs:
       # Docker-Compose Build System #
       ###############################
       - name: Build the Docker-Compose Image
-        if: ${{ success() && matrix.system == docker-compose }}
+        if: ${{ success() && matrix.system == 'docker-compose' }}
         run: |
           docker build \
           --file docker/zomboid-dedicated-server.Dockerfile \
@@ -107,7 +107,7 @@ jobs:
           .
 
       - name: Test Run the Docker-Compose Image
-        if: ${{ success() && matrix.system == docker-compose }}
+        if: ${{ success() && matrix.system == 'docker-compose' }}
         continue-on-error: true
         timeout-minutes: 5
         run: |
@@ -124,7 +124,7 @@ jobs:
       # Podman Build System #
       #######################
       - name: Build the Podman Image
-        if: ${{ success() && matrix.system == podman }}
+        if: ${{ success() && matrix.system == 'podman' }}
         run: |
           BUILDAH_LAYERS=true buildah bud \
           --file docker/zomboid-dedicated-server.Dockerfile \
@@ -132,7 +132,7 @@ jobs:
           .
 
       - name: Test Run the Podman Image
-        if: ${{ success() && matrix.system == podman }}
+        if: ${{ success() && matrix.system == 'podman' }}
         continue-on-error: true
         timeout-minutes: 5
         run: |
