@@ -69,10 +69,10 @@ jobs:
       - name: Test Run the Docker Image
         if: ${{ success() && matrix.system == 'docker' }}
         continue-on-error: true
-        timeout-minutes: 5
+        timeout-minutes: 7
         run: |
           # Start a timed shutdown signal
-          (sleep 270 && docker exec \
+          (sleep 330 && docker exec \
             zomboid-dedicated-server bash -c \
               "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
@@ -106,10 +106,10 @@ jobs:
       - name: Test Run the Docker-Compose Image
         if: ${{ success() && matrix.system == 'docker-compose' }}
         continue-on-error: true
-        timeout-minutes: 5
+        timeout-minutes: 7
         run: |
           # Start a timed shutdown signal
-          (sleep 270 && docker-compose exec zomboid-server bash -c \
+          (sleep 330 && docker-compose exec zomboid-server bash -c \
             "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
           # Run the Docker-Compose Image
@@ -130,10 +130,10 @@ jobs:
       - name: Test Run the Podman Image
         if: ${{ success() && matrix.system == 'podman' }}
         continue-on-error: true
-        timeout-minutes: 5
+        timeout-minutes: 7
         run: |
           # Start a timed shutdown signal
-          (sleep 270 && podman exec \
+          (sleep 330 && podman exec \
             zomboid-dedicated-server bash -c \
               "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
