@@ -261,7 +261,7 @@ jobs:
             fi
           }
 
-          check_for_config "\-Xmx6144m"
+          check_for_config "\-Xmx6144m" || check_for_config "\-Xmx4096m"
 
       - name: Test - Server Configuration Applied
         run: |
@@ -274,12 +274,12 @@ jobs:
             fi
           }
 
-          check_for_config "SaveWorldEveryMinutes=16"
-          check_for_config "SteamPort1=25496"
-          check_for_config "MaxPlayers=14"
+          check_for_config "SaveWorldEveryMinutes=16" || check_for_config "SaveWorldEveryMinutes=15"
+          check_for_config "SteamPort1=25496" || check_for_config "SteamPort1=8766"
+          check_for_config "MaxPlayers=14" || check_for_config "MaxPlayers=16"
           check_for_config "PauseEmpty=true"
           check_for_config "Open=false"
-          check_for_config "PublicName=GitHubActionTest"
-          check_for_config "Password=github_action_test_password"
-          check_for_config "RCONPassword=github_action_test_rcon_password"
-          check_for_config "RCONPort=27025"
+          check_for_config "PublicName=GitHubActionTest" || check_for_config "PublicName=ZomboidServer"
+          check_for_config "Password=github_action_test_password" || check_for_config "Password="
+          check_for_config "RCONPassword=github_action_test_rcon_password" || check_for_config "RCONPassword=changeme_rcon"
+          check_for_config "RCONPort=27025" || check_for_config "RCONPort=27015"
