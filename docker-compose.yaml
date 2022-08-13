@@ -19,12 +19,12 @@
 version: "3.8"
 
 services:
-  zomboid-server:
+  zomboid-dedicated-server:
     build:
       context: .
       dockerfile: docker/zomboid-dedicated-server.Dockerfile
     image: "docker.io/renegademaster/zomboid-dedicated-server:latest"
-    container_name: zomboid-server
+    container_name: zomboid-dedicated-server
     restart: "no"
     environment:
       - "ADMIN_PASSWORD=changeme"

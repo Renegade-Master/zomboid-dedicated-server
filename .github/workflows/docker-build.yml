@@ -109,8 +109,9 @@ jobs:
         timeout-minutes: 7
         run: |
           # Start a timed shutdown signal
-          (sleep 330 && docker-compose exec zomboid-server bash -c \
-            "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+          (sleep 330 && docker exec \
+            zomboid-dedicated-server bash -c \
+              "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
           # Run the Docker-Compose Image
           docker-compose up \
