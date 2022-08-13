@@ -33,6 +33,9 @@ jobs:
   build-and-run:
     name: Build and Run Server
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        system: [docker, docker-compose, podman]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -52,8 +55,11 @@ jobs:
       - name: Make Directories
         run: mkdir ZomboidConfig ZomboidDedicatedServer
 
+      #######################
+      # Docker Build System #
+      #######################
       - name: Build the Docker Image
-        if: ${{ success() }}
+        if: ${{ success() && matrix.system == 'docker' }}
         run: |
           docker build \
           --file docker/zomboid-dedicated-server.Dockerfile \
@@ -61,12 +67,12 @@ jobs:
           .
 
       - name: Test Run the Docker Image
-        if: ${{ success() }}
+        if: ${{ success() && matrix.system == 'docker' }}
         continue-on-error: true
-        timeout-minutes: 5
+        timeout-minutes: 7
         run: |
           # Start a timed shutdown signal
-          (sleep 270 && docker exec \
+          (sleep 330 && docker exec \
             zomboid-dedicated-server bash -c \
               "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
@@ -79,6 +85,81 @@ jobs:
             --env=AUTOSAVE_INTERVAL="16" \
             --env=GAME_PORT="25496" \
             --env=MAP_NAMES="North;South;West" \
+            --env=MAX_PLAYERS="14" \
+            --env=MAX_RAM="6144m" \
+            --env=PAUSE_ON_EMPTY="true" \
+            --env=PUBLIC_SERVER="false" \
+            --env=SERVER_NAME="GitHubActionTest" \
+            --env=SERVER_PASSWORD="github_action_test_password" \
+            --env=RCON_PASSWORD="github_action_test_rcon_password" \
+            --env=RCON_PORT="27025" \
+            docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+            2>&1 | tee ./docker-log.log
+
+      ###############################
+      # Docker-Compose Build System #
+      ###############################
+      - name: Update Docker-Compose File
+        if: ${{ success() && matrix.system == 'docker-compose' }}
+        run: |
+          sed -i "s/AUTOSAVE_INTERVAL=.*\"/AUTOSAVE_INTERVAL=16\"/g" "./docker-compose.yaml"
+          sed -i "s/GAME_PORT=.*\"/GAME_PORT=25496\"/g" "./docker-compose.yaml"
+          sed -i "s/MAX_PLAYERS=.*\"/MAX_PLAYERS=14\"/g" "./docker-compose.yaml"
+          sed -i "s/MAX_RAM=.*m\"/MAX_RAM=6144m\"/g" "./docker-compose.yaml"
+          sed -i "s/PUBLIC_SERVER=.*/PUBLIC_SERVER=false\"/g" "./docker-compose.yaml"
+          sed -i "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./docker-compose.yaml"
+          sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./docker-compose.yaml"
+          sed -i "s/RCON_PASSWORD=.*/RCON_PASSWORD=github_action_test_rcon_password\"/g" "./docker-compose.yaml"
+          sed -i "s/RCON_PORT=.*\"/RCON_PORT=27025\"/g" "./docker-compose.yaml"
+
+      - name: Build the Docker-Compose Image
+        if: ${{ success() && matrix.system == 'docker-compose' }}
+        run: |
+          docker-compose build
+
+      - name: Test Run the Docker-Compose Image
+        if: ${{ success() && matrix.system == 'docker-compose' }}
+        continue-on-error: true
+        timeout-minutes: 7
+        run: |
+          # Start a timed shutdown signal
+          (sleep 330 && docker exec \
+            zomboid-dedicated-server bash -c \
+              "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+
+          # Run the Docker-Compose Image
+          docker-compose up \
+            2>&1 | tee ./docker-log.log
+
+      #######################
+      # Podman Build System #
+      #######################
+      - name: Build the Podman Image
+        if: ${{ success() && matrix.system == 'podman' }}
+        run: |
+          BUILDAH_LAYERS=true buildah bud \
+          --file docker/zomboid-dedicated-server.Dockerfile \
+          --tag docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+          .
+
+      - name: Test Run the Podman Image
+        if: ${{ success() && matrix.system == 'podman' }}
+        continue-on-error: true
+        timeout-minutes: 7
+        run: |
+          # Start a timed shutdown signal
+          (sleep 330 && podman exec \
+            zomboid-dedicated-server bash -c \
+              "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+
+          # Run the Podman Image
+          podman run \
+            --rm \
+            --name zomboid-dedicated-server \
+            --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
+            --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
+            --env=AUTOSAVE_INTERVAL="16" \
+            --env=GAME_PORT="25496" \
             --env=MAX_PLAYERS="14" \
             --env=MAX_RAM="6144m" \
             --env=PAUSE_ON_EMPTY="true" \
@@ -107,7 +188,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: docker-logs
+          name: docker-logs-${{ matrix.system }}
           path: |
             docker-log.log
 
@@ -115,17 +196,20 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: server-configs
+          name: server-configs-${{ matrix.system }}
           path: |
             ZomboidConfig/Server/GitHubActionTest.ini
             ZomboidConfig/Server/GitHubActionTest_SandboxVars.lua
             ZomboidDedicatedServer/ProjectZomboid64.json
 
-  test:
+  test-docker:
     name: Test Server
     runs-on: ubuntu-latest
     needs:
       - build-and-run
+    strategy:
+      matrix:
+        system: [docker, docker-compose, podman]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -133,12 +217,12 @@ jobs:
       - name: Download Docker Logs
         uses: actions/download-artifact@v2
         with:
-          name: docker-logs
+          name: docker-logs-${{ matrix.system }}
 
       - name: Download Server Configs
         uses: actions/download-artifact@v2
         with:
-          name: server-configs
+          name: server-configs-${{ matrix.system }}
 
       - name: Test - Server Started
         run: |

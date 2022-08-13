@@ -41,8 +41,7 @@ docker run --detach \
     --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
     --publish 16261:16261/udp --publish 8766:8766/udp \
     --name zomboid-server \
-    --user=$(id -u):$(id -g) \
-    renegademaster/zomboid-dedicated-server:latest
+    docker.io/renegademaster/zomboid-dedicated-server:latest
 ```
 
 ### Assurance / Testing
@@ -64,9 +63,9 @@ runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/
 
 | Provider                                                                                                               | Image                                      | Pull Command                                                                                                                                   |
 |------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| [GitHub Packages](https://github.com/Renegade-Master/zomboid-dedicated-server/pkgs/container/zomboid-dedicated-server) | `renegade-master/zomboid-dedicated-server` | `docker pull ghcr.io/renegade-master/zomboid-dedicated-server:x.y.z`<br/>`docker pull ghcr.io/renegade-master/zomboid-dedicated-server:latest` |
-| [DockerHub](https://hub.docker.com/r/renegademaster/zomboid-dedicated-server)                                          | `renegademaster/zomboid-dedicated-server`  | `docker pull renegademaster/zomboid-dedicated-server:x.y.z`<br/>`docker pull renegademaster/zomboid-dedicated-server:latest`                   |
-| [Red Hat Quay](https://quay.io/repository/renegade_master/zomboid-dedicated-server)                                    | `renegade_master/zomboid-dedicated-server` | `docker pull quay.io/renegade_master/zomboid-dedicated-server:x.y.z`<br/>`docker pull quay.io/renegade_master/zomboid-dedicated-server:latest` |
+| [GitHub Packages](https://github.com/Renegade-Master/zomboid-dedicated-server/pkgs/container/zomboid-dedicated-server) | `ghcr.io/renegade-master/zomboid-dedicated-server` | `docker pull ghcr.io/renegade-master/zomboid-dedicated-server:x.y.z`<br/>`docker pull ghcr.io/renegade-master/zomboid-dedicated-server:latest` |
+| [DockerHub](https://hub.docker.com/r/renegademaster/zomboid-dedicated-server)                                          | `docker.io/renegademaster/zomboid-dedicated-server`  | `docker pull docker.io/renegademaster/zomboid-dedicated-server:x.y.z`<br/>`docker pull docker.io/renegademaster/zomboid-dedicated-server:latest`                   |
+| [Red Hat Quay](https://quay.io/repository/renegade_master/zomboid-dedicated-server)                                    | `quay.io/renegade_master/zomboid-dedicated-server` | `docker pull quay.io/renegade_master/zomboid-dedicated-server:x.y.z`<br/>`docker pull quay.io/renegade_master/zomboid-dedicated-server:latest` |
 
 ### External Resources:
 
@@ -153,8 +152,6 @@ recommended for ease of configuration.
 | `MOD_NAMES`           | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits)   | mod1;mod2;mod     |               |
 | `MOD_WORKSHOP_IDS`    | Workshop Mod IDs (e.g. 2160432461;2685168362)                            | xxxxxx;xxxxx;     |               |
 | `MAP_NAMES`           | Map Names (e.g. North;South)                                             | map1;map2;map3    | Muldraugh, KY |
-| `NO_CHOWN_CONFIG_DIR` | Disables automatic filesystem permissions management on config directory | (true&vert;false) | false         |
-| `NO_CHOWN_GAME_DIR`   | Disables automatic filesystem permissions management on game directory   | (true&vert;false) | false         |
 | `PAUSE_ON_EMPTY`      | Pause the Server when no Players are connected                           | (true&vert;false) | true          |
 | `PUBLIC_SERVER`       | If set to `true` only Pre-Approved/Allowed players can join the server   | (true&vert;false) | true          |
 | `QUERY_PORT`          | Port for other players to connect to                                     | 1000 - 65535      | 16261         |
@@ -181,7 +178,7 @@ The following are instructions for running the server using the Docker image.
       git clone https://github.com/Renegade-Master/zomboid-dedicated-server.git \
           && cd zomboid-dedicated-server
 
-      docker build -t renegademaster/zomboid-dedicated-server:<tag> -f docker/zomboid-dedicated-server.Dockerfile .
+      docker build -t docker.io/renegademaster/zomboid-dedicated-server:<tag> -f docker/zomboid-dedicated-server.Dockerfile .
       ```
 
 2. Run the container:
@@ -197,7 +194,6 @@ The following are instructions for running the server using the Docker image.
        --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
        --publish 16261:16261/udp --publish 8766:8766/udp [--publish 27015:27015/tcp] \
        --name zomboid-server \
-       --user=$(id -u):$(id -g) \
        [--env=ADMIN_PASSWORD=<value>] \
        [--env=ADMIN_USERNAME=<value>] \
        [--env=AUTOSAVE_INTERVAL=<value>] \
@@ -208,8 +204,6 @@ The following are instructions for running the server using the Docker image.
        [--env=MAX_RAM=<value>] \
        [--env=MOD_NAMES=<value>] \
        [--env=MOD_WORKSHOP_IDS=<value>] \
-       [--env=NO_CHOWN_CONFIG_DIR=<value>] \
-       [--env=NO_CHOWN_GAME_DIR=<value>] \
        [--env=PAUSE_ON_EMPTY=<value>] \
        [--env=PUBLIC_SERVER=<value>] \
        [--env=QUERY_PORT=<value>] \
@@ -219,7 +213,13 @@ The following are instructions for running the server using the Docker image.
        [--env=SERVER_PASSWORD=<value>] \
        [--env=STEAM_VAC=<value>] \
        [--env=USE_STEAM=<value>] \
-       renegademaster/zomboid-dedicated-server[:<tagname>]
+       docker.io/renegademaster/zomboid-dedicated-server[:<tagname>]
+   ```
+
+3. Optionally, reattach the terminal to the log output (***Note**: this is not an Interactive Terminal*)
+
+   ```shell
+   docker logs --follow zomboid-server
    ```
 
 4. Once you see `LuaNet: Initialization [DONE]` in the console, people can start to join the server.
@@ -240,19 +240,30 @@ The following are instructions for running the server using Docker-Compose.
 
    ***Note**: If the default ports are to be overridden, then the `published` ports must also be changed*
 
-3. In the `docker-compose.yaml` file, you must change the `service.zomboid-server.user` values to match your local user.
-   To find your local user and group ids, run the following command:
+3. Run the following commands:
+
+    * Make the data and configuration directories:
+
+      ```shell
+      mkdir ZomboidConfig ZomboidDedicatedServer
+      ```
+
+    * Pull the image from DockerHub:
+
+      ```shell
+      docker-compose up --detach
+      ```
+
+    * Or alternatively, build the image:
+
+      ```shell
+      docker-compose up --build --detach
+      ```
+
+4. Optionally, reattach the terminal to the log output (***Note**: this is not an Interactive Terminal*)
 
    ```shell
-   printf "UID: %s\nGID: %s\n" $(id -u) $(id -g)
+   docker-compose logs --follow
    ```
 
-4. Run the following commands:
-
-   ```shell
-   mkdir ZomboidConfig ZomboidDedicatedServer
-
-   docker-compose up --build --detach
-   ```
-
-6. Once you see `LuaNet: Initialization [DONE]` in the console, people can start to join the server.
+5. Once you see `LuaNet: Initialization [DONE]` in the console, people can start to join the server.
