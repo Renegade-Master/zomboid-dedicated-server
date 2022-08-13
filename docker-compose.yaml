@@ -60,5 +60,3 @@ services:
     volumes:
       - ./ZomboidDedicatedServer:/home/steam/ZomboidDedicatedServer
       - ./ZomboidConfig:/home/steam/Zomboid/
-    cap_drop:
-      - ALL
