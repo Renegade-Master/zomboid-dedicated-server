@@ -23,6 +23,7 @@ services:
     build:
       context: .
       dockerfile: docker/zomboid-dedicated-server.Dockerfile
+      image: "docker.io/renegademaster/zomboid-dedicated-server:local-latest"
     image: "docker.io/renegademaster/zomboid-dedicated-server:latest"
     restart: "no"
     environment:

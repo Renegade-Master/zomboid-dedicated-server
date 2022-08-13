@@ -101,10 +101,7 @@ jobs:
       - name: Build the Docker-Compose Image
         if: ${{ success() && matrix.system == 'docker-compose' }}
         run: |
-          docker build \
-          --file docker/zomboid-dedicated-server.Dockerfile \
-          --tag docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
-          .
+          docker-compose build
 
       - name: Test Run the Docker-Compose Image
         if: ${{ success() && matrix.system == 'docker-compose' }}
@@ -112,7 +109,7 @@ jobs:
         timeout-minutes: 5
         run: |
           # Start a timed shutdown signal
-          (sleep 270 && docker- exec \
+          (sleep 270 && docker-compose exec \
             zomboid-dedicated-server bash -c \
               "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
