@@ -101,25 +101,15 @@ jobs:
       - name: Update Docker-Compose File
         if: ${{ success() && matrix.system == 'docker-compose' }}
         run: |
-          sed "s/AUTOSAVE_INTERVAL=[0-9]+\"/AUTOSAVE_INTERVAL=16\"/g" "./docker-compose.yaml"
-          sed "s/GAME_PORT=[0-9]+\"/GAME_PORT=25496\"/g" "./docker-compose.yaml"
-          sed "s/MAX_PLAYERS=[0-9]+\"/MAX_PLAYERS=14\"/g" "./docker-compose.yaml"
-          sed "s/MAX_RAM=[0-9]+m\"/MAX_RAM=6144m\"/g" "./docker-compose.yaml"
-          sed "s/PUBLIC_SERVER=.*/PUBLIC_SERVER=false\"/g" "./docker-compose.yaml"
-          sed "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./docker-compose.yaml"
-          sed "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./docker-compose.yaml"
-          sed "s/RCON_PASSWORD=.*/RCON_PASSWORD=github_action_test_rcon_password\"/g" "./docker-compose.yaml"
-          sed "s/RCON_PORT=[0-9]+\"/RCON_PORT=27025\"/g" "./docker-compose.yaml"
-
-          sed -i "s/AUTOSAVE_INTERVAL=[0-9]+\"/AUTOSAVE_INTERVAL=16\"/g" "./docker-compose.yaml"
-          sed -i "s/GAME_PORT=[0-9]+\"/GAME_PORT=25496\"/g" "./docker-compose.yaml"
-          sed -i "s/MAX_PLAYERS=[0-9]+\"/MAX_PLAYERS=14\"/g" "./docker-compose.yaml"
-          sed -i "s/MAX_RAM=[0-9]+m\"/MAX_RAM=6144m\"/g" "./docker-compose.yaml"
+          sed -i "s/AUTOSAVE_INTERVAL=.*\"/AUTOSAVE_INTERVAL=16\"/g" "./docker-compose.yaml"
+          sed -i "s/GAME_PORT=.*\"/GAME_PORT=25496\"/g" "./docker-compose.yaml"
+          sed -i "s/MAX_PLAYERS=.*\"/MAX_PLAYERS=14\"/g" "./docker-compose.yaml"
+          sed -i "s/MAX_RAM=.*m\"/MAX_RAM=6144m\"/g" "./docker-compose.yaml"
           sed -i "s/PUBLIC_SERVER=.*/PUBLIC_SERVER=false\"/g" "./docker-compose.yaml"
           sed -i "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./docker-compose.yaml"
           sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./docker-compose.yaml"
           sed -i "s/RCON_PASSWORD=.*/RCON_PASSWORD=github_action_test_rcon_password\"/g" "./docker-compose.yaml"
-          sed -i "s/RCON_PORT=[0-9]+\"/RCON_PORT=27025\"/g" "./docker-compose.yaml"
+          sed -i "s/RCON_PORT=.*\"/RCON_PORT=27025\"/g" "./docker-compose.yaml"
 
       - name: Build the Docker-Compose Image
         if: ${{ success() && matrix.system == 'docker-compose' }}
