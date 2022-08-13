@@ -19,15 +19,13 @@
 version: "3.8"
 
 services:
-  zomboid-server:
+  zomboid-dedicated-server:
     build:
       context: .
       dockerfile: docker/zomboid-dedicated-server.Dockerfile
-      args:
-        USER_ID: 1000
-        GROUP_ID: 1000
+    image: "docker.io/renegademaster/zomboid-dedicated-server:latest"
+    container_name: zomboid-dedicated-server
     restart: "no"
-    user: "1000:1000"
     environment:
       - "ADMIN_PASSWORD=changeme"
       - "ADMIN_USERNAME=superuser"
@@ -39,8 +37,6 @@ services:
       - "MAX_RAM=4096m"
       - "MOD_NAMES="
       - "MOD_WORKSHOP_IDS="
-      - "NO_CHOWN_CONFIG_DIR=false"
-      - "NO_CHOWN_GAME_DIR=false"
       - "PAUSE_ON_EMPTY=true"
       - "PUBLIC_SERVER=true"
       - "QUERY_PORT=16261"
@@ -63,5 +59,3 @@ services:
     volumes:
       - ./ZomboidDedicatedServer:/home/steam/ZomboidDedicatedServer
       - ./ZomboidConfig:/home/steam/Zomboid/
-    cap_drop:
-      - ALL
