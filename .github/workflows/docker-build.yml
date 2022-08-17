@@ -310,6 +310,7 @@ jobs:
               printf "Found directory [%s] in [%s]\n" "$1" "${bedford_maps}"
             else
               printf "Could not find directory [%s] in [%s]\n" "$1" "${bedford_maps}"
+              ls -lAuhFn "${bedford_maps}"
             fi
           }
 
@@ -324,7 +325,7 @@ jobs:
           check_for_config "SaveWorldEveryMinutes=16"
           check_for_config "SteamPort1=25496"
 
-          [[ -d "${bedford_maps}/BedfordFalls" ]]
-          [[ -d "${bedford_maps}/North" ]]
-          [[ -d "${bedford_maps}/South" ]]
-          [[ -d "${bedford_maps}/West" ]]
+          check_for_directory "${bedford_maps}/BedfordFalls"
+          check_for_directory "${bedford_maps}/North"
+          check_for_directory "${bedford_maps}/South"
+          check_for_directory "${bedford_maps}/West"
