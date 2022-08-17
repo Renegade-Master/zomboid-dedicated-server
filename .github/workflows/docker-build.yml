@@ -298,6 +298,17 @@ jobs:
           mods_directory="${workshop_directory}/content/108600/522891356/mods"
           bedford_maps="${mods_directory}/Bedford Falls/media/maps"
 
+          map_search_string="$(cat << EOF
+          │       ├── content
+          │       │   └── 108600
+          │       │       └── 522891356
+          │       │           └── mods
+          │       │               └── Bedford Falls
+          │       │                   ├── media
+          │       │                   │   ├── lua
+          │       │                   │   │   ├── client
+          EOF)"
+
           check_for_config() {
             if ! grep -q -iE "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"; then
               printf "Could not find [%s] in [%s]\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
@@ -308,15 +319,10 @@ jobs:
           }
 
           check_for_directory() {
-            if [[ -d "$1" ]]; then
-              printf "Found directory [%s] in [%s]\n" "$1" "${bedford_maps}"
+            if [[ find -type f -name "./dedicated-server-install-tree.txt" -exec grep -l "$1" {} + ]]; then
+              printf "Found map directory in [%s]\n" "$1" "${bedford_maps}"
             else
-              printf "Could not find directory [%s] in [%s]\n" "$1" "${bedford_maps}"
-              ls -lAuhFn "./"
-              ls -lAuhFn "${install_directory}"
-              ls -lAuhFn "${workshop_directory}"
-              ls -lAuhFn "${mods_directory}"
-              ls -lAuhFn "${bedford_maps}"
+              printf "Could not find map directory in [%s]\n" "$1" "${bedford_maps}"
               exit 1
             fi
           }
@@ -332,7 +338,4 @@ jobs:
           check_for_config "SaveWorldEveryMinutes=16"
           check_for_config "SteamPort1=25496"
 
-          check_for_directory "${bedford_maps}/BedfordFalls"
-          check_for_directory "${bedford_maps}/North"
-          check_for_directory "${bedford_maps}/South"
-          check_for_directory "${bedford_maps}/West"
+          check_for_directory "$map_search_string"
