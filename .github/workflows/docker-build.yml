@@ -293,8 +293,8 @@ jobs:
 
       - name: Test - Server Configuration Applied
         run: |
-          mods_directory="./ZomboidDedicatedServer/steamapps/workshop/content/108600/522891356/mods/"
-          bedford_maps="${mods_directory}/Bedford Falls/media/maps/"
+          mods_directory="./ZomboidDedicatedServer/steamapps/workshop/content/108600/522891356/mods"
+          bedford_maps="${mods_directory}/Bedford Falls/media/maps"
 
           check_for_config() {
             if ! grep -q -iE "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"; then
