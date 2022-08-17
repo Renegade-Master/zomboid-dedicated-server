@@ -299,14 +299,27 @@ jobs:
           bedford_maps="${mods_directory}/Bedford Falls/media/maps"
 
           map_search_string="$(cat << EOF
-          │       ├── content
-          │       │   └── 108600
-          │       │       └── 522891356
-          │       │           └── mods
-          │       │               └── Bedford Falls
-          │       │                   ├── media
-          │       │                   │   ├── lua
-          │       │                   │   │   ├── client
+          │       ├── content
+          │       │   └── 108600
+          │       │       └── 522891356
+          │       │           └── mods
+          │       │               └── Bedford Falls
+          │       │                   ├── media
+          │       │                   │   ├── lua
+          │       │                   │   │   ├── client
+          EOF
+          )"
+
+          py_script="$(cat << EOF
+          to_find = """${map_search_string}"""
+
+          with open("dedicated-server-install-tree.txt", "r") as file:
+              file_string = file.read()
+
+              if (to_find in file_string):
+                  print("FOUND")
+              else:
+                  print("NOT_FOUND")
           EOF
           )"
 
@@ -320,7 +333,7 @@ jobs:
           }
 
           check_for_directory() {
-            if [[ find -type f -name "./dedicated-server-install-tree.txt" -exec grep -l "$1" {} + ]]; then
+            if [[ $(python3 -c "${py_script}") == "FOUND" ]]; then
               printf "Found map directory in [%s]\n" "$1" "${bedford_maps}"
             else
               printf "Could not find map directory in [%s]\n" "$1" "${bedford_maps}"
@@ -339,4 +352,4 @@ jobs:
           check_for_config "SaveWorldEveryMinutes=16"
           check_for_config "SteamPort1=25496"
 
-          check_for_directory "$map_search_string"
+          check_for_directory
