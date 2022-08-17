@@ -117,6 +117,8 @@ jobs:
           sed -i "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./docker-compose.yaml"
           sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./docker-compose.yaml"
 
+          cat docker-compose.yaml
+
       - name: Build the Docker-Compose Image
         if: ${{ success() && matrix.system == 'docker-compose' }}
         run: |
@@ -187,9 +189,9 @@ jobs:
           echo ''
           ls -lAuhFn ./ZomboidConfig/ > ./dedicated-server-config-listing.txt
           echo ''
-          tree -aL 4 ./ZomboidDedicatedServer/ > ./dedicated-server-install-tree.txt
+          tree -aL 10 ./ZomboidDedicatedServer/ > ./dedicated-server-install-tree.txt
           echo ''
-          tree -aL 4 ./ZomboidConfig/ > ./dedicated-server-config-tree.txt
+          tree -aL 10 ./ZomboidConfig/ > ./dedicated-server-config-tree.txt
 
       - name: Upload Docker Logs
         if: ${{ always() }}
@@ -205,6 +207,7 @@ jobs:
         with:
           name: server-configs-${{ matrix.system }}
           path: |
+            docker-compose.yaml
             ZomboidConfig/Server/GitHubActionTest.ini
             ZomboidConfig/Server/GitHubActionTest_SandboxVars.lua
             ZomboidDedicatedServer/ProjectZomboid64.json
@@ -307,6 +310,7 @@ jobs:
               printf "Found directory [%s] in [%s]\n" "$1" "${bedford_maps}"
             else
               printf "Could not find directory [%s] in [%s]\n" "$1" "${bedford_maps}"
+            fi
           }
 
           check_for_config "Map=BedfordFalls;North;South;West"
