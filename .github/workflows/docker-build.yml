@@ -84,15 +84,17 @@ jobs:
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
             --env=GAME_PORT="25496" \
-            --env=MAP_NAMES="North;South;West" \
+            --env=MAP_NAMES="BedfordFalls;North;South;West" \
             --env=MAX_PLAYERS="14" \
             --env=MAX_RAM="6144m" \
+            --env=MOD_NAMES="BedfordFalls" \
+            --env=MOD_WORKSHOP_IDS="522891356" \
             --env=PAUSE_ON_EMPTY="true" \
             --env=PUBLIC_SERVER="false" \
-            --env=SERVER_NAME="GitHubActionTest" \
-            --env=SERVER_PASSWORD="github_action_test_password" \
             --env=RCON_PASSWORD="github_action_test_rcon_password" \
             --env=RCON_PORT="27025" \
+            --env=SERVER_NAME="GitHubActionTest" \
+            --env=SERVER_PASSWORD="github_action_test_password" \
             docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
             2>&1 | tee ./docker-log.log
 
@@ -104,13 +106,16 @@ jobs:
         run: |
           sed -i "s/AUTOSAVE_INTERVAL=.*\"/AUTOSAVE_INTERVAL=16\"/g" "./docker-compose.yaml"
           sed -i "s/GAME_PORT=.*\"/GAME_PORT=25496\"/g" "./docker-compose.yaml"
+          sed -i "s/MAP_NAMES=.*\"/MAP_NAMES=BedfordFalls;North;South;West\"/g" "./docker-compose.yaml"
           sed -i "s/MAX_PLAYERS=.*\"/MAX_PLAYERS=14\"/g" "./docker-compose.yaml"
           sed -i "s/MAX_RAM=.*m\"/MAX_RAM=6144m\"/g" "./docker-compose.yaml"
+          sed -i "s/MOD_NAMES=.*m\"/MOD_NAMES=BedfordFalls\"/g" "./docker-compose.yaml"
+          sed -i "s/MOD_WORKSHOP_IDS=.*m\"/MOD_WORKSHOP_IDS=522891356\"/g" "./docker-compose.yaml"
           sed -i "s/PUBLIC_SERVER=.*/PUBLIC_SERVER=false\"/g" "./docker-compose.yaml"
-          sed -i "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./docker-compose.yaml"
-          sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./docker-compose.yaml"
           sed -i "s/RCON_PASSWORD=.*/RCON_PASSWORD=github_action_test_rcon_password\"/g" "./docker-compose.yaml"
           sed -i "s/RCON_PORT=.*\"/RCON_PORT=27025\"/g" "./docker-compose.yaml"
+          sed -i "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./docker-compose.yaml"
+          sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./docker-compose.yaml"
 
       - name: Build the Docker-Compose Image
         if: ${{ success() && matrix.system == 'docker-compose' }}
@@ -160,14 +165,17 @@ jobs:
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
             --env=GAME_PORT="25496" \
+            --env=MAP_NAMES="BedfordFalls;North;South;West" \
             --env=MAX_PLAYERS="14" \
             --env=MAX_RAM="6144m" \
+            --env=MOD_NAMES="BedfordFalls" \
+            --env=MOD_WORKSHOP_IDS="522891356" \
             --env=PAUSE_ON_EMPTY="true" \
             --env=PUBLIC_SERVER="false" \
-            --env=SERVER_NAME="GitHubActionTest" \
-            --env=SERVER_PASSWORD="github_action_test_password" \
             --env=RCON_PASSWORD="github_action_test_rcon_password" \
             --env=RCON_PORT="27025" \
+            --env=SERVER_NAME="GitHubActionTest" \
+            --env=SERVER_PASSWORD="github_action_test_password" \
             docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
             2>&1 | tee ./docker-log.log
 
@@ -288,13 +296,20 @@ jobs:
             fi
           }
 
-          check_for_config "SaveWorldEveryMinutes=16"
-          check_for_config "SteamPort1=25496"
-          check_for_config "Map=North;South;West"
+          check_for_config "Map=BedfordFalls;North;South;West"
           check_for_config "MaxPlayers=14"
-          check_for_config "PauseEmpty=true"
           check_for_config "Open=false"
-          check_for_config "PublicName=GitHubActionTest"
           check_for_config "Password=github_action_test_password"
+          check_for_config "PauseEmpty=true"
+          check_for_config "PublicName=GitHubActionTest"
           check_for_config "RCONPassword=github_action_test_rcon_password"
           check_for_config "RCONPort=27025"
+          check_for_config "SaveWorldEveryMinutes=16"
+          check_for_config "SteamPort1=25496"
+
+          mods_directory="./ZomboidDedicatedServer/steamapps/workshop/content/108600/522891356/mods/"
+          bedford_maps="${mods_directory}/Bedford Falls/media/maps/"
+          [[ -d "${bedford_maps}/BedfordFalls" ]]
+          [[ -d "${bedford_maps}/North" ]]
+          [[ -d "${bedford_maps}/South" ]]
+          [[ -d "${bedford_maps}/West" ]]

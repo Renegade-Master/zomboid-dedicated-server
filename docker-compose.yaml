@@ -33,6 +33,7 @@ services:
       - "BIND_IP=0.0.0.0"
       - "GAME_PORT=8766"
       - "GAME_VERSION=public"
+      - "MAP_NAMES=Muldraugh, KY"
       - "MAX_PLAYERS=16"
       - "MAX_RAM=4096m"
       - "MOD_NAMES="
