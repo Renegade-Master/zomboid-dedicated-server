@@ -293,7 +293,9 @@ jobs:
 
       - name: Test - Server Configuration Applied
         run: |
-          mods_directory="./ZomboidDedicatedServer/steamapps/workshop/content/108600/522891356/mods"
+          install_directory="./ZomboidDedicatedServer"
+          workshop_directory="${install_directory}/steamapps/workshop"
+          mods_directory=""{workshop_directory}/content/108600/522891356/mods"
           bedford_maps="${mods_directory}/Bedford Falls/media/maps"
 
           check_for_config() {
@@ -310,7 +312,12 @@ jobs:
               printf "Found directory [%s] in [%s]\n" "$1" "${bedford_maps}"
             else
               printf "Could not find directory [%s] in [%s]\n" "$1" "${bedford_maps}"
+              ls -lAuhFn "./"
+              ls -lAuhFn "${install_directory}"
+              ls -lAuhFn "${workshop_directory}"
+              ls -lAuhFn "${mods_directory}"
               ls -lAuhFn "${bedford_maps}"
+              exit 1
             fi
           }
 
