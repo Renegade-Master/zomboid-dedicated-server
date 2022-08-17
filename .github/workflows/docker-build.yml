@@ -179,18 +179,17 @@ jobs:
             docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
             2>&1 | tee ./docker-log.log
 
-      - name: Investigate File Structure on Failure
-        if: ${{ failure() }}
+      - name: Investigate File Structure
         run: |
           pwd
           echo ''
-          ls -lAuhFn ./ZomboidDedicatedServer/
+          ls -lAuhFn ./ZomboidDedicatedServer/ > ./dedicated-server-install-listing.txt
           echo ''
-          ls -lAuhFn ./ZomboidConfig/
+          ls -lAuhFn ./ZomboidConfig/ > ./dedicated-server-config-listing.txt
           echo ''
-          tree -aL 4 ./ZomboidDedicatedServer/
+          tree -aL 4 ./ZomboidDedicatedServer/ > ./dedicated-server-install-tree.txt
           echo ''
-          tree -aL 4 ./ZomboidConfig/
+          tree -aL 4 ./ZomboidConfig/ > ./dedicated-server-config-tree.txt
 
       - name: Upload Docker Logs
         if: ${{ always() }}
@@ -209,6 +208,10 @@ jobs:
             ZomboidConfig/Server/GitHubActionTest.ini
             ZomboidConfig/Server/GitHubActionTest_SandboxVars.lua
             ZomboidDedicatedServer/ProjectZomboid64.json
+            dedicated-server-install-listing.txt
+            dedicated-server-config-listing.txt
+            dedicated-server-install-tree.txt
+            dedicated-server-config-tree.txt
 
   test-docker:
     name: Test Server
@@ -236,10 +239,10 @@ jobs:
         run: |
           check_for_config() {
             if ! grep -q -iE "$1" "./docker-log.log"; then
-              printf "Could not find %s in %s\n" "$1" "./docker-log.log"
+              printf "Could not find [%s] in [%s]\n" "$1" "./docker-log.log"
               exit 1
             else
-              printf "Found %s in %s\n" "$1" "./docker-log.log"
+              printf "Found [%s] in [%s]\n" "$1" "./docker-log.log"
             fi
           }
 
@@ -249,10 +252,10 @@ jobs:
         run: |
           check_for_config() {
             if ! grep -q -iE "$1" "./docker-log.log"; then
-              printf "Could not find %s in %s\n" "$1" "./docker-log.log"
+              printf "Could not find [%s] in [%s]\n" "$1" "./docker-log.log"
               exit 1
             else
-              printf "Found %s in %s\n" "$1" "./docker-log.log"
+              printf "Found [%s] in [%s]\n" "$1" "./docker-log.log"
             fi
           }
 
@@ -262,9 +265,9 @@ jobs:
         run: |
           check_for_config() {
             if ! grep -q -iE "$1" "./docker-log.log"; then
-              printf "Could not find %s in %s\n" "$1" "./docker-log.log"
+              printf "Could not find [%s] in [%s]\n" "$1" "./docker-log.log"
             else
-              printf "Found %s in %s\n" "$1" "./docker-log.log"
+              printf "Found [%s] in [%s]\n" "$1" "./docker-log.log"
               exit 1
             fi
           }
@@ -276,10 +279,10 @@ jobs:
         run: |
           check_for_config() {
             if ! grep -q -iE "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"; then
-              printf "Could not find %s in %s\n" "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"
+              printf "Could not find [%s] in [%s]\n" "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"
               exit 1
             else
-              printf "Found %s in %s\n" "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"
+              printf "Found [%s] in [%s]\n" "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"
             fi
           }
 
@@ -287,13 +290,23 @@ jobs:
 
       - name: Test - Server Configuration Applied
         run: |
+          mods_directory="./ZomboidDedicatedServer/steamapps/workshop/content/108600/522891356/mods/"
+          bedford_maps="${mods_directory}/Bedford Falls/media/maps/"
+
           check_for_config() {
             if ! grep -q -iE "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"; then
-              printf "Could not find %s in %s\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
+              printf "Could not find [%s] in [%s]\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
               exit 1
             else
-              printf "Found %s in %s\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
+              printf "Found [%s] in [%s]\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
             fi
+          }
+
+          check_for_directory() {
+            if [[ -d "$1" ]]; then
+              printf "Found directory [%s] in [%s]\n" "$1" "${bedford_maps}"
+            else
+              printf "Could not find directory [%s] in [%s]\n" "$1" "${bedford_maps}"
           }
 
           check_for_config "Map=BedfordFalls;North;South;West"
@@ -307,8 +320,6 @@ jobs:
           check_for_config "SaveWorldEveryMinutes=16"
           check_for_config "SteamPort1=25496"
 
-          mods_directory="./ZomboidDedicatedServer/steamapps/workshop/content/108600/522891356/mods/"
-          bedford_maps="${mods_directory}/Bedford Falls/media/maps/"
           [[ -d "${bedford_maps}/BedfordFalls" ]]
           [[ -d "${bedford_maps}/North" ]]
           [[ -d "${bedford_maps}/South" ]]
