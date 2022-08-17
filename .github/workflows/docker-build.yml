@@ -336,7 +336,7 @@ jobs:
             if [[ $(python3 -c "${py_script}") == "FOUND" ]]; then
               printf "Found map directory in [%s]\n" "${bedford_maps}"
             else
-              printf "Could not find map directory in [%s]\n" "$1" "${bedford_maps}"
+              printf "Could not find map directory in [%s]\n" "${bedford_maps}"
               exit 1
             fi
           }
