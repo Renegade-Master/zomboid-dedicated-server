@@ -295,7 +295,7 @@ jobs:
         run: |
           install_directory="./ZomboidDedicatedServer"
           workshop_directory="${install_directory}/steamapps/workshop"
-          mods_directory=""{workshop_directory}/content/108600/522891356/mods"
+          mods_directory="${workshop_directory}/content/108600/522891356/mods"
           bedford_maps="${mods_directory}/Bedford Falls/media/maps"
 
           check_for_config() {
