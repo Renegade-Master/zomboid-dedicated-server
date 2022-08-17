@@ -307,7 +307,8 @@ jobs:
           │       │                   ├── media
           │       │                   │   ├── lua
           │       │                   │   │   ├── client
-          EOF)"
+          EOF
+          )"
 
           check_for_config() {
             if ! grep -q -iE "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"; then
