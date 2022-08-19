@@ -77,6 +77,9 @@ function apply_postinstall_config() {
     # Set the Mod names
     "$EDIT_CONFIG" "$SERVER_CONFIG" "Mods" "$MOD_NAMES"
 
+    # Set the Map names
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "Map" "$MAP_NAMES"
+
     # Set the Mod Workshop IDs
     "$EDIT_CONFIG" "$SERVER_CONFIG" "WorkshopItems" "$MOD_WORKSHOP_IDS"
 
@@ -186,6 +189,9 @@ function set_variables() {
     # Set the Mods to use from workshop
     MOD_NAMES=${MOD_NAMES:-""}
     MOD_WORKSHOP_IDS=${MOD_WORKSHOP_IDS:-""}
+
+    # Set the Maps to use
+    MAP_NAMES=${MAP_NAMES:-"Muldraugh, KY"}
 
     # Set the Pause on Empty variable
     PAUSE_ON_EMPTY=${PAUSE_ON_EMPTY:-"true"}
