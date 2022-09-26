@@ -106,6 +106,9 @@ function apply_postinstall_config() {
 
     # Set the maximum amount of RAM for the JVM
     sed -i "s/-Xmx.*/-Xmx$MAX_RAM\",/g" "$SERVER_VM_CONFIG"
+    
+    # Set the maximum amount of RAM for the JVM
+    sed -i "s/-XX\+UseZGC.*/-XX\+Use$GC_CONFIG\",/g" "$SERVER_VM_CONFIG"
 
     printf "\n### Post Install Configuration applied.\n"
 }
@@ -188,6 +191,9 @@ function set_variables() {
 
     # Set the Maximum RAM variable
     MAX_RAM=${MAX_RAM:-"4096m"}
+    
+    # Sets GC
+    GC_CONFIG=${GC_CONFIG:-"ZGC"}
 
     # Set the Mods to use from workshop
     MOD_NAMES=${MOD_NAMES:-""}
