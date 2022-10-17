@@ -36,6 +36,7 @@ services:
       - "MAP_NAMES=Muldraugh, KY"
       - "MAX_PLAYERS=16"
       - "MAX_RAM=4096m"
+      - "GC_CONFIG=ZGC"
       - "MOD_NAMES="
       - "MOD_WORKSHOP_IDS="
       - "PAUSE_ON_EMPTY=true"
