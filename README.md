@@ -110,9 +110,9 @@ There are a total of three ports that can be utilised by the server, but only tw
 
 | Name         | Default Port | Description                                                      | Required |
 | ------------ | ------------ | ---------------------------------------------------------------- | -------- |
-| `QUERY_PORT` | `16261`      | Port used by the server to listen for connections.               | `true`   |
-| `GAME_PORT`  | `8766`       | Port used by the server to communicate with connected clients.   | `true`   |
-| `RCON_PORT`  | `27015`      | Port used by the server to listen for RCON connections/commands. | `false`  |
+| `QUERY_PORT` | `16261`      | Port used by the server to listen for connections.               | yes      |
+| `GAME_PORT`  | `8766`       | Port used by the server to communicate with connected clients.   | yes      |
+| `RCON_PORT`  | `27015`      | Port used by the server to listen for RCON connections/commands. | no       |
 
 All Ports are configurable to use different Port numbers, however you must be aware that by changing a Port in the game
 configuration files, that you must also expose the changed (or default) Port in the Docker run command `--publish ...`
@@ -137,30 +137,40 @@ command, nor in the Docker-Compose file.
 The server can be run using plain Docker, or using Docker-Compose. The end-result is the same, but Docker-Compose is
 recommended for ease of configuration.
 
-_Optional arguments table_:
+### Optional environment variables
 
-| Argument            | Description                                                            | Values            | Default       |
-| ------------------- | ---------------------------------------------------------------------- | ----------------- | ------------- |
-| `ADMIN_PASSWORD`    | Server Admin account password                                          | [a-zA-Z0-9]+      | changeme      |
-| `ADMIN_USERNAME`    | Server Admin account username                                          | [a-zA-Z0-9]+      | superuser     |
-| `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes                                  | [0-9]+            | 15m           |
-| `BIND_IP`           | IP to bind the server to                                               | 0.0.0.0           | 0.0.0.0       |
-| `GAME_PORT`         | Port for sending game data to clients                                  | 1000 - 65535      | 8766          |
-| `GAME_VERSION`      | Game version to serve                                                  | [a-zA-Z0-9_]+     | `public`      |
-| `MAP_NAMES`         | Map Names (e.g. North;South)                                           | map1;map2;map3    | Muldraugh, KY |
-| `MAX_PLAYERS`       | Maximum players allowed in the Server                                  | [0-9]+            | 16            |
-| `MAX_RAM`           | Maximum amount of RAM to be used                                       | ([0-9]+)m         | 4096m         |
-| `MOD_NAMES`         | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits) | mod1;mod2;mod     |               |
-| `MOD_WORKSHOP_IDS`  | Workshop Mod IDs (e.g. 2160432461;2685168362)                          | xxxxxx;xxxxx;     |               |
-| `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected                         | (true&vert;false) | true          |
-| `PUBLIC_SERVER`     | If set to `true` only Pre-Approved/Allowed players can join the server | (true&vert;false) | true          |
-| `QUERY_PORT`        | Port for other players to connect to                                   | 1000 - 65535      | 16261         |
-| `RCON_PASSWORD`     | Password for authenticating incoming RCON commands                     | [a-zA-Z0-9]+      | changeme_rcon |
-| `RCON_PORT`         | Port to listen on for RCON commands                                    | (true&vert;false) | 27015         |
-| `SERVER_NAME`       | Publicly visible Server Name                                           | [a-zA-Z0-9]+      | ZomboidServer |
-| `SERVER_PASSWORD`   | Server password                                                        | [a-zA-Z0-9]+      |               |
-| `STEAM_VAC`         | Use Steam VAC anti-cheat                                               | (true&vert;false) | true          |
-| `USE_STEAM`         | Create a Steam Server, or a Non-Steam Server                           | (true&vert;false) | true          |
+| Argument         | Description                                  | Values            | Default       |
+| ---------------- | -------------------------------------------- | ----------------- | ------------- |
+| `ADMIN_PASSWORD` | Server Admin account password                | [a-zA-Z0-9]+      | changeme      |
+| `ADMIN_USERNAME` | Server Admin account username                | [a-zA-Z0-9]+      | superuser     |
+| `BIND_IP`        | IP to bind the server to                     | 0.0.0.0           | 0.0.0.0       |
+| `GAME_VERSION`   | Game version to serve                        | [a-zA-Z0-9_]+     | `public`      |
+| `MAP_NAMES`      | Map Names (e.g. North;South)                 | map1;map2;map3    | Muldraugh, KY |
+| `MAX_RAM`        | Maximum amount of RAM to be used             | ([0-9]+)m         | 4096m         |
+| `STEAM_VAC`      | Use Steam VAC anti-cheat                     | (true&vert;false) | true          |
+| `USE_STEAM`      | Create a Steam Server, or a Non-Steam Server | (true&vert;false) | true          |
+
+### Config file environment variables
+
+The following environment variables will automatically overwrite values in the server's config.ini file (located at `/home/steam/Zomboid/Server/[name].ini`).
+Editing these values directly in the .ini file will result in them being overwritten with either the default value, or the configured environment variable.
+
+Any other values *can* and *should* be edited directly in the .ini file.
+
+| Argument            | Description                                                                                                                             | .ini variable         | Values                 | Default       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ---------------------- | ------------- |
+| `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes                                                                                                   | SaveWorldEveryMinutes | [0-9]+                 | 15m           |
+| `GAME_PORT`         | Port for sending game data to clients                                                                                                   | SteamPort1            | 1000 - 65535           | 8766          |
+| `MAX_PLAYERS`       | Maximum players allowed in the Server                                                                                                   | MaxPlayers            | [0-9]+                 | 16            |
+| `MOD_NAMES`         | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits)                                                                  | Mods                  | mod1;mod2;mod          |               |
+| `MOD_WORKSHOP_IDS`  | Workshop Mod IDs (e.g. 2160432461;2685168362)                                                                                           | WorkshopItems         | 2160432461;2685168362; |               |
+| `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected                                                                                          | PauseEmpty            | (true&vert;false)      | true          |
+| `PUBLIC_SERVER`     | If set to `false` only Pre-Approved/Allowed players can join the server (**NOTE:** Do not confuse with the `Public` option in the .ini) | Open                  | (true&vert;false)      | true          |
+| `QUERY_PORT`        | Port for other players to connect to                                                                                                    | DefaultPort           | 1000 - 65535           | 16261         |
+| `RCON_PASSWORD`     | Password for authenticating incoming RCON commands                                                                                      | RCONPassword          | [a-zA-Z0-9]+           | changeme_rcon |
+| `RCON_PORT`         | Port to listen on for RCON commands                                                                                                     | RCONPort              | (true&vert;false)      | 27015         |
+| `SERVER_NAME`       | Publicly visible Server Name                                                                                                            | PublicName            | [a-zA-Z0-9]+           | ZomboidServer |
+| `SERVER_PASSWORD`   | Server password                                                                                                                         | Password              | [a-zA-Z0-9]+           |               |
 
 ### Docker
 
