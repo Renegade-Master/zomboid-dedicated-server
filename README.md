@@ -108,11 +108,11 @@ table provided by the Docker image.
 
 There are a total of three ports that can be utilised by the server, but only two are strictly required:
 
-| Name         | Default Port | Description                                                      | Required |
-| ------------ | ------------ | ---------------------------------------------------------------- | -------- |
-| `QUERY_PORT` | `16261`      | Port used by the server to listen for connections.               | yes      |
-| `GAME_PORT`  | `8766`       | Port used by the server to communicate with connected clients.   | yes      |
-| `RCON_PORT`  | `27015`      | Port used by the server to listen for RCON connections/commands. | no       |
+| Name         | Default Port   | Description                                                       | Required |
+| ------------ | -------------- | ----------------------------------------------------------------- | -------- |
+| `QUERY_PORT` | `16261, 16262` | Ports used by the server to listen for connections.               | yes      |
+| `GAME_PORT`  | `8766`         | Port used by the server to communicate with connected clients.    | yes      |
+| `RCON_PORT`  | `27015`        | Port used by the server to listen for RCON connections/commands.  | no       |
 
 All Ports are configurable to use different Port numbers, however you must be aware that by changing a Port in the game
 configuration files, that you must also expose the changed (or default) Port in the Docker run command `--publish ...`
