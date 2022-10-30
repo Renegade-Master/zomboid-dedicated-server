@@ -54,6 +54,9 @@ services:
       - target: 16261
         published: 16261
         protocol: udp
+      - target: 16262
+        published: 16262
+        protocol: udp
       - target: 27015
         published: 27015
         protocol: tcp
