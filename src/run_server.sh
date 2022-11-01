@@ -46,7 +46,7 @@ function start_server() {
         -cachedir="$CONFIG_DIR" \
         -adminusername "$ADMIN_USERNAME" \
         -adminpassword "$ADMIN_PASSWORD" \
-        -ip "$BIND_IP" -port "$QUERY_PORT" \
+        -ip "$BIND_IP" -port "$DEFAULT_PORT" \
         -servername "$SERVER_NAME" \
         -steamvac "$STEAM_VAC" "$USE_STEAM" &
 
@@ -68,8 +68,11 @@ function apply_postinstall_config() {
     # Set the Autosave Interval
     "$EDIT_CONFIG" "$SERVER_CONFIG" "SaveWorldEveryMinutes" "$AUTOSAVE_INTERVAL"
 
-    # Set the Server game Port
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "SteamPort1" "$GAME_PORT"
+    # Set the default Server Port
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "DefaultPort" "$DEFAULT_PORT"
+
+    # Set the default extra UDP Port
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "UDPPort" "$UDP_PORT"
 
     # Set the Max Players
     "$EDIT_CONFIG" "$SERVER_CONFIG" "MaxPlayers" "$MAX_PLAYERS"
@@ -88,9 +91,6 @@ function apply_postinstall_config() {
 
     # Set the Server Publicity status
     "$EDIT_CONFIG" "$SERVER_CONFIG" "Open" "$PUBLIC_SERVER"
-
-    # Set the Server query Port
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "DefaultPort" "$QUERY_PORT"
 
     # Set the Server RCON Password
     "$EDIT_CONFIG" "$SERVER_CONFIG" "RCONPassword" "$RCON_PASSWORD"
@@ -175,7 +175,10 @@ function set_variables() {
     echo "$BIND_IP" > "$CONFIG_DIR/ip.txt"
 
     # Set the IP Game Port variable
-    GAME_PORT=${GAME_PORT:-"8766"}
+    DEFAULT_PORT=${DEFAULT_PORT:-"16261"}
+
+    # Set the extra UDP Game Port variable
+    UDP_PORT=${UDP_PORT:-"16262"}
 
     # Set the game version variable
     GAME_VERSION=${GAME_VERSION:-"public"}
@@ -200,7 +203,7 @@ function set_variables() {
     PUBLIC_SERVER=${PUBLIC_SERVER:-"true"}
 
     # Set the IP Query Port variable
-    QUERY_PORT=${QUERY_PORT:-"16261"}
+    DEFAULT_PORT=${DEFAULT_PORT:-"16261"}
 
     # Set the Server name variable
     SERVER_NAME=${SERVER_NAME:-"ZomboidServer"}

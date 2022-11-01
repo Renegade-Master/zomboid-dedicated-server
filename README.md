@@ -39,7 +39,7 @@ mkdir ZomboidConfig ZomboidDedicatedServer
 docker run --detach \
     --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
     --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
-    --publish 16261:16261/udp --publish 16262:16262/udp --publish 8766:8766/udp \
+    --publish 16261:16261/udp --publish 16262:16262/udp \
     --name zomboid-server \
     docker.io/renegademaster/zomboid-dedicated-server:latest
 ```
@@ -108,11 +108,11 @@ table provided by the Docker image.
 
 There are a total of three ports that can be utilised by the server, but only two are strictly required:
 
-| Name         | Default Port   | Description                                                       | Required |
-| ------------ | -------------- | ----------------------------------------------------------------- | -------- |
-| `QUERY_PORT` | `16261, 16262` | Ports used by the server to listen for connections.               | yes      |
-| `GAME_PORT`  | `8766`         | Port used by the server to communicate with connected clients.    | yes      |
-| `RCON_PORT`  | `27015`        | Port used by the server to listen for RCON connections/commands.  | no       |
+| Name           | Default Port | Description                                                          | Required |
+|----------------|--------------|----------------------------------------------------------------------| -------- |
+| `DEFAULT_PORT` | `16261`      | Port used by the server to listen for connections.                   | yes      |
+| `RCON_PORT`    | `27015`      | Port used by the server to listen for RCON connections/commands.     | no       |
+| `UDP_PORT`     | `16262`      | Additional Port used by the server to facilitate Client connections. | yes      |
 
 All Ports are configurable to use different Port numbers, however you must be aware that by changing a Port in the game
 configuration files, that you must also expose the changed (or default) Port in the Docker run command `--publish ...`
@@ -152,25 +152,27 @@ recommended for ease of configuration.
 
 ### Config file environment variables
 
-The following environment variables will automatically overwrite values in the server's config.ini file (located at `/home/steam/Zomboid/Server/[name].ini`).
-Editing these values directly in the .ini file will result in them being overwritten with either the default value, or the configured environment variable.
+The following environment variables will automatically overwrite values in the server's config.ini file (located
+at `/home/steam/Zomboid/Server/[name].ini`).
+Editing these values directly in the .ini file will result in them being overwritten with either the default value, or
+the configured environment variable.
 
 Any other values *can* and *should* be edited directly in the .ini file.
 
 | Argument            | Description                                                                                                                             | .ini variable         | Values                 | Default       |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ---------------------- | ------------- |
+|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------| --------------------- | ---------------------- | ------------- |
 | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes                                                                                                   | SaveWorldEveryMinutes | [0-9]+                 | 15m           |
-| `GAME_PORT`         | Port for sending game data to clients                                                                                                   | SteamPort1            | 1000 - 65535           | 8766          |
+| `DEFAULT_PORT`      | Port for other players to connect to                                                                                                    | DefaultPort           | 1000 - 65535           | 16261         |
 | `MAX_PLAYERS`       | Maximum players allowed in the Server                                                                                                   | MaxPlayers            | [0-9]+                 | 16            |
 | `MOD_NAMES`         | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits)                                                                  | Mods                  | mod1;mod2;mod          |               |
 | `MOD_WORKSHOP_IDS`  | Workshop Mod IDs (e.g. 2160432461;2685168362)                                                                                           | WorkshopItems         | 2160432461;2685168362; |               |
 | `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected                                                                                          | PauseEmpty            | (true&vert;false)      | true          |
 | `PUBLIC_SERVER`     | If set to `false` only Pre-Approved/Allowed players can join the server (**NOTE:** Do not confuse with the `Public` option in the .ini) | Open                  | (true&vert;false)      | true          |
-| `QUERY_PORT`        | Port for other players to connect to                                                                                                    | DefaultPort           | 1000 - 65535           | 16261         |
 | `RCON_PASSWORD`     | Password for authenticating incoming RCON commands                                                                                      | RCONPassword          | [a-zA-Z0-9]+           | changeme_rcon |
 | `RCON_PORT`         | Port to listen on for RCON commands                                                                                                     | RCONPort              | (true&vert;false)      | 27015         |
 | `SERVER_NAME`       | Publicly visible Server Name                                                                                                            | PublicName            | [a-zA-Z0-9]+           | ZomboidServer |
 | `SERVER_PASSWORD`   | Server password                                                                                                                         | Password              | [a-zA-Z0-9]+           |               |
+| `UDP_PORT`          | Additional Port for facilitating Client connections                                                                                     | SteamPort1            | 1000 - 65535           | 8766          |
 
 ### Docker
 
@@ -178,20 +180,20 @@ The following are instructions for running the server using the Docker image.
 
 1. Acquire the image locally:
 
-   - Pull the image from DockerHub:
+    - Pull the image from DockerHub:
 
-     ```shell
-     docker pull renegademaster/zomboid-dedicated-server:<tagname>
-     ```
+      ```shell
+      docker pull renegademaster/zomboid-dedicated-server:<tagname>
+      ```
 
-   - Or alternatively, build the image:
+    - Or alternatively, build the image:
 
-     ```shell
-     git clone https://github.com/Renegade-Master/zomboid-dedicated-server.git \
-         && cd zomboid-dedicated-server
-
-     docker build -t docker.io/renegademaster/zomboid-dedicated-server:<tag> -f docker/zomboid-dedicated-server.Dockerfile .
-     ```
+      ```shell
+      git clone https://github.com/Renegade-Master/zomboid-dedicated-server.git \
+          && cd zomboid-dedicated-server
+ 
+      docker build -t docker.io/renegademaster/zomboid-dedicated-server:<tag> -f docker/zomboid-dedicated-server.Dockerfile .
+      ```
 
 2. Run the container:
 
@@ -255,23 +257,23 @@ The following are instructions for running the server using Docker-Compose.
 
 3. Run the following commands:
 
-   - Make the data and configuration directories:
+    - Make the data and configuration directories:
 
-     ```shell
-     mkdir ZomboidConfig ZomboidDedicatedServer
-     ```
+      ```shell
+      mkdir ZomboidConfig ZomboidDedicatedServer
+      ```
 
-   - Pull the image from DockerHub:
+    - Pull the image from DockerHub:
 
-     ```shell
-     docker-compose up --detach
-     ```
+      ```shell
+      docker-compose up --detach
+      ```
 
-   - Or alternatively, build the image:
+    - Or alternatively, build the image:
 
-     ```shell
-     docker-compose up --build --detach
-     ```
+      ```shell
+      docker-compose up --build --detach
+      ```
 
 4. Optionally, reattach the terminal to the log output (**\*Note**: this is not an Interactive Terminal\*)
 
