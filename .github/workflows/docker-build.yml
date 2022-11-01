@@ -84,6 +84,7 @@ jobs:
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
             --env=DEFAULT_PORT="25496" \
+            --env=GC_CONFIG="G1GC" \
             --env=MAP_NAMES="BedfordFalls;North;South;West" \
             --env=MAX_PLAYERS="14" \
             --env=MAX_RAM="6144m" \
@@ -107,6 +108,7 @@ jobs:
         run: |
           sed -i "s/AUTOSAVE_INTERVAL=.*\"/AUTOSAVE_INTERVAL=16\"/g" "./docker-compose.yaml"
           sed -i "s/DEFAULT_PORT=.*\"/DEFAULT_PORT=25496\"/g" "./docker-compose.yaml"
+          sed -i "s/GC_CONFIG=.*\"/GC_CONFIG=G1GC\"/g" "./docker-compose.yaml"
           sed -i "s/MAP_NAMES=.*\"/MAP_NAMES=BedfordFalls;North;South;West\"/g" "./docker-compose.yaml"
           sed -i "s/MAX_PLAYERS=.*\"/MAX_PLAYERS=14\"/g" "./docker-compose.yaml"
           sed -i "s/MAX_RAM=.*m\"/MAX_RAM=6144m\"/g" "./docker-compose.yaml"
@@ -169,6 +171,7 @@ jobs:
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
             --env=DEFAULT_PORT="25496" \
+            --env=GC_CONFIG="G1GC" \
             --env=MAP_NAMES="BedfordFalls;North;South;West" \
             --env=MAX_PLAYERS="14" \
             --env=MAX_RAM="6144m" \
@@ -293,6 +296,7 @@ jobs:
           }
 
           check_for_config "\-Xmx6144m"
+          check_for_config "\-XX:+UseG1GC"
 
       - name: Test - Server Configuration Applied
         run: |
