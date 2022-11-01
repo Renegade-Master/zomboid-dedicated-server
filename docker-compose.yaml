@@ -31,7 +31,7 @@ services:
       - "ADMIN_USERNAME=superuser"
       - "AUTOSAVE_INTERVAL=15"
       - "BIND_IP=0.0.0.0"
-      - "GAME_PORT=8766"
+      - "DEFAULT_PORT=16261"
       - "GAME_VERSION=public"
       - "MAP_NAMES=Muldraugh, KY"
       - "MAX_PLAYERS=16"
@@ -40,12 +40,12 @@ services:
       - "MOD_WORKSHOP_IDS="
       - "PAUSE_ON_EMPTY=true"
       - "PUBLIC_SERVER=true"
-      - "QUERY_PORT=16261"
       - "RCON_PASSWORD=changeme_rcon"
       - "RCON_PORT=27015"
       - "SERVER_NAME=ZomboidServer"
       - "SERVER_PASSWORD="
       - "STEAM_VAC=true"
+      - "UDP_PORT=16262"
       - "USE_STEAM=true"
     ports:
       - target: 8766
@@ -53,6 +53,9 @@ services:
         protocol: udp
       - target: 16261
         published: 16261
+        protocol: udp
+      - target: 16262
+        published: 16262
         protocol: udp
       - target: 27015
         published: 27015
