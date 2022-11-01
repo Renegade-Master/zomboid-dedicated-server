@@ -147,7 +147,7 @@ recommended for ease of configuration.
 | `GAME_VERSION`   | Game version to serve                        | [a-zA-Z0-9_]+     | `public`      |
 | `MAP_NAMES`      | Map Names (e.g. North;South)                 | map1;map2;map3    | Muldraugh, KY |
 | `MAX_RAM`        | Maximum amount of RAM to be used             | ([0-9]+)m         | 4096m         |
-| `GC_CONFIG`      | Specifices Java GC to use                    | ([0-9]+)m         | ZGC           |
+| `GC_CONFIG`      | Specifices Java GC to use                    | [a-zA-Z0-9_]+     | ZGC           |
 | `STEAM_VAC`      | Use Steam VAC anti-cheat                     | (true&vert;false) | true          |
 | `USE_STEAM`      | Create a Steam Server, or a Non-Steam Server | (true&vert;false) | true          |
 
