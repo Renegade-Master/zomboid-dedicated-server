@@ -105,10 +105,10 @@ function apply_postinstall_config() {
     "$EDIT_CONFIG" "$SERVER_CONFIG" "Password" "$SERVER_PASSWORD"
 
     # Set the maximum amount of RAM for the JVM
-    sed -i "s/-Xmx.*/-Xmx$MAX_RAM\",/g" "$SERVER_VM_CONFIG"
+    sed -i "s/-Xmx.*/-Xmx${MAX_RAM}\",/g" "${SERVER_VM_CONFIG}"
 
     # Set the GC for the JVM (advanced, some crashes can be fixed with a different GC algorithm)
-    sed -i "s/-XX\+Use.*/-XX\+Use$GC_CONFIG\",/g" "$SERVER_VM_CONFIG"
+    sed -i "s/-XX:+Use.*/-XX:+Use${GC_CONFIG}\",/g" "${SERVER_VM_CONFIG}"
 
     printf "\n### Post Install Configuration applied.\n"
 }
