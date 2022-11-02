@@ -207,7 +207,7 @@ The following are instructions for running the server using the Docker image.
    docker run --detach \
        --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
        --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
-       --publish 16261:16261/udp --publish 8766:8766/udp [--publish 27015:27015/tcp] \
+       --publish 16261:16261/udp --publish 16262:16262/udp [--publish 27015:27015/tcp] \
        --name zomboid-server \
        [--env=ADMIN_PASSWORD=<value>] \
        [--env=ADMIN_USERNAME=<value>] \
