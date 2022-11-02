@@ -296,7 +296,7 @@ jobs:
           }
 
           check_for_config "\-Xmx6144m"
-          check_for_config "\-XX:+UseG1GC"
+          check_for_config "\-XX:\+UseG1GC"
 
       - name: Test - Server Configuration Applied
         run: |
