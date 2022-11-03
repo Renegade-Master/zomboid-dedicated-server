@@ -49,9 +49,6 @@ services:
       - "UDP_PORT=16262"
       - "USE_STEAM=true"
     ports:
-      - target: 8766
-        published: 8766
-        protocol: udp
       - target: 16261
         published: 16261
         protocol: udp
