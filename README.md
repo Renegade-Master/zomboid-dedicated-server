@@ -44,6 +44,13 @@ docker run --detach \
     docker.io/renegademaster/zomboid-dedicated-server:latest
 ```
 
+The default behaviour of the Container is not to automatically restart after a crash to give the user time to investigate the cause of the issue. You may however want to change the [restart policy](https://docs.docker.com/engine/reference/run/#restart-policies---restart) to automatically recover from an unexpected failure. The following options will help to recover from such a situation:
+
+- `--restart=unless-stopped` will restart the container every time that it exits unless the Container is stopped using the Docker/Podman API.
+- `--restart=on-failure[:max-retries]` will restart the container only if it exits with a non-zero exit code. Optionally, it can also be configured to only restart a fixed number of times to help prevent crash-loops.
+
+These same options can be set in the `docker-compose.yaml` file.
+
 ### Assurance / Testing
 
 For every commit, the server is built and started briefly using GitHub Actions. This is to ensure that the server always
@@ -192,7 +199,7 @@ The following are instructions for running the server using the Docker image.
       ```shell
       git clone https://github.com/Renegade-Master/zomboid-dedicated-server.git \
           && cd zomboid-dedicated-server
- 
+
       docker build -t docker.io/renegademaster/zomboid-dedicated-server:<tag> -f docker/zomboid-dedicated-server.Dockerfile .
       ```
 
@@ -209,6 +216,7 @@ The following are instructions for running the server using the Docker image.
        --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
        --publish 16261:16261/udp --publish 16262:16262/udp [--publish 27015:27015/tcp] \
        --name zomboid-server \
+       [--restart=no] \
        [--env=ADMIN_PASSWORD=<value>] \
        [--env=ADMIN_USERNAME=<value>] \
        [--env=AUTOSAVE_INTERVAL=<value>] \
