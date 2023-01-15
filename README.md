@@ -36,7 +36,7 @@ docker pull renegademaster/zomboid-dedicated-server:latest
 mkdir ZomboidConfig ZomboidDedicatedServer
 
 # Run the server (with bare minimum options):
-docker run --detach \
+docker run --restart=unless-stopped --detach \
     --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
     --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
     --publish 16261:16261/udp --publish 16262:16262/udp \
