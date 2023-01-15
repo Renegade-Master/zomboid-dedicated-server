@@ -36,13 +36,15 @@ docker pull renegademaster/zomboid-dedicated-server:latest
 mkdir ZomboidConfig ZomboidDedicatedServer
 
 # Run the server (with bare minimum options):
-docker run --restart=unless-stopped --detach \
+docker run --restart=no --detach \
     --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
     --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
     --publish 16261:16261/udp --publish 16262:16262/udp \
     --name zomboid-server \
     docker.io/renegademaster/zomboid-dedicated-server:latest
 ```
+
+You may want to change --restart to "unless-stopped" so that the container restarts when the server reboots or power is interrupted.
 
 ### Assurance / Testing
 
