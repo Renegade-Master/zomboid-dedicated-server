@@ -36,7 +36,7 @@ docker pull renegademaster/zomboid-dedicated-server:latest
 mkdir ZomboidConfig ZomboidDedicatedServer
 
 # Run the server (with bare minimum options):
-docker run --restart=no --detach \
+docker run --detach \
     --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
     --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
     --publish 16261:16261/udp --publish 16262:16262/udp \
@@ -44,7 +44,12 @@ docker run --restart=no --detach \
     docker.io/renegademaster/zomboid-dedicated-server:latest
 ```
 
-You may want to change --restart to "unless-stopped" so that the container restarts when the server reboots or power is interrupted.
+The default behaviour of the Container is not to automatically restart after a crash to give the user time to investigate the cause of the issue. You may however want to change the restart policy to automatically recover from an unexpected failure. The following options will help to recover from such a situation:
+
+- `--restart=unless-stopped` will restart the container every time that it exits unless the Container is stopped using the Docker/Podman API.
+- `--restart=on-failure[:max-retries]` will restart the container only if it exits with a non-zero exit code. Optionally, it can also be configured to only restart a fixed number of times to help prevent crash-loops.
+
+These same options can be set in the `docker-compose.yaml` file.
 
 ### Assurance / Testing
 
@@ -194,7 +199,7 @@ The following are instructions for running the server using the Docker image.
       ```shell
       git clone https://github.com/Renegade-Master/zomboid-dedicated-server.git \
           && cd zomboid-dedicated-server
- 
+
       docker build -t docker.io/renegademaster/zomboid-dedicated-server:<tag> -f docker/zomboid-dedicated-server.Dockerfile .
       ```
 
