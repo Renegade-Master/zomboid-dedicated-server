@@ -133,7 +133,7 @@ function test_first_run() {
 function update_server() {
     printf "\n### Updating Project Zomboid Server...\n"
 
-    steamcmd.sh +runscript "$STEAM_INSTALL_FILE"
+    ./steamcmd.sh +runscript "$STEAM_INSTALL_FILE"
 
     printf "\n### Project Zomboid Server updated.\n"
 }
