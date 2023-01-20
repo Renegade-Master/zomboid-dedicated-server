@@ -72,7 +72,7 @@ jobs:
         timeout-minutes: 10
         run: |
           # Start a timed shutdown signal
-          (sleep 480 && docker exec \
+          (sleep 360 && docker exec \
             zomboid-dedicated-server bash -c \
               "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
@@ -134,7 +134,7 @@ jobs:
         timeout-minutes: 10
         run: |
           # Start a timed shutdown signal
-          (sleep 480 && docker exec \
+          (sleep 360 && docker exec \
             zomboid-dedicated-server bash -c \
               "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
@@ -159,7 +159,7 @@ jobs:
         timeout-minutes: 10
         run: |
           # Start a timed shutdown signal
-          (sleep 480 && podman exec \
+          (sleep 360 && podman exec \
             zomboid-dedicated-server bash -c \
               "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
