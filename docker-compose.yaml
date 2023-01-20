@@ -48,6 +48,7 @@ services:
       - "STEAM_VAC=true"
       - "UDP_PORT=16262"
       - "USE_STEAM=true"
+      - "TZ=UTC"
     ports:
       - target: 16261
         published: 16261

@@ -156,6 +156,7 @@ recommended for ease of configuration.
 | `MAP_NAMES`      | Map Names (e.g. North;South)                 | map1;map2;map3    | Muldraugh, KY |
 | `MAX_RAM`        | Maximum amount of RAM to be used             | ([0-9]+)m         | 4096m         |
 | `STEAM_VAC`      | Use Steam VAC anti-cheat                     | (true&vert;false) | true          |
+| `TZ`             | Set the timezone for the container           | [A-Z]+            | UTC           |
 | `USE_STEAM`      | Create a Steam Server, or a Non-Steam Server | (true&vert;false) | true          |
 
 ### Config file environment variables
@@ -237,6 +238,7 @@ The following are instructions for running the server using the Docker image.
        [--env=SERVER_NAME=<value>] \
        [--env=SERVER_PASSWORD=<value>] \
        [--env=STEAM_VAC=<value>] \
+       [--env=TZ=<value>] \
        [--env=USE_STEAM=<value>] \
        docker.io/renegademaster/zomboid-dedicated-server[:<tagname>]
    ```
