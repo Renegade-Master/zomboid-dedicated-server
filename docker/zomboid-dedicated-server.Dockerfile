@@ -23,9 +23,11 @@
 
 # Base Image
 ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:2.0.0"
+ARG UID=1000
 ARG USER=steam
 
 FROM ${BASE_IMAGE}
+ARG UID
 ARG USER
 
 # Add metadata labels
@@ -40,12 +42,13 @@ USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-minimal iputils-ping \
     && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && chown -R ${UID}:${UID} /home/steam/
 
-USER ${USER}
+USER ${UID}
 
 # Copy the source files
-COPY src /home/steam/
+COPY --chown=${UID}:${UID} src /home/steam/
 
 # Run the setup script
 ENTRYPOINT ["/bin/bash", "/home/steam/run_server.sh"]

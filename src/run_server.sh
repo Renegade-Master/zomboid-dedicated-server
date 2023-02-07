@@ -253,6 +253,9 @@ fail_with_reason() {
 
   printf "${c_red}Error encountered: [%s]${c_clr}\n" "$1" 1>&2
 
+  printf "Directory listing: \n[%s]\n" "$(ls -lAuhF /home/steam/)" 1>&2
+  printf "Directory listing with IDs: \n[%s]\n" "$(ls -lAuhFn /home/steam/)" 1>&2
+
   # shellcheck disable=SC2059
   printf "${c_red}Exiting program...${c_clr}\n" 1>&2
 
