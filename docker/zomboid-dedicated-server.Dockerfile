@@ -1,5 +1,5 @@
 #   Project Zomboid Dedicated Server using SteamCMD Docker Image.
-#   Copyright (C) 2021-2022 Renegade-Master [renegade.master.dev@protonmail.com]
+#   Copyright (C) 2021-2023 Renegade-Master [renegade.master.dev@protonmail.com]
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -22,9 +22,11 @@
 #######################################################################
 
 # Base Image
-ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:1.1.2"
+ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:2.0.0"
+ARG USER=steam
 
 FROM ${BASE_IMAGE}
+ARG USER
 
 # Add metadata labels
 LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
@@ -32,14 +34,18 @@ LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
     com.renegademaster.zomboid-dedicated-server.source-repository="https://github.com/Renegade-Master/zomboid-dedicated-server" \
     com.renegademaster.zomboid-dedicated-server.image-repository="https://hub.docker.com/renegademaster/zomboid-dedicated-server"
 
-# Copy the source files
-COPY src /home/steam/
+USER root
 
 # Install Python, and take ownership of rcon binary
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        python3-minimal iputils-ping tzdata \
+        python3-minimal iputils-ping \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
+
+USER ${USER}
+
+# Copy the source files
+COPY src /home/steam/
 
 # Run the setup script
 ENTRYPOINT ["/bin/bash", "/home/steam/run_server.sh"]

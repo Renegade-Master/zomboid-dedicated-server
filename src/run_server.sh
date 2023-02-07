@@ -2,7 +2,7 @@
 
 #
 #  Project Zomboid Dedicated Server using SteamCMD Docker Image.
-#  Copyright (C) 2021-2022 Renegade-Master [renegade.master.dev@protonmail.com]
+#  Copyright (C) 2021-2023 Renegade-Master [renegade.master.dev@protonmail.com]
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,10 +26,10 @@
 #######################################################################
 
 # Set to `-x` for Debug logging
-set +x -o pipefail
+set +x -eo pipefail
 
 # Handle shutting down the server, with optional RCON quit for graceful shutdown
-function shutdown() {
+shutdown() {
     if [[ "$RCON_ENABLED" == "true" ]]; then
         printf "\n### Sending RCON quit command\n"
         rcon --address "$BIND_IP:$RCON_PORT" --password "$RCON_PASSWORD" quit
@@ -40,7 +40,7 @@ function shutdown() {
 }
 
 # Start the Server
-function start_server() {
+start_server() {
     printf "\n### Starting Project Zomboid Server...\n"
     timeout "$TIMEOUT" "$BASE_GAME_DIR"/start-server.sh \
         -cachedir="$CONFIG_DIR" \
@@ -62,11 +62,12 @@ function start_server() {
     printf "\n### Project Zomboid Server stopped.\n"
 }
 
-function apply_postinstall_config() {
+apply_postinstall_config() {
     printf "\n### Applying Post Install Configuration...\n"
 
     # Set the Autosave Interval
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "SaveWorldEveryMinutes" "$AUTOSAVE_INTERVAL"
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "SaveWorldEveryMinutes" "$AUTOSAVE_INTERVAL" \
+      || fail_with_reason "Could not apply post-install configuration to file [${SERVER_CONFIG}]"
 
     # Set the default Server Port
     "$EDIT_CONFIG" "$SERVER_CONFIG" "DefaultPort" "$DEFAULT_PORT"
@@ -105,7 +106,8 @@ function apply_postinstall_config() {
     "$EDIT_CONFIG" "$SERVER_CONFIG" "Password" "$SERVER_PASSWORD"
 
     # Set the maximum amount of RAM for the JVM
-    sed -i "s/-Xmx.*/-Xmx${MAX_RAM}\",/g" "${SERVER_VM_CONFIG}"
+    sed -i "s/-Xmx.*/-Xmx${MAX_RAM}\",/g" "${SERVER_VM_CONFIG}" \
+      || fail_with_reason "Could not apply post-install configuration to file [${SERVER_VM_CONFIG}]"
 
     # Set the GC for the JVM (advanced, some crashes can be fixed with a different GC algorithm)
     sed -i "s/-XX:+Use.*/-XX:+Use${GC_CONFIG}\",/g" "${SERVER_VM_CONFIG}"
@@ -114,7 +116,7 @@ function apply_postinstall_config() {
 }
 
 # Test if this is the the first time the server has run
-function test_first_run() {
+test_first_run() {
     printf "\n### Checking if this is the first run...\n"
 
     if [[ ! -f "$SERVER_CONFIG" ]] || [[ ! -f "$SERVER_RULES_CONFIG" ]]; then
@@ -130,26 +132,28 @@ function test_first_run() {
 }
 
 # Update the server
-function update_server() {
+update_server() {
     printf "\n### Updating Project Zomboid Server...\n"
 
-    steamcmd.sh +runscript "$STEAM_INSTALL_FILE"
+    steamcmd.sh +runscript "$STEAM_INSTALL_FILE" \
+      || fail_with_reason "Could not update game server using install file [${STEAM_INSTALL_FILE}]"
 
     printf "\n### Project Zomboid Server updated.\n"
 }
 
 # Apply user configuration to the server
-function apply_preinstall_config() {
+apply_preinstall_config() {
     printf "\n### Applying Pre Install Configuration...\n"
 
     # Set the selected game version
-    sed -i "s/beta .* /beta $GAME_VERSION /g" "$STEAM_INSTALL_FILE"
+    sed -i "s/beta .* /beta $GAME_VERSION /g" "$STEAM_INSTALL_FILE" \
+      || fail_with_reason "Could not apply game version [${GAME_VERSION}] to install file [${STEAM_INSTALL_FILE}]"
 
     printf "\n### Pre Install Configuration applied.\n"
 }
 
 # Set variables for use in the script
-function set_variables() {
+set_variables() {
     printf "\n### Setting variables...\n"
 
     TIMEOUT="60"
@@ -175,7 +179,8 @@ function set_variables() {
     else
         BIND_IP="$BIND_IP"
     fi
-    echo "$BIND_IP" > "$CONFIG_DIR/ip.txt"
+    echo "$BIND_IP" > "$CONFIG_DIR/ip.txt" \
+      || fail_with_reason "Could print Bind IP [${BIND_IP}] to file [${CONFIG_DIR}/ip.txt]"
 
     # Set the IP Game Port variable
     DEFAULT_PORT=${DEFAULT_PORT:-"16261"}
@@ -239,6 +244,19 @@ function set_variables() {
     SERVER_CONFIG="$CONFIG_DIR/Server/$SERVER_NAME.ini"
     SERVER_VM_CONFIG="$BASE_GAME_DIR/ProjectZomboid64.json"
     SERVER_RULES_CONFIG="$CONFIG_DIR/Server/${SERVER_NAME}_SandboxVars.lua"
+}
+
+# fail_with_reason prints an error to STDERR and exits the script.
+fail_with_reason() {
+  c_red="\x1b[31m"
+  c_clr="\x1b[0m"
+
+  printf "${c_red}Error encountered: [%s]${c_clr}\n" "$1" 1>&2
+
+  # shellcheck disable=SC2059
+  printf "${c_red}Exiting program...${c_clr}\n" 1>&2
+
+  exit 1
 }
 
 ## Main

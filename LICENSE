@@ -2,7 +2,7 @@
                        Version 3, 29 June 2007
 
  Project Zomboid Dedicated Server using SteamCMD Docker Image.
- Copyright (C) 2021-2022 Renegade-Master [renegade.master.dev@protonmail.com]
+ Copyright (C) 2021-2023 Renegade-Master [renegade.master.dev@protonmail.com]
 
  Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
  Everyone is permitted to copy and distribute verbatim copies
@@ -635,7 +635,7 @@ state the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
     Project Zomboid Dedicated Server using SteamCMD Docker Image.
-    Copyright (C) 2021-2022 Renegade-Master [renegade.master.dev@protonmail.com]
+    Copyright (C) 2021-2023 Renegade-Master [renegade.master.dev@protonmail.com]
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -656,7 +656,7 @@ Also add information on how to contact you by electronic and paper mail.
 notice like this when it starts in an interactive mode:
 
     Project Zomboid Dedicated Server using SteamCMD Docker Image.
-    Copyright (C) 2021-2022 Renegade-Master [renegade.master.dev@protonmail.com]
+    Copyright (C) 2021-2023 Renegade-Master [renegade.master.dev@protonmail.com]
 
     This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
     This is free software, and you are welcome to redistribute it

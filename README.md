@@ -44,10 +44,15 @@ docker run --detach \
     docker.io/renegademaster/zomboid-dedicated-server:latest
 ```
 
-The default behaviour of the Container is not to automatically restart after a crash to give the user time to investigate the cause of the issue. You may however want to change the [restart policy](https://docs.docker.com/engine/reference/run/#restart-policies---restart) to automatically recover from an unexpected failure. The following options will help to recover from such a situation:
+The default behaviour of the Container is not to automatically restart after a crash to give the user time to
+investigate the cause of the issue. You may however want to change
+the [restart policy](https://docs.docker.com/engine/reference/run/#restart-policies---restart) to automatically recover
+from an unexpected failure. The following options will help to recover from such a situation:
 
-- `--restart=unless-stopped` will restart the container every time that it exits unless the Container is stopped using the Docker/Podman API.
-- `--restart=on-failure[:max-retries]` will restart the container only if it exits with a non-zero exit code. Optionally, it can also be configured to only restart a fixed number of times to help prevent crash-loops.
+- `--restart=unless-stopped` will restart the container every time that it exits unless the Container is stopped using
+  the Docker/Podman API.
+- `--restart=on-failure[:max-retries]` will restart the container only if it exits with a non-zero exit code.
+  Optionally, it can also be configured to only restart a fixed number of times to help prevent crash-loops.
 
 These same options can be set in the `docker-compose.yaml` file.
 
@@ -69,7 +74,7 @@ runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/
 ### Images:
 
 | Provider                                                                                                               | Image                                               | Pull Command                                                                                                                                     |
-| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+|------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
 | [GitHub Packages](https://github.com/Renegade-Master/zomboid-dedicated-server/pkgs/container/zomboid-dedicated-server) | `ghcr.io/renegade-master/zomboid-dedicated-server`  | `docker pull ghcr.io/renegade-master/zomboid-dedicated-server:x.y.z`<br/>`docker pull ghcr.io/renegade-master/zomboid-dedicated-server:latest`   |
 | [DockerHub](https://hub.docker.com/r/renegademaster/zomboid-dedicated-server)                                          | `docker.io/renegademaster/zomboid-dedicated-server` | `docker pull docker.io/renegademaster/zomboid-dedicated-server:x.y.z`<br/>`docker pull docker.io/renegademaster/zomboid-dedicated-server:latest` |
 | [Red Hat Quay](https://quay.io/repository/renegade_master/zomboid-dedicated-server)                                    | `quay.io/renegade_master/zomboid-dedicated-server`  | `docker pull quay.io/renegade_master/zomboid-dedicated-server:x.y.z`<br/>`docker pull quay.io/renegade_master/zomboid-dedicated-server:latest`   |
@@ -87,7 +92,7 @@ runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/
 Two directories are required to be present on the host:
 
 | Name               | Directory                | Description                                          |
-| ------------------ | ------------------------ | ---------------------------------------------------- |
+|--------------------|--------------------------|------------------------------------------------------|
 | Configuration Data | `ZomboidConfig`          | For storing the server configuration and save files. |
 | Installation Data  | `ZomboidDedicatedServer` | For storing the server game data.                    |
 
@@ -116,7 +121,7 @@ table provided by the Docker image.
 There are a total of three ports that can be utilised by the server, but only two are strictly required:
 
 | Name           | Default Port | Description                                                          | Required |
-|----------------|--------------|----------------------------------------------------------------------| -------- |
+|----------------|--------------|----------------------------------------------------------------------|----------|
 | `DEFAULT_PORT` | `16261`      | Port used by the server to listen for connections.                   | yes      |
 | `RCON_PORT`    | `27015`      | Port used by the server to listen for RCON connections/commands.     | no       |
 | `UDP_PORT`     | `16262`      | Additional Port used by the server to facilitate Client connections. | yes      |
@@ -147,7 +152,7 @@ recommended for ease of configuration.
 ### Optional environment variables
 
 | Argument         | Description                                  | Values            | Default       |
-| ---------------- | -------------------------------------------- | ----------------- | ------------- |
+|------------------|----------------------------------------------|-------------------|---------------|
 | `ADMIN_PASSWORD` | Server Admin account password                | [a-zA-Z0-9]+      | changeme      |
 | `ADMIN_USERNAME` | Server Admin account username                | [a-zA-Z0-9]+      | superuser     |
 | `BIND_IP`        | IP to bind the server to                     | 0.0.0.0           | 0.0.0.0       |
@@ -169,7 +174,7 @@ the configured environment variable.
 Any other values *can* and *should* be edited directly in the .ini file.
 
 | Argument            | Description                                                                                                                             | .ini variable         | Values                 | Default       |
-|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------| --------------------- | ---------------------- | ------------- |
+|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------|-----------------------|------------------------|---------------|
 | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes                                                                                                   | SaveWorldEveryMinutes | [0-9]+                 | 15m           |
 | `DEFAULT_PORT`      | Port for other players to connect to                                                                                                    | DefaultPort           | 1000 - 65535           | 16261         |
 | `MAX_PLAYERS`       | Maximum players allowed in the Server                                                                                                   | MaxPlayers            | [0-9]+                 | 16            |
