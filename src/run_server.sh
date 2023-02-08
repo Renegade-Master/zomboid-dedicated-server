@@ -253,8 +253,11 @@ fail_with_reason() {
 
   printf "${c_red}Error encountered: [%s]${c_clr}\n" "$1" 1>&2
 
-  printf "Directory listing: \n[%s]\n\n" "$(ls -lAuhFd /home/steam)" 1>&2
-  printf "Directory listing with IDs: \n[%s]\n\n" "$(ls -lAuhFdn /home/steam)" 1>&2
+  printf "Directory listing: \n[%s]\n\n" "$(ls -lAuhF /home/steam/)" 1>&2
+  printf "Directory listing with IDs: \n[%s]\n\n" "$(ls -lAuhFn /home/steam/)" 1>&2
+
+  printf "ZomboidConfig listing: \n[%s]\n\n" "$(ls -lAuhF ${CONFIG_DIR})" 1>&2
+  printf "ZomboidDedicatedServer listing: \n[%s]\n\n" "$(ls -lAuhF ${BASE_GAME_DIR})" 1>&2
 
   # shellcheck disable=SC2059
   printf "${c_red}Exiting program...${c_clr}\n" 1>&2
