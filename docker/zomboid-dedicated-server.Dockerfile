@@ -44,16 +44,12 @@ USER 0:0
 RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-minimal iputils-ping \
     && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir /home/steam/Zomboid /home/steam/ZomboidDedicatedServer
+    && rm -rf /var/lib/apt/lists/*
 
-RUN chown -R ${UID}:${GID} /home/steam/ /home/steam/Zomboid /home/steam/ZomboidDedicatedServer \
-    && chmod -R 2777 /home/steam/Zomboid /home/steam/ZomboidDedicatedServer
-
-USER ${UID}:${GID}
+USER ${USER}
 
 # Copy the source files
-COPY --chown=${UID}:${GID} src /home/steam/
+COPY --chown=${USER} src /home/steam/
 
 # Run the setup script
 ENTRYPOINT ["/bin/bash", "/home/steam/run_server.sh"]

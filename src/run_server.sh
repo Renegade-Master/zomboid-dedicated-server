@@ -48,7 +48,8 @@ start_server() {
         -adminpassword "$ADMIN_PASSWORD" \
         -ip "$BIND_IP" -port "$DEFAULT_PORT" \
         -servername "$SERVER_NAME" \
-        -steamvac "$STEAM_VAC" "$USE_STEAM" &
+        -steamvac "$STEAM_VAC" "$USE_STEAM" \
+      || fail_with_reason "Could not start server script: [${BASE_GAME_DIR}/start-server.sh]" &
 
     server_pid=$!
     wait $server_pid
@@ -147,9 +148,6 @@ apply_preinstall_config() {
 
     mkdir -p "${BASE_GAME_DIR}" "${CONFIG_DIR}" \
       || fail_with_reason "Could not create required game directories: [${BASE_GAME_DIR}] and [${CONFIG_DIR}]"
-
-    chown -R "$(id -u):$(id -g)" "${BASE_GAME_DIR}" "${CONFIG_DIR}"\
-      || fail_with_reason "Could not modify permissions on the required game directories: [${BASE_GAME_DIR}] and [${CONFIG_DIR}]"
 
     # Set the selected game version
     sed -i "s/beta .* /beta $GAME_VERSION /g" "$STEAM_INSTALL_FILE" \
@@ -301,5 +299,4 @@ apply_postinstall_config
 # Intercept termination signals to stop the server gracefully
 trap shutdown SIGTERM SIGINT
 
-start_server \
-  || fail_with_reason "Could not start the server using: [${BASE_GAME_DIR}/start-server.sh]"
+start_server
