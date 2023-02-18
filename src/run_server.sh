@@ -148,6 +148,9 @@ apply_preinstall_config() {
     mkdir -p "${BASE_GAME_DIR}" "${CONFIG_DIR}" \
       || fail_with_reason "Could not create required game directories: [${BASE_GAME_DIR}] and [${CONFIG_DIR}]"
 
+    chown -R "$(id -u):$(id -g)" "${BASE_GAME_DIR}" "${CONFIG_DIR}"\
+      || fail_with_reason "Could not modify permissions on the required game directories: [${BASE_GAME_DIR}] and [${CONFIG_DIR}]"
+
     # Set the selected game version
     sed -i "s/beta .* /beta $GAME_VERSION /g" "$STEAM_INSTALL_FILE" \
       || fail_with_reason "Could not apply game version [${GAME_VERSION}] to install file [${STEAM_INSTALL_FILE}]"
