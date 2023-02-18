@@ -135,8 +135,11 @@ test_first_run() {
 update_server() {
     printf "\n### Updating Project Zomboid Server...\n"
 
-    steamcmd.sh +runscript "$STEAM_INSTALL_FILE" \
-      || fail_with_reason "Could not update game server using install file [${STEAM_INSTALL_FILE}]"
+    steamcmd.sh +runscript "$STEAM_INSTALL_FILE"
+
+    if [[ ! -f "$BASE_GAME_DIR"/start-server.sh ]]; then
+      fail_with_reason "Could not install/update game server using install file [${STEAM_INSTALL_FILE}]"
+    fi
 
     printf "\n### Project Zomboid Server updated.\n"
 }
