@@ -50,7 +50,7 @@ jobs:
 
       - name: Set Permissions on Executable Scripts
         run: |
-          chown ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} src/install_server.scmd src/run_server.sh
+          chown 0:0 src/install_server.scmd src/run_server.sh
           chmod +x src/install_server.scmd src/run_server.sh
 
       - name: Make Directories
@@ -80,7 +80,7 @@ jobs:
           # Run the Docker Image
           docker run \
             --rm \
-            --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
+            --user 0:0 \
             --name zomboid-dedicated-server \
             --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
@@ -125,7 +125,7 @@ jobs:
           sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./docker-compose.yaml"
           sed -i "s/UDP_PORT=.*\"/UDP_PORT=25499\"/g" "./docker-compose.yaml"
 
-          echo "    user: ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }}" >> "./docker-compose.yaml"
+          echo "    user: 0:0" >> "./docker-compose.yaml"
 
           cat docker-compose.yaml
 
@@ -172,7 +172,7 @@ jobs:
           # Run the Podman Image
           podman run \
             --rm \
-            --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
+            --user 0:0 \
             --name zomboid-dedicated-server \
             --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
