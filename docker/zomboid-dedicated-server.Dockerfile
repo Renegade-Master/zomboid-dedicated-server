@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir /home/steam/Zomboid /home/steam/ZomboidDedicatedServer
 
-RUN chown -R ${UID}:${UID} /home/steam/ \
+RUN chown -R ${UID}:${UID} /home/steam/ /home/steam/Zomboid /home/steam/ZomboidDedicatedServer \
     && chmod -R 2777 /home/steam/Zomboid /home/steam/ZomboidDedicatedServer
 
 USER ${UID}

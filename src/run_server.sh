@@ -48,7 +48,8 @@ start_server() {
         -adminpassword "$ADMIN_PASSWORD" \
         -ip "$BIND_IP" -port "$DEFAULT_PORT" \
         -servername "$SERVER_NAME" \
-        -steamvac "$STEAM_VAC" "$USE_STEAM" &
+        -steamvac "$STEAM_VAC" "$USE_STEAM" \
+      || fail_with_reason "Could not start the server using: [${BASE_GAME_DIR}/start-server.sh]" &
 
     server_pid=$!
     wait $server_pid

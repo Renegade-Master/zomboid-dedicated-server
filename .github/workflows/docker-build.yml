@@ -83,6 +83,7 @@ jobs:
             --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
+            --env=DEBUG="true" \
             --env=DEFAULT_PORT="25496" \
             --env=GC_CONFIG="G1GC" \
             --env=MAP_NAMES="BedfordFalls;North;South;West" \
@@ -107,6 +108,7 @@ jobs:
         if: ${{ success() && matrix.system == 'docker-compose' }}
         run: |
           sed -i "s/AUTOSAVE_INTERVAL=.*\"/AUTOSAVE_INTERVAL=16\"/g" "./docker-compose.yaml"
+          sed -i "s/DEBUG=.*\"/DEBUG=true\"/g" "./docker-compose.yaml"
           sed -i "s/DEFAULT_PORT=.*\"/DEFAULT_PORT=25496\"/g" "./docker-compose.yaml"
           sed -i "s/GC_CONFIG=.*\"/GC_CONFIG=G1GC\"/g" "./docker-compose.yaml"
           sed -i "s/MAP_NAMES=.*\"/MAP_NAMES=BedfordFalls;North;South;West\"/g" "./docker-compose.yaml"
@@ -170,6 +172,7 @@ jobs:
             --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
+            --env=DEBUG="true" \
             --env=DEFAULT_PORT="25496" \
             --env=GC_CONFIG="G1GC" \
             --env=MAP_NAMES="BedfordFalls;North;South;West" \
