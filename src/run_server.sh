@@ -269,7 +269,6 @@ fail_with_reason() {
 
     printf "${c_yel}Can SUDO?:${c_clr} [%s]\n\n" "$(if [[ $(sudo -v 2>/dev/null) ]]; then echo "YES"; else echo "NO"; fi)" 1>&2
 
-    printf "${c_yel}OS:${c_clr} \n[\n%s\n]\n\n" "$(grep -iE "Pretty_Name" < /etc/os-release)" 1>&2
     printf "${c_yel}CPU Info:${c_clr} \n[\n%s\n]\n\n" "$(lscpu | grep -iE "Architecture")" 1>&2
     printf "${c_yel}Environment variables:${c_clr} \n[\n%s\n]\n\n" "$(env | sort)" 1>&2
 

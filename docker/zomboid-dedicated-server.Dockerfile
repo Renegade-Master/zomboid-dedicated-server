@@ -24,10 +24,12 @@
 # Base Image
 ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:2.0.0"
 ARG UID=1000
+ARG GID=${UID}
 ARG USER=steam
 
 FROM ${BASE_IMAGE}
 ARG UID
+ARG GID
 ARG USER
 
 # Add metadata labels
@@ -36,7 +38,7 @@ LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
     com.renegademaster.zomboid-dedicated-server.source-repository="https://github.com/Renegade-Master/zomboid-dedicated-server" \
     com.renegademaster.zomboid-dedicated-server.image-repository="https://hub.docker.com/renegademaster/zomboid-dedicated-server"
 
-USER root
+USER 0:0
 
 # Install Python, and take ownership of rcon binary
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -45,13 +47,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir /home/steam/Zomboid /home/steam/ZomboidDedicatedServer
 
-RUN chown -R ${UID}:${UID} /home/steam/ /home/steam/Zomboid /home/steam/ZomboidDedicatedServer \
+RUN chown -R ${UID}:${GID} /home/steam/ /home/steam/Zomboid /home/steam/ZomboidDedicatedServer \
     && chmod -R 2777 /home/steam/Zomboid /home/steam/ZomboidDedicatedServer
 
-USER ${UID}
+USER ${UID}:${GID}
 
 # Copy the source files
-COPY --chown=${UID}:${UID} src /home/steam/
+COPY --chown=${UID}:${GID} src /home/steam/
 
 # Run the setup script
 ENTRYPOINT ["/bin/bash", "/home/steam/run_server.sh"]
