@@ -199,17 +199,17 @@ jobs:
         run: |
           pwd
           echo ''
-          ls -lAuhFn ./ > ./root-fs-listing.txt
+          ls -lAuhFn ./ | tee ./root-fs-listing.txt
           echo ''
-          tree -aL 10 ./ > ./root-fs-tree.txt
+          tree -aL 10 ./ | tee ./root-fs-tree.txt
           echo ''
-          ls -lAuhFn ./ZomboidDedicatedServer/ > ./dedicated-server-install-listing.txt
+          ls -lAuhFn ./ZomboidDedicatedServer/ | tee ./dedicated-server-install-listing.txt
           echo ''
-          ls -lAuhFn ./ZomboidConfig/ > ./dedicated-server-config-listing.txt
+          ls -lAuhFn ./ZomboidConfig/ | tee ./dedicated-server-config-listing.txt
           echo ''
-          tree -aL 10 ./ZomboidDedicatedServer/ > ./dedicated-server-install-tree.txt
+          tree -aL 10 ./ZomboidDedicatedServer/ | tee ./dedicated-server-install-tree.txt
           echo ''
-          tree -aL 10 ./ZomboidConfig/ > ./dedicated-server-config-tree.txt
+          tree -aL 10 ./ZomboidConfig/ | tee ./dedicated-server-config-tree.txt
 
       - name: Upload Docker Logs
         if: ${{ always() }}
