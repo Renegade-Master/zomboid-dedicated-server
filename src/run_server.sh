@@ -48,8 +48,7 @@ start_server() {
         -adminpassword "$ADMIN_PASSWORD" \
         -ip "$BIND_IP" -port "$DEFAULT_PORT" \
         -servername "$SERVER_NAME" \
-        -steamvac "$STEAM_VAC" "$USE_STEAM" \
-      || fail_with_reason "Could not start the server using: [${BASE_GAME_DIR}/start-server.sh]" &
+        -steamvac "$STEAM_VAC" "$USE_STEAM" &
 
     server_pid=$!
     wait $server_pid
@@ -300,4 +299,5 @@ apply_postinstall_config
 # Intercept termination signals to stop the server gracefully
 trap shutdown SIGTERM SIGINT
 
-start_server
+start_server \
+  || fail_with_reason "Could not start the server using: [${BASE_GAME_DIR}/start-server.sh]"
