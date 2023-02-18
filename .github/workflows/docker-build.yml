@@ -50,8 +50,8 @@ jobs:
 
       - name: Set Permissions on Executable Scripts
         run: |
-          chmod +x src/install_server.scmd
-          chmod +x src/run_server.sh
+          chown ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} src/install_server.scmd src/run_server.sh
+          chmod +x src/install_server.scmd src/run_server.sh
 
       - name: Make Directories
         run: mkdir ZomboidConfig ZomboidDedicatedServer
