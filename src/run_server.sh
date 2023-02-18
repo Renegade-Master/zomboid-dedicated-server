@@ -145,6 +145,9 @@ update_server() {
 apply_preinstall_config() {
     printf "\n### Applying Pre Install Configuration...\n"
 
+    mkdir -p "${BASE_GAME_DIR}" "${CONFIG_DIR}" \
+      || fail_with_reason "Could not create required game directories: [${BASE_GAME_DIR}] and [${CONFIG_DIR}]"
+
     # Set the selected game version
     sed -i "s/beta .* /beta $GAME_VERSION /g" "$STEAM_INSTALL_FILE" \
       || fail_with_reason "Could not apply game version [${GAME_VERSION}] to install file [${STEAM_INSTALL_FILE}]"
@@ -180,7 +183,7 @@ set_variables() {
         BIND_IP="$BIND_IP"
     fi
     echo "$BIND_IP" > "$CONFIG_DIR/ip.txt" \
-      || fail_with_reason "Could print Bind IP [${BIND_IP}] to file [${CONFIG_DIR}/ip.txt]"
+      || fail_with_reason "Could write Bind IP [${BIND_IP}] to file [${CONFIG_DIR}/ip.txt]"
 
     # Set the IP Game Port variable
     DEFAULT_PORT=${DEFAULT_PORT:-"16261"}
@@ -248,19 +251,33 @@ set_variables() {
 
 # fail_with_reason prints an error to STDERR and exits the script.
 fail_with_reason() {
-  c_red="\x1b[31m"
+  c_red="\x1b[0;31m"
+  c_yel="\x1b[4;33m"
   c_clr="\x1b[0m"
 
-  printf "${c_red}Error encountered: [%s]${c_clr}\n" "$1" 1>&2
+  printf "\n${c_yel}Error encountered:${c_red} [%s]${c_clr}\n" "$1" 1>&2
 
-  printf "Directory listing: \n[%s]\n\n" "$(ls -lAuhF /home/steam/)" 1>&2
-  printf "Directory listing with IDs: \n[%s]\n\n" "$(ls -lAuhFn /home/steam/)" 1>&2
+  # If Debug is not empty and not set to FALSE
+  if [[ -n "${DEBUG}" ]] && [[ "${DEBUG}" != "FALSE" ]] && [[ "${DEBUG}" != "false" ]]; then
+    # shellcheck disable=SC2059
+    printf "\nStart DEBUG info\n\n" 1>&2
 
-  printf "ZomboidConfig listing: \n[%s]\n\n" "$(ls -lAuhF ${CONFIG_DIR})" 1>&2
-  printf "ZomboidDedicatedServer listing: \n[%s]\n\n" "$(ls -lAuhF ${BASE_GAME_DIR})" 1>&2
+    printf "${c_yel}OS:${c_clr} \n[\n%s\n]\n\n" "$(grep -iE "Pretty_Name" < /etc/os-release)" 1>&2
+    printf "${c_yel}CPU Info:${c_clr} \n[\n%s\n]\n\n" "$(lscpu | grep -iE "Architecture")" 1>&2
+    printf "${c_yel}Environment variables:${c_clr} \n[\n%s\n]\n\n" "$(env | sort)" 1>&2
+
+    printf "${c_yel}Directory listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF /home/steam/)" 1>&2
+    printf "${c_yel}Directory listing with IDs:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhFn /home/steam/)" 1>&2
+
+    printf "${c_yel}ZomboidConfig listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF ${CONFIG_DIR})" 1>&2
+    printf "${c_yel}ZomboidDedicatedServer listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF ${BASE_GAME_DIR})" 1>&2
+
+    # shellcheck disable=SC2059
+    printf "End DEBUG info\n\n" 1>&2
+  fi
 
   # shellcheck disable=SC2059
-  printf "${c_red}Exiting program...${c_clr}\n" 1>&2
+  printf "${c_yel}Exiting program...${c_clr}\n" 1>&2
 
   exit 1
 }

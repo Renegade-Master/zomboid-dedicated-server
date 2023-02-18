@@ -156,6 +156,7 @@ recommended for ease of configuration.
 | `ADMIN_PASSWORD` | Server Admin account password                | [a-zA-Z0-9]+      | changeme      |
 | `ADMIN_USERNAME` | Server Admin account username                | [a-zA-Z0-9]+      | superuser     |
 | `BIND_IP`        | IP to bind the server to                     | 0.0.0.0           | 0.0.0.0       |
+| `DEBUG`          | Enable debug logging                         | (true&vert;false) | `false`       |
 | `GAME_VERSION`   | Game version to serve                        | [a-zA-Z0-9_]+     | `public`      |
 | `GC_CONFIG`      | Specifices Java GC to use                    | [a-zA-Z0-9_]+     | ZGC           |
 | `MAP_NAMES`      | Map Names (e.g. North;South)                 | map1;map2;map3    | Muldraugh, KY |
