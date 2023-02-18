@@ -1,6 +1,6 @@
 #
 #   Project Zomboid Dedicated Server using SteamCMD Docker Image.
-#   Copyright (C) 2021-2022 Renegade-Master [renegade.master.dev@protonmail.com]
+#   Copyright (C) 2021-2023 Renegade-Master [renegade.master.dev@protonmail.com]
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 name: Build and Test Server Image
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
   pull_request:
@@ -43,14 +44,13 @@ jobs:
       - name: Set Variables
         id: variables
         run: |
-          echo "::set-output name=datetime::$(date +%Y%m%dT%H%M%SZ)"
-          echo "::set-output name=userid::$(id -u)"
-          echo "::set-output name=groupid::$(id -g)"
+          echo "datetime=$(date +%Y%m%dT%H%M%SZ)" >> $GITHUB_OUTPUT
+          echo "userid=$(id -u)" >> $GITHUB_OUTPUT
+          echo "groupid=$(id -g)" >> $GITHUB_OUTPUT
 
       - name: Set Permissions on Executable Scripts
         run: |
-          chmod +x src/install_server.scmd
-          chmod +x src/run_server.sh
+          chmod +x src/install_server.scmd src/run_server.sh
 
       - name: Make Directories
         run: mkdir ZomboidConfig ZomboidDedicatedServer
@@ -79,10 +79,12 @@ jobs:
           # Run the Docker Image
           docker run \
             --rm \
+            --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
             --name zomboid-dedicated-server \
             --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
+            --env=DEBUG="true" \
             --env=DEFAULT_PORT="25496" \
             --env=GC_CONFIG="G1GC" \
             --env=MAP_NAMES="BedfordFalls;North;South;West" \
@@ -107,6 +109,7 @@ jobs:
         if: ${{ success() && matrix.system == 'docker-compose' }}
         run: |
           sed -i "s/AUTOSAVE_INTERVAL=.*\"/AUTOSAVE_INTERVAL=16\"/g" "./docker-compose.yaml"
+          sed -i "s/DEBUG=.*\"/DEBUG=true\"/g" "./docker-compose.yaml"
           sed -i "s/DEFAULT_PORT=.*\"/DEFAULT_PORT=25496\"/g" "./docker-compose.yaml"
           sed -i "s/GC_CONFIG=.*\"/GC_CONFIG=G1GC\"/g" "./docker-compose.yaml"
           sed -i "s/MAP_NAMES=.*\"/MAP_NAMES=BedfordFalls;North;South;West\"/g" "./docker-compose.yaml"
@@ -120,6 +123,8 @@ jobs:
           sed -i "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./docker-compose.yaml"
           sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./docker-compose.yaml"
           sed -i "s/UDP_PORT=.*\"/UDP_PORT=25499\"/g" "./docker-compose.yaml"
+
+          echo "    user: ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }}" >> "./docker-compose.yaml"
 
           cat docker-compose.yaml
 
@@ -166,10 +171,12 @@ jobs:
           # Run the Podman Image
           podman run \
             --rm \
+            --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
             --name zomboid-dedicated-server \
             --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
+            --env=DEBUG="true" \
             --env=DEFAULT_PORT="25496" \
             --env=GC_CONFIG="G1GC" \
             --env=MAP_NAMES="BedfordFalls;North;South;West" \
@@ -191,13 +198,21 @@ jobs:
         run: |
           pwd
           echo ''
-          ls -lAuhFn ./ZomboidDedicatedServer/ > ./dedicated-server-install-listing.txt
+          ls -lAuhFn ./ | tee ./root-fs-listing.txt
           echo ''
-          ls -lAuhFn ./ZomboidConfig/ > ./dedicated-server-config-listing.txt
+          tree -aL 10 ./ | tee ./root-fs-tree.txt
           echo ''
-          tree -aL 10 ./ZomboidDedicatedServer/ > ./dedicated-server-install-tree.txt
+          ls -lAuhFn ./src/ | tee ./src-listing.txt
           echo ''
-          tree -aL 10 ./ZomboidConfig/ > ./dedicated-server-config-tree.txt
+          tree -aL 10 ./src/ | tee ./src-tree.txt
+          echo ''
+          ls -lAuhFn ./ZomboidDedicatedServer/ | tee ./dedicated-server-install-listing.txt
+          echo ''
+          ls -lAuhFn ./ZomboidConfig/ | tee ./dedicated-server-config-listing.txt
+          echo ''
+          tree -aL 10 ./ZomboidDedicatedServer/ | tee ./dedicated-server-install-tree.txt
+          echo ''
+          tree -aL 10 ./ZomboidConfig/ | tee ./dedicated-server-config-tree.txt
 
       - name: Upload Docker Logs
         if: ${{ always() }}
@@ -219,8 +234,12 @@ jobs:
             ZomboidDedicatedServer/ProjectZomboid64.json
             dedicated-server-install-listing.txt
             dedicated-server-config-listing.txt
+            root-fs-listing.txt
+            src-listing.txt
             dedicated-server-install-tree.txt
             dedicated-server-config-tree.txt
+            root-fs-config-tree.txt
+            src-config-tree.txt
 
   test-docker:
     name: Test Server

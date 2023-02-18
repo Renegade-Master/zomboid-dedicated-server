@@ -51,10 +51,10 @@ jobs:
       - name: Set Variables
         id: variables
         run: |
-          echo "::set-output name=dkimagepath::renegademaster/zomboid-dedicated-server"
-          echo "::set-output name=ghimagepath::renegade-master/zomboid-dedicated-server"
-          echo "::set-output name=qyimagepath::renegade_master/zomboid-dedicated-server"
-          echo "::set-output name=datetime::$(date +%Y%m%dT%H%M%SZ)"
+          echo "datetime=$(date +%Y%m%dT%H%M%SZ)" >> $GITHUB_OUTPUT
+          echo "dkimagepath=renegademaster/zomboid-dedicated-server" >> $GITHUB_OUTPUT
+          echo "ghimagepath=renegade-master/zomboid-dedicated-server" >> $GITHUB_OUTPUT
+          echo "qyimagepath=renegade_master/zomboid-dedicated-server" >> $GITHUB_OUTPUT
 
       - name: Login to Image Repositories
         run: |
