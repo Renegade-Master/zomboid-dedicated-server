@@ -257,39 +257,40 @@ set_variables() {
 
 # fail_with_reason prints an error to STDERR and exits the script.
 fail_with_reason() {
-  c_red="\x1b[0;31m"
-  c_yel="\x1b[4;33m"
   c_clr="\x1b[0m"
+  c_it_gre="\x1b[3;32m"
+  c_red="\x1b[0;31m"
+  c_ul_yel="\x1b[4;33m"
 
-  printf "\n${c_yel}Error encountered:${c_red} [%s]${c_clr}\n" "$1" 1>&2
+  printf "\n${c_ul_yel}Error encountered:${c_red} [%s]${c_clr}\n" "$1" 1>&2
 
   # If Debug is not empty and not set to FALSE
   if [[ -n "${DEBUG}" ]] && [[ "${DEBUG}" != "FALSE" ]] && [[ "${DEBUG}" != "false" ]]; then
     # shellcheck disable=SC2059
-    printf "\nStart DEBUG info\n\n" 1>&2
+    printf "\n${c_it_gre}Start DEBUG info\n\n${c_clr}" 1>&2
 
-    printf "${c_yel}User:${c_clr} [%s]\n" "$(whoami)" 1>&2
-    printf "${c_yel}Groups:${c_clr} [%s]\n" "$(groups)" 1>&2
-    printf "${c_yel}User ID:${c_clr} [%s]\n" "$(id -u)" 1>&2
-    printf "${c_yel}Group ID:${c_clr} [%s]\n\n" "$(id -g)" 1>&2
+    printf "${c_ul_yel}User:${c_clr} [%s]\n" "$(whoami)" 1>&2
+    printf "${c_ul_yel}Groups:${c_clr} [%s]\n" "$(groups)" 1>&2
+    printf "${c_ul_yel}User ID:${c_clr} [%s]\n" "$(id -u)" 1>&2
+    printf "${c_ul_yel}Group ID:${c_clr} [%s]\n\n" "$(id -g)" 1>&2
 
-    printf "${c_yel}Can SUDO?:${c_clr} [%s]\n\n" "$(if [[ $(sudo -v 2>/dev/null) ]]; then echo "YES"; else echo "NO"; fi)" 1>&2
+    printf "${c_ul_yel}Can SUDO?:${c_clr} [%s]\n\n" "$(if [[ $(sudo -v 2>/dev/null) ]]; then echo "YES"; else echo "NO"; fi)" 1>&2
 
-    printf "${c_yel}CPU Info:${c_clr} \n[\n%s\n]\n\n" "$(lscpu | grep -iE "Architecture")" 1>&2
-    printf "${c_yel}Environment variables:${c_clr} \n[\n%s\n]\n\n" "$(env | sort)" 1>&2
+    printf "${c_ul_yel}CPU Info:${c_clr} \n[\n%s\n]\n\n" "$(lscpu | grep -iE "Architecture")" 1>&2
+    printf "${c_ul_yel}Environment variables:${c_clr} \n[\n%s\n]\n\n" "$(env | sort)" 1>&2
 
-    printf "${c_yel}Directory listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF /home/steam/)" 1>&2
-    printf "${c_yel}Directory listing with IDs:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhFn /home/steam/)" 1>&2
+    printf "${c_ul_yel}Directory listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF /home/steam/)" 1>&2
+    printf "${c_ul_yel}Directory listing with IDs:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhFn /home/steam/)" 1>&2
 
-    printf "${c_yel}ZomboidConfig listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF ${CONFIG_DIR})" 1>&2
-    printf "${c_yel}ZomboidDedicatedServer listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF ${BASE_GAME_DIR})" 1>&2
+    printf "${c_ul_yel}ZomboidConfig listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF ${CONFIG_DIR})" 1>&2
+    printf "${c_ul_yel}ZomboidDedicatedServer listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF ${BASE_GAME_DIR})" 1>&2
 
     # shellcheck disable=SC2059
-    printf "End DEBUG info\n\n" 1>&2
+    printf "${c_it_gre}End DEBUG info\n\n${c_clr}" 1>&2
   fi
 
   # shellcheck disable=SC2059
-  printf "${c_yel}Exiting program...${c_clr}\n" 1>&2
+  printf "${c_ul_yel}Exiting program...${c_clr}\n" 1>&2
 
   exit 1
 }

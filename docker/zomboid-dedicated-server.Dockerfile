@@ -22,15 +22,15 @@
 #######################################################################
 
 # Base Image
-ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:2.0.0"
+ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:2.0.0-root"
 ARG UID=1000
 ARG GID=${UID}
-ARG USER=steam
+ARG RUN_USER=steam
 
 FROM ${BASE_IMAGE}
 ARG UID
 ARG GID
-ARG USER
+ARG RUN_USER
 
 # Add metadata labels
 LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
@@ -46,10 +46,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-USER ${USER}
+# Setup runtime user
+RUN groupadd "${RUN_USER}" \
+        --gid "${GID}" \
+    && useradd "${RUN_USER}" --create-home \
+        --uid "${UID}" \
+        --gid "${GID}" \
+        --home-dir /home/${RUN_USER} \
+    && chown -R ${UID}:${GID} /home/${RUN_USER}/
+
+# Login as the runtime user
+USER ${RUN_USER}
 
 # Copy the source files
-COPY --chown=${USER} src /home/steam/
+COPY --chown=${RUN_USER} src /home/steam/
 
 # Run the setup script
 ENTRYPOINT ["/bin/bash", "/home/steam/run_server.sh"]
