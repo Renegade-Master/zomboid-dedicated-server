@@ -43,9 +43,9 @@ jobs:
       - name: Set Variables
         id: variables
         run: |
-          echo "::set-output name=datetime::$(date +%Y%m%dT%H%M%SZ)"
-          echo "::set-output name=userid::$(id -u)"
-          echo "::set-output name=groupid::$(id -g)"
+          echo "datetime=$(date +%Y%m%dT%H%M%SZ)" >> $GITHUB_OUTPUT
+          echo "userid=$(id -u)" >> $GITHUB_OUTPUT
+          echo "groupid=$(id -g)" >> $GITHUB_OUTPUT
 
       - name: Set Permissions on Executable Scripts
         run: |
@@ -79,7 +79,7 @@ jobs:
           # Run the Docker Image
           docker run \
             --rm \
-            --user "0:0" \
+            --user 0:0 \
             --name zomboid-dedicated-server \
             --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
@@ -123,7 +123,7 @@ jobs:
           sed -i "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./docker-compose.yaml"
           sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./docker-compose.yaml"
           sed -i "s/UDP_PORT=.*\"/UDP_PORT=25499\"/g" "./docker-compose.yaml"
-          
+
           echo "    user: 0:0" >> "./docker-compose.yaml"
 
           cat docker-compose.yaml
@@ -171,7 +171,7 @@ jobs:
           # Run the Podman Image
           podman run \
             --rm \
-            --user "0:0" \
+            --user 0:0 \
             --name zomboid-dedicated-server \
             --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
