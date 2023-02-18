@@ -263,6 +263,13 @@ fail_with_reason() {
     # shellcheck disable=SC2059
     printf "\nStart DEBUG info\n\n" 1>&2
 
+    printf "${c_yel}User:${c_clr} [%s]\n" "$(whoami)" 1>&2
+    printf "${c_yel}Groups:${c_clr} [%s]\n" "$(groups)" 1>&2
+    printf "${c_yel}User ID:${c_clr} [%s]\n" "$(id -u)" 1>&2
+    printf "${c_yel}Group ID:${c_clr} [%s]\n\n" "$(id -g)" 1>&2
+
+    printf "${c_yel}Can SUDO?:${c_clr} [%s]\n\n" "$(if [[ $(sudo -v 2>/dev/null) ]]; then echo "YES"; else echo "NO"; fi)" 1>&2
+
     printf "${c_yel}OS:${c_clr} \n[\n%s\n]\n\n" "$(grep -iE "Pretty_Name" < /etc/os-release)" 1>&2
     printf "${c_yel}CPU Info:${c_clr} \n[\n%s\n]\n\n" "$(lscpu | grep -iE "Architecture")" 1>&2
     printf "${c_yel}Environment variables:${c_clr} \n[\n%s\n]\n\n" "$(env | sort)" 1>&2
