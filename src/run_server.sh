@@ -153,8 +153,8 @@ function set_variables() {
     printf "\n### Setting variables...\n"
 
     TIMEOUT="60"
-    EDIT_CONFIG="/home/steam/edit_server_config.py"
-    STEAM_INSTALL_FILE="/home/steam/install_server.scmd"
+    EDIT_CONFIG="/usr/bin/edit_server_config.py"
+    STEAM_INSTALL_FILE="/usr/bin/install_server.scmd"
     BASE_GAME_DIR="/home/steam/ZomboidDedicatedServer"
     CONFIG_DIR="/home/steam/Zomboid"
 
