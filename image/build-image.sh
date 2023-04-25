@@ -1,48 +1,82 @@
 #!/usr/bin/env bash
 set +x -euo pipefail
 
+FEDORA_IMAGE="docker.io/fedora:39"
 RCON_IMAGE="docker.io/outdead/rcon:0.10.2"
 
-dwnldr=$(buildah from scratch)
-wkcntr=$(buildah from scratch)
-rccntr=$(buildah from ${RCON_IMAGE})
+# Create the containers for building the image
+downloadCtr=$(buildah from scratch)
+fedoraCtr=$(buildah from ${FEDORA_IMAGE})
+workingCtr=$(buildah from scratch)
+rconCtr=$(buildah from ${RCON_IMAGE})
 
-wkdir=$(pwd)
-dwnmnt=$(buildah mount "${dwnldr}")
-wrkmnt=$(buildah mount "${wkcntr}")
-rcnmnt=$(buildah mount "${rccntr}")
+# Create some directories for storing the working directories
+workDir=$(pwd)
+downloadMnt=$(buildah mount "${downloadCtr}")
+workingMnt=$(buildah mount "${workingCtr}")
+rconMnt=$(buildah mount "${rconCtr}")
 
-cd "${dwnmnt}"
-mkdir -p "${wrkmnt}/home/steam/.local/steamcmd/"
+mkdir -p "${workingMnt}/etc/"
+touch "${workingMnt}/etc/passwd"
+
+# Create the Steam user
+buildah run \
+  --mount type=bind,source="${workingMnt}/etc/passwd",target=/etc/passwd:z \
+  "${fedoraCtr}" \
+  -- \
+  useradd \
+      --base-dir "${workingMnt}/home" \
+      --comment "Steam user" \
+      --home-dir "${workingMnt}/home/steam" \
+      --create-home \
+      --no-user-group \
+      steam
+
+# CD into the Download directory, and download Steam
+cd "${downloadMnt}"
+mkdir -p "${workingMnt}/home/steam/.local/steamcmd/"
 wget "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz"
-tar --directory="${wrkmnt}/home/steam/.local/steamcmd/" -zxf steamcmd_linux.tar.gz
+tar --directory="${workingMnt}/home/steam/.local/steamcmd/" -zxf steamcmd_linux.tar.gz
 rm steamcmd_linux.tar.gz
 
-cd "${wkdir}"
+cd "${workDir}"
 
-dnf install \
+# Install the dependencies
+buildah run \
+  --mount type=bind,source="${workingMnt}",target=/:z \
+  "${fedoraCtr}" \
+  -- \
+  dnf install \
   --assumeyes \
-  --installroot "${wrkmnt}" \
+  --installroot "${workingMnt}" \
   --releasever 36 \
   --setopt install_weak_deps=false \
   bash python3 hostname tzdata
 
-dnf --installroot "${wrkmnt}" clean all
+buildah run \
+  --mount type=bind,source="${workingMnt}",target=/:z \
+  "${fedoraCtr}" \
+  -- \
+  dnf --installroot "${workingMnt}" clean all
 
-cp "${wkdir}/src/edit_server_config.py" "${wrkmnt}/usr/bin"
-cp "${wkdir}/src/install_server.scmd" "${wrkmnt}/usr/bin"
-cp "${wkdir}/src/run_server.sh" "${wrkmnt}/usr/bin"
-cp "${rcnmnt}/rcon" "${wrkmnt}/usr/bin/rcon"
+# Copy files from the repo into the image
+cp "${workDir}/src/edit_server_config.py" "${workingMnt}/usr/bin"
+cp "${workDir}/src/install_server.scmd" "${workingMnt}/usr/bin"
+cp "${workDir}/src/run_server.sh" "${workingMnt}/usr/bin"
+cp "${rconMnt}/rcon" "${workingMnt}/usr/bin/rcon"
 
-buildah umount "${wkcntr}"
-buildah umount "${dwnldr}"
-buildah umount "${rccntr}"
+# Unmount the working directories
+buildah umount "${workingCtr}"
+buildah umount "${downloadCtr}"
+buildah umount "${rconCtr}"
 
-buildah config --env "PATH=/home/steam/.local/steamcmd/:\$PATH" "${wkcntr}"
-buildah config --cmd "/usr/bin/run_server.sh" "${wkcntr}"
+# Set configurations for the image
+buildah config --env "PATH=/home/steam/.local/bin:/home/steam/.local/steamcmd:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" "${workingCtr}"
+buildah config --cmd "/usr/bin/run_server.sh" "${workingCtr}"
 
-#BUILDAH_ISOLATION="chroot ${wkcntr}"
-buildah commit "${wkcntr}" localhost/buildah-scratch-test:latest
+#BUILDAH_ISOLATION="chroot ${workingCtr}"
+buildah commit "${workingCtr}" localhost/buildah-scratch-test:latest
 
-buildah rm "${wkcntr}"
-buildah rm "${dwnldr}"
+# Remove working containers
+buildah rm "${workingCtr}"
+buildah rm "${downloadCtr}"
