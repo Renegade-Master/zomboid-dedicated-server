@@ -2,7 +2,7 @@
 
 #
 #  Project Zomboid Dedicated Server using SteamCMD Docker Image.
-#  Copyright (C) 2021-2022 Renegade-Master [renegade.master.dev@protonmail.com]
+#  Copyright (C) 2021-2023 Renegade-Master [renegade.master.dev@protonmail.com]
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #######################################################################
 
 # Set to `-x` for Debug logging
-set +x -o pipefail
+set +x -eo pipefail
 
 # Handle shutting down the server, with optional RCON quit for graceful shutdown
 function shutdown() {
@@ -66,7 +66,8 @@ function apply_postinstall_config() {
     printf "\n### Applying Post Install Configuration...\n"
 
     # Set the Autosave Interval
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "SaveWorldEveryMinutes" "$AUTOSAVE_INTERVAL"
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "SaveWorldEveryMinutes" "$AUTOSAVE_INTERVAL" \
+      || fail_with_reason "Could not apply post-install configuration to file [${SERVER_CONFIG}]"
 
     # Set the default Server Port
     "$EDIT_CONFIG" "$SERVER_CONFIG" "DefaultPort" "$DEFAULT_PORT"
@@ -105,7 +106,8 @@ function apply_postinstall_config() {
     "$EDIT_CONFIG" "$SERVER_CONFIG" "Password" "$SERVER_PASSWORD"
 
     # Set the maximum amount of RAM for the JVM
-    sed -i "s/-Xmx.*/-Xmx${MAX_RAM}\",/g" "${SERVER_VM_CONFIG}"
+    sed -i "s/-Xmx.*/-Xmx${MAX_RAM}\",/g" "${SERVER_VM_CONFIG}" \
+      || fail_with_reason "Could not apply post-install configuration to file [${SERVER_VM_CONFIG}]"
 
     # Set the GC for the JVM (advanced, some crashes can be fixed with a different GC algorithm)
     sed -i "s/-XX:+Use.*/-XX:+Use${GC_CONFIG}\",/g" "${SERVER_VM_CONFIG}"
@@ -135,6 +137,10 @@ function update_server() {
 
     steamcmd.sh +runscript "$STEAM_INSTALL_FILE"
 
+    if [[ ! -f "$BASE_GAME_DIR"/start-server.sh ]]; then
+      fail_with_reason "Could not install/update game server using install file [${STEAM_INSTALL_FILE}]"
+    fi
+
     printf "\n### Project Zomboid Server updated.\n"
 }
 
@@ -142,8 +148,15 @@ function update_server() {
 function apply_preinstall_config() {
     printf "\n### Applying Pre Install Configuration...\n"
 
+    mkdir -p "${BASE_GAME_DIR}" "${CONFIG_DIR}" \
+      || fail_with_reason "Could not create required game directories: [${BASE_GAME_DIR}] and [${CONFIG_DIR}]"
+
+    chown -R "$(id -u):$(id -g)" "${BASE_GAME_DIR}" "${CONFIG_DIR}" \
+      || fail_with_reason "Could not modify permissions on the required game directories: [${BASE_GAME_DIR}] and [${CONFIG_DIR}]"
+
     # Set the selected game version
-    sed -i "s/beta .* /beta $GAME_VERSION /g" "$STEAM_INSTALL_FILE"
+    sed -i "s/beta .* /beta $GAME_VERSION /g" "$STEAM_INSTALL_FILE" \
+      || fail_with_reason "Could not apply game version [${GAME_VERSION}] to install file [${STEAM_INSTALL_FILE}]"
 
     printf "\n### Pre Install Configuration applied.\n"
 }
@@ -167,6 +180,9 @@ function set_variables() {
     # Set the Autosave Interval variable
     AUTOSAVE_INTERVAL=${AUTOSAVE_INTERVAL:-"15"}
 
+    ls -lAufn ${BASE_GAME_DIR}
+    ls -lAufn ${CONFIG_DIR}
+
     # Set the IP address variable
     # NOTE: Project Zomboid cannot handle the IN_ANY address
     if [[ -z "$BIND_IP" ]] || [[ "$BIND_IP" == "0.0.0.0" ]]; then
@@ -175,7 +191,8 @@ function set_variables() {
     else
         BIND_IP="$BIND_IP"
     fi
-    echo "$BIND_IP" > "$CONFIG_DIR/ip.txt"
+    echo "$BIND_IP" > "$CONFIG_DIR/ip.txt" \
+      || fail_with_reason "Could write Bind IP [${BIND_IP}] to file [${CONFIG_DIR}/ip.txt]"
 
     # Set the IP Game Port variable
     DEFAULT_PORT=${DEFAULT_PORT:-"16261"}
@@ -239,6 +256,46 @@ function set_variables() {
     SERVER_CONFIG="$CONFIG_DIR/Server/$SERVER_NAME.ini"
     SERVER_VM_CONFIG="$BASE_GAME_DIR/ProjectZomboid64.json"
     SERVER_RULES_CONFIG="$CONFIG_DIR/Server/${SERVER_NAME}_SandboxVars.lua"
+}
+
+# fail_with_reason prints an error to STDERR and exits the script.
+fail_with_reason() {
+  c_clr="\x1b[0m"
+  c_it_gre="\x1b[3;32m"
+  c_red="\x1b[0;31m"
+  c_ul_yel="\x1b[4;33m"
+
+  printf "\n${c_ul_yel}Error encountered:${c_red} [%s]${c_clr}\n" "$1" 1>&2
+
+  # If Debug is not empty and not set to FALSE
+  if [[ -n "${DEBUG}" ]] && [[ "${DEBUG}" != "FALSE" ]] && [[ "${DEBUG}" != "false" ]]; then
+    # shellcheck disable=SC2059
+    printf "\n${c_it_gre}Start DEBUG info\n\n${c_clr}" 1>&2
+
+    printf "${c_ul_yel}User:${c_clr} [%s]\n" "$(whoami)" 1>&2
+    printf "${c_ul_yel}Groups:${c_clr} [%s]\n" "$(groups)" 1>&2
+    printf "${c_ul_yel}User ID:${c_clr} [%s]\n" "$(id -u)" 1>&2
+    printf "${c_ul_yel}Group ID:${c_clr} [%s]\n\n" "$(id -g)" 1>&2
+
+    printf "${c_ul_yel}Can SUDO?:${c_clr} [%s]\n\n" "$(if [[ $(sudo -v 2>/dev/null) ]]; then echo "YES"; else echo "NO"; fi)" 1>&2
+
+    printf "${c_ul_yel}CPU Info:${c_clr} \n[\n%s\n]\n\n" "$(lscpu | grep -iE "Architecture")" 1>&2
+    printf "${c_ul_yel}Environment variables:${c_clr} \n[\n%s\n]\n\n" "$(env | sort)" 1>&2
+
+    printf "${c_ul_yel}Directory listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF /home/steam/)" 1>&2
+    printf "${c_ul_yel}Directory listing with IDs:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhFn /home/steam/)" 1>&2
+
+    printf "${c_ul_yel}ZomboidConfig listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF ${CONFIG_DIR})" 1>&2
+    printf "${c_ul_yel}ZomboidDedicatedServer listing:${c_clr} \n[\n%s\n]\n\n" "$(ls -lAuhF ${BASE_GAME_DIR})" 1>&2
+
+    # shellcheck disable=SC2059
+    printf "${c_it_gre}End DEBUG info\n\n${c_clr}" 1>&2
+  fi
+
+  # shellcheck disable=SC2059
+  printf "${c_ul_yel}Exiting program...${c_clr}\n" 1>&2
+
+  exit 1
 }
 
 ## Main
