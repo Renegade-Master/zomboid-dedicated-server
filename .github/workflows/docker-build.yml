@@ -97,6 +97,7 @@ jobs:
             --env=SERVER_NAME="GitHubActionTest" \
             --env=SERVER_PASSWORD="github_action_test_password" \
             --env=UDP_PORT="25499" \
+            --env=CPU_MHZ="1000" \
             docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
             2>&1 | tee ./docker-log.log
 
@@ -184,6 +185,7 @@ jobs:
             --env=SERVER_NAME="GitHubActionTest" \
             --env=SERVER_PASSWORD="github_action_test_password" \
             --env=UDP_PORT="25499" \
+            --env=CPU_MHZ="1000" \
             docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
             2>&1 | tee ./docker-log.log
 

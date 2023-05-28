@@ -22,9 +22,17 @@
 #######################################################################
 
 # Base Image
-ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:1.1.2"
+ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:2.0.0-root"
+ARG UID=1000
+ARG GID=${UID}
+ARG RUN_USER=steam
 
 FROM ${BASE_IMAGE}
+ARG UID
+ARG GID
+ARG RUN_USER
+
+USER 0:0
 
 # Add metadata labels
 LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
@@ -32,14 +40,32 @@ LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
     com.renegademaster.zomboid-dedicated-server.source-repository="https://github.com/Renegade-Master/zomboid-dedicated-server" \
     com.renegademaster.zomboid-dedicated-server.image-repository="https://hub.docker.com/renegademaster/zomboid-dedicated-server"
 
-# Copy the source files
-COPY src /home/steam/
-
 # Install Python, and take ownership of rcon binary
 RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-minimal iputils-ping tzdata \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
+
+
+# Setup runtime user
+RUN groupadd "${RUN_USER}" \
+        --gid "${GID}" \
+    && useradd "${RUN_USER}" --create-home \
+        --uid "${UID}" \
+        --gid "${GID}" \
+        --home-dir /home/${RUN_USER} \
+    && chown -R ${UID}:${GID} /home/${RUN_USER}/
+
+# Login as the runtime user
+USER ${RUN_USER}
+
+# Copy the source files
+COPY --chown=${RUN_USER} src /home/steam/
+COPY --chown=${RUN_USER} --from="docker.io/renegademaster/steamcmd-minimal:2.0.0-root" /home/root/.local/steamcmd /home/steam/.local/steamcmd
+
+# ENV
+ENV STEAMDIR=/home/steam/.local/steamcmd
+ENV PATH=/home/steam/.local/steamcmd:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Run the setup script
 ENTRYPOINT ["/bin/bash", "/home/steam/run_server.sh"]
