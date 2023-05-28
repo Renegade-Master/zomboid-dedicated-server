@@ -49,6 +49,7 @@ services:
       - "UDP_PORT=16262"
       - "USE_STEAM=true"
       - "TZ=UTC"
+      - "CPU_MHZ=1000"
     ports:
       - target: 16261
         published: 16261
