@@ -42,7 +42,7 @@ function shutdown() {
 # Start the Server
 function start_server() {
     printf "\n### Starting Project Zomboid Server...\n"
-    timeout "$TIMEOUT" "$BASE_GAME_DIR"/start-server.sh \
+    timeout "$TIMEOUT" sudo -u steam "$BASE_GAME_DIR"/start-server.sh \
         -cachedir="$CONFIG_DIR" \
         -adminusername "$ADMIN_USERNAME" \
         -adminpassword "$ADMIN_PASSWORD" \
@@ -110,6 +110,8 @@ function apply_postinstall_config() {
     # Set the GC for the JVM (advanced, some crashes can be fixed with a different GC algorithm)
     sed -i "s/-XX:+Use.*/-XX:+Use${GC_CONFIG}\",/g" "${SERVER_VM_CONFIG}"
 
+    chown -R steam "${BASE_GAME_DIR}"
+
     printf "\n### Post Install Configuration applied.\n"
 }
 
@@ -134,6 +136,7 @@ function update_server() {
     printf "\n### Updating Project Zomboid Server...\n"
 
     steamcmd.sh +runscript "$STEAM_INSTALL_FILE"
+    chown -R steam "${BASE_GAME_DIR}"
 
     printf "\n### Project Zomboid Server updated.\n"
 }
@@ -144,6 +147,7 @@ function apply_preinstall_config() {
 
     # Set the selected game version
     sed -i "s/beta .* /beta $GAME_VERSION /g" "$STEAM_INSTALL_FILE"
+    chown -R steam "${STEAM_INSTALL_FILE}"
 
     printf "\n### Pre Install Configuration applied.\n"
 }
@@ -239,6 +243,10 @@ function set_variables() {
     SERVER_CONFIG="$CONFIG_DIR/Server/$SERVER_NAME.ini"
     SERVER_VM_CONFIG="$BASE_GAME_DIR/ProjectZomboid64.json"
     SERVER_RULES_CONFIG="$CONFIG_DIR/Server/${SERVER_NAME}_SandboxVars.lua"
+    if [[ ! -d "${CONFIG_DIR}" ]]; then
+        mkdir -p "${CONFIG_DIR}"
+    fi
+    chown -R steam "${CONFIG_DIR}"
 }
 
 ## Main

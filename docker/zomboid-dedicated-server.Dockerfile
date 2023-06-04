@@ -22,7 +22,7 @@
 #######################################################################
 
 # Base Image
-ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:1.1.2"
+ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:2.0.0-root"
 
 FROM ${BASE_IMAGE}
 
@@ -37,9 +37,10 @@ COPY src /home/steam/
 
 # Install Python, and take ownership of rcon binary
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        python3-minimal iputils-ping tzdata \
+        python3-minimal iputils-ping sudo tzdata \
     && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -s /bin/bash -m steam
 
 # Run the setup script
 ENTRYPOINT ["/bin/bash", "/home/steam/run_server.sh"]
