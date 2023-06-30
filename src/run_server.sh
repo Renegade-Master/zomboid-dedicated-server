@@ -62,47 +62,54 @@ function start_server() {
     printf "\n### Project Zomboid Server stopped.\n"
 }
 
+###
+#
+# UPD: fix config override 
+# see: https://unix.stackexchange.com/questions/109625/shell-scripting-z-and-n-options-with-if
+#
+###
+
 function apply_postinstall_config() {
     printf "\n### Applying Post Install Configuration...\n"
 
     # Set the Autosave Interval
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "SaveWorldEveryMinutes" "$AUTOSAVE_INTERVAL"
+    [ -n "$AUTOSAVE_INTERVAL" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "SaveWorldEveryMinutes" "$AUTOSAVE_INTERVAL"
 
     # Set the default Server Port
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "DefaultPort" "$DEFAULT_PORT"
+    [ -n "$DEFAULT_PORT" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "DefaultPort" "$DEFAULT_PORT"
 
     # Set the default extra UDP Port
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "UDPPort" "$UDP_PORT"
+    [ -n "$UDP_PORT" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "UDPPort" "$UDP_PORT"
 
     # Set the Max Players
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "MaxPlayers" "$MAX_PLAYERS"
+    [ -n "$MAX_PLAYERS" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "MaxPlayers" "$MAX_PLAYERS"
 
     # Set the Mod names
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "Mods" "$MOD_NAMES"
+    [ -n "$MOD_NAMES" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "Mods" "$MOD_NAMES"
 
     # Set the Map names
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "Map" "$MAP_NAMES"
+    [ -n "$MAP_NAMES" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "Map" "$MAP_NAMES"
 
     # Set the Mod Workshop IDs
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "WorkshopItems" "$MOD_WORKSHOP_IDS"
+    [ -n "$MOD_WORKSHOP_IDS" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "WorkshopItems" "$MOD_WORKSHOP_IDS"
 
     # Set the Pause on Empty Server
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "PauseEmpty" "$PAUSE_ON_EMPTY"
+    [ -n "$PAUSE_ON_EMPTY" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "PauseEmpty" "$PAUSE_ON_EMPTY"
 
     # Set the Server Publicity status
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "Open" "$PUBLIC_SERVER"
+    [ -n "$PUBLIC_SERVER" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "Open" "$PUBLIC_SERVER"
 
     # Set the Server RCON Password
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "RCONPassword" "$RCON_PASSWORD"
+    [ -n "$RCON_PASSWORD" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "RCONPassword" "$RCON_PASSWORD"
 
     # Set the Server RCON Port
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "RCONPort" "$RCON_PORT"
+    [ -n "$RCON_PORT" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "RCONPort" "$RCON_PORT"
 
     # Set the Server Name
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "PublicName" "$SERVER_NAME"
+    [ -n "$SERVER_NAME" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "PublicName" "$SERVER_NAME"
 
     # Set the Server Password
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "Password" "$SERVER_PASSWORD"
+    [ -n "$SERVER_PASSWORD" ] && "$EDIT_CONFIG" "$SERVER_CONFIG" "Password" "$SERVER_PASSWORD"
 
     # Set the maximum amount of RAM for the JVM
     sed -i "s/-Xmx.*/-Xmx${MAX_RAM}\",/g" "${SERVER_VM_CONFIG}"
