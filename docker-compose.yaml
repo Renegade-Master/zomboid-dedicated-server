@@ -19,43 +19,42 @@
 version: "3.8"
 
 services:
-  zomboid-server:
+  zomboid-dedicated-server:
     build:
       context: .
       dockerfile: docker/zomboid-dedicated-server.Dockerfile
-      args:
-        USER_ID: 1000
-        GROUP_ID: 1000
+    image: "docker.io/renegademaster/zomboid-dedicated-server:latest"
+    container_name: zomboid-dedicated-server
     restart: "no"
-    user: "1000:1000"
     environment:
       - "ADMIN_PASSWORD=changeme"
       - "ADMIN_USERNAME=superuser"
       - "AUTOSAVE_INTERVAL=15"
       - "BIND_IP=0.0.0.0"
-      - "GAME_PORT=8766"
+      - "DEFAULT_PORT=16261"
       - "GAME_VERSION=public"
+      - "GC_CONFIG=ZGC"
+      - "MAP_NAMES=Muldraugh, KY"
       - "MAX_PLAYERS=16"
       - "MAX_RAM=4096m"
       - "MOD_NAMES="
       - "MOD_WORKSHOP_IDS="
-      - "NO_CHOWN_CONFIG_DIR=false"
-      - "NO_CHOWN_GAME_DIR=false"
       - "PAUSE_ON_EMPTY=true"
       - "PUBLIC_SERVER=true"
-      - "QUERY_PORT=16261"
       - "RCON_PASSWORD=changeme_rcon"
       - "RCON_PORT=27015"
       - "SERVER_NAME=ZomboidServer"
       - "SERVER_PASSWORD="
       - "STEAM_VAC=true"
+      - "UDP_PORT=16262"
       - "USE_STEAM=true"
+      - "TZ=UTC"
     ports:
-      - target: 8766
-        published: 8766
-        protocol: udp
       - target: 16261
         published: 16261
+        protocol: udp
+      - target: 16262
+        published: 16262
         protocol: udp
       - target: 27015
         published: 27015
@@ -63,5 +62,3 @@ services:
     volumes:
       - ./ZomboidDedicatedServer:/home/steam/ZomboidDedicatedServer
       - ./ZomboidConfig:/home/steam/Zomboid/
-    cap_drop:
-      - ALL

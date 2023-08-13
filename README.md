@@ -39,11 +39,17 @@ mkdir ZomboidConfig ZomboidDedicatedServer
 docker run --detach \
     --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
     --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
-    --publish 16261:16261/udp --publish 8766:8766/udp \
+    --publish 16261:16261/udp --publish 16262:16262/udp \
     --name zomboid-server \
-    --user=$(id -u):$(id -g) \
-    renegademaster/zomboid-dedicated-server:latest
+    docker.io/renegademaster/zomboid-dedicated-server:latest
 ```
+
+The default behaviour of the Container is not to automatically restart after a crash to give the user time to investigate the cause of the issue. You may however want to change the [restart policy](https://docs.docker.com/engine/reference/run/#restart-policies---restart) to automatically recover from an unexpected failure. The following options will help to recover from such a situation:
+
+- `--restart=unless-stopped` will restart the container every time that it exits unless the Container is stopped using the Docker/Podman API.
+- `--restart=on-failure[:max-retries]` will restart the container only if it exits with a non-zero exit code. Optionally, it can also be configured to only restart a fixed number of times to help prevent crash-loops.
+
+These same options can be set in the `docker-compose.yaml` file.
 
 ### Assurance / Testing
 
@@ -62,11 +68,11 @@ runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/
 
 ### Images:
 
-| Provider                                                                                                               | Image                                      | Pull Command                                                                                                                                   |
-|------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| [GitHub Packages](https://github.com/Renegade-Master/zomboid-dedicated-server/pkgs/container/zomboid-dedicated-server) | `renegade-master/zomboid-dedicated-server` | `docker pull ghcr.io/renegade-master/zomboid-dedicated-server:x.y.z`<br/>`docker pull ghcr.io/renegade-master/zomboid-dedicated-server:latest` |
-| [DockerHub](https://hub.docker.com/r/renegademaster/zomboid-dedicated-server)                                          | `renegademaster/zomboid-dedicated-server`  | `docker pull renegademaster/zomboid-dedicated-server:x.y.z`<br/>`docker pull renegademaster/zomboid-dedicated-server:latest`                   |
-| [Red Hat Quay](https://quay.io/repository/renegade_master/zomboid-dedicated-server)                                    | `renegade_master/zomboid-dedicated-server` | `docker pull quay.io/renegade_master/zomboid-dedicated-server:x.y.z`<br/>`docker pull quay.io/renegade_master/zomboid-dedicated-server:latest` |
+| Provider                                                                                                               | Image                                               | Pull Command                                                                                                                                     |
+| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [GitHub Packages](https://github.com/Renegade-Master/zomboid-dedicated-server/pkgs/container/zomboid-dedicated-server) | `ghcr.io/renegade-master/zomboid-dedicated-server`  | `docker pull ghcr.io/renegade-master/zomboid-dedicated-server:x.y.z`<br/>`docker pull ghcr.io/renegade-master/zomboid-dedicated-server:latest`   |
+| [DockerHub](https://hub.docker.com/r/renegademaster/zomboid-dedicated-server)                                          | `docker.io/renegademaster/zomboid-dedicated-server` | `docker pull docker.io/renegademaster/zomboid-dedicated-server:x.y.z`<br/>`docker pull docker.io/renegademaster/zomboid-dedicated-server:latest` |
+| [Red Hat Quay](https://quay.io/repository/renegade_master/zomboid-dedicated-server)                                    | `quay.io/renegade_master/zomboid-dedicated-server`  | `docker pull quay.io/renegade_master/zomboid-dedicated-server:x.y.z`<br/>`docker pull quay.io/renegade_master/zomboid-dedicated-server:latest`   |
 
 ### External Resources:
 
@@ -81,7 +87,7 @@ runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/
 Two directories are required to be present on the host:
 
 | Name               | Directory                | Description                                          |
-|--------------------|--------------------------|------------------------------------------------------|
+| ------------------ | ------------------------ | ---------------------------------------------------- |
 | Configuration Data | `ZomboidConfig`          | For storing the server configuration and save files. |
 | Installation Data  | `ZomboidDedicatedServer` | For storing the server game data.                    |
 
@@ -109,11 +115,11 @@ table provided by the Docker image.
 
 There are a total of three ports that can be utilised by the server, but only two are strictly required:
 
-| Name         | Default Port | Description                                                      | Required |
-|--------------|--------------|------------------------------------------------------------------|----------|
-| `QUERY_PORT` | `16261`      | Port used by the server to listen for connections.               | `true`   |
-| `GAME_PORT`  | `8766`       | Port used by the server to communicate with connected clients.   | `true`   |
-| `RCON_PORT`  | `27015`      | Port used by the server to listen for RCON connections/commands. | `false`  |
+| Name           | Default Port | Description                                                          | Required |
+|----------------|--------------|----------------------------------------------------------------------| -------- |
+| `DEFAULT_PORT` | `16261`      | Port used by the server to listen for connections.                   | yes      |
+| `RCON_PORT`    | `27015`      | Port used by the server to listen for RCON connections/commands.     | no       |
+| `UDP_PORT`     | `16262`      | Additional Port used by the server to facilitate Client connections. | yes      |
 
 All Ports are configurable to use different Port numbers, however you must be aware that by changing a Port in the game
 configuration files, that you must also expose the changed (or default) Port in the Docker run command `--publish ...`
@@ -138,55 +144,70 @@ command, nor in the Docker-Compose file.
 The server can be run using plain Docker, or using Docker-Compose. The end-result is the same, but Docker-Compose is
 recommended for ease of configuration.
 
-*Optional arguments table*:
+### Optional environment variables
 
-| Argument              | Description                                                              | Values            | Default       |
-|-----------------------|--------------------------------------------------------------------------|-------------------|---------------|
-| `ADMIN_PASSWORD`      | Server Admin account password                                            | [a-zA-Z0-9]+      | changeme      |
-| `ADMIN_USERNAME`      | Server Admin account username                                            | [a-zA-Z0-9]+      | superuser     |
-| `AUTOSAVE_INTERVAL`   | Interval between autosaves in minutes                                    | [0-9]+            | 15m           |
-| `BIND_IP`             | IP to bind the server to                                                 | 0.0.0.0           | 0.0.0.0       |
-| `GAME_PORT`           | Port for sending game data to clients                                    | 1000 - 65535      | 8766          |
-| `GAME_VERSION`        | Game version to serve                                                    | [a-zA-Z0-9_]+     | `public`      |
-| `MAX_PLAYERS`         | Maximum players allowed in the Server                                    | [0-9]+            | 16            |
-| `MAX_RAM`             | Maximum amount of RAM to be used                                         | ([0-9]+)m         | 4096m         |
-| `MOD_NAMES`           | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits)   | mod1;mod2;mod     |               |
-| `MOD_WORKSHOP_IDS`    | Workshop Mod IDs (e.g. 2160432461;2685168362)                            | xxxxxx;xxxxx;     |               |
-| `NO_CHOWN_CONFIG_DIR` | Disables automatic filesystem permissions management on config directory | (true&vert;false) | false         |
-| `NO_CHOWN_GAME_DIR`   | Disables automatic filesystem permissions management on game directory   | (true&vert;false) | false         |
-| `PAUSE_ON_EMPTY`      | Pause the Server when no Players are connected                           | (true&vert;false) | true          |
-| `PUBLIC_SERVER`       | Is the server displayed Publicly                                         | (true&vert;false) | true          |
-| `QUERY_PORT`          | Port for other players to connect to                                     | 1000 - 65535      | 16261         |
-| `RCON_PASSWORD`       | Password for authenticating incoming RCON commands                       | [a-zA-Z0-9]+      | changeme_rcon |
-| `RCON_PORT`           | Port to listen on for RCON commands                                      | (true&vert;false) | 27015         |
-| `SERVER_NAME`         | Publicly visible Server Name                                             | [a-zA-Z0-9]+      | ZomboidServer |
-| `SERVER_PASSWORD`     | Server password                                                          | [a-zA-Z0-9]+      |               |
-| `STEAM_VAC`           | Use Steam VAC anti-cheat                                                 | (true&vert;false) | true          |
-| `USE_STEAM`           | Create a Steam Server, or a Non-Steam Server                             | (true&vert;false) | true          |
+| Argument         | Description                                  | Values            | Default       |
+| ---------------- | -------------------------------------------- | ----------------- | ------------- |
+| `ADMIN_PASSWORD` | Server Admin account password                | [a-zA-Z0-9]+      | changeme      |
+| `ADMIN_USERNAME` | Server Admin account username                | [a-zA-Z0-9]+      | superuser     |
+| `BIND_IP`        | IP to bind the server to                     | 0.0.0.0           | 0.0.0.0       |
+| `GAME_VERSION`   | Game version to serve                        | [a-zA-Z0-9_]+     | `public`      |
+| `GC_CONFIG`      | Specifices Java GC to use                    | [a-zA-Z0-9_]+     | ZGC           |
+| `MAP_NAMES`      | Map Names (e.g. North;South)                 | map1;map2;map3    | Muldraugh, KY |
+| `MAX_RAM`        | Maximum amount of RAM to be used             | ([0-9]+)m         | 4096m         |
+| `STEAM_VAC`      | Use Steam VAC anti-cheat                     | (true&vert;false) | true          |
+| `TZ`             | Set the timezone for the container           | [A-Z]+            | UTC           |
+| `USE_STEAM`      | Create a Steam Server, or a Non-Steam Server | (true&vert;false) | true          |
+
+### Config file environment variables
+
+The following environment variables will automatically overwrite values in the server's config.ini file (located
+at `/home/steam/Zomboid/Server/[name].ini`).
+Editing these values directly in the .ini file will result in them being overwritten with either the default value, or
+the configured environment variable.
+
+Any other values *can* and *should* be edited directly in the .ini file.
+
+| Argument            | Description                                                                                                                             | .ini variable         | Values                 | Default       |
+|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------| --------------------- | ---------------------- | ------------- |
+| `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes                                                                                                   | SaveWorldEveryMinutes | [0-9]+                 | 15m           |
+| `DEFAULT_PORT`      | Port for other players to connect to                                                                                                    | DefaultPort           | 1000 - 65535           | 16261         |
+| `MAX_PLAYERS`       | Maximum players allowed in the Server                                                                                                   | MaxPlayers            | [0-9]+                 | 16            |
+| `MOD_NAMES`         | Workshop Mod Names (e.g. ClaimNonResidential;MoreDescriptionForTraits)                                                                  | Mods                  | mod1;mod2;mod          |               |
+| `MOD_WORKSHOP_IDS`  | Workshop Mod IDs (e.g. 2160432461;2685168362)                                                                                           | WorkshopItems         | 2160432461;2685168362; |               |
+| `PAUSE_ON_EMPTY`    | Pause the Server when no Players are connected                                                                                          | PauseEmpty            | (true&vert;false)      | true          |
+| `PUBLIC_SERVER`     | If set to `false` only Pre-Approved/Allowed players can join the server (**NOTE:** Do not confuse with the `Public` option in the .ini) | Open                  | (true&vert;false)      | true          |
+| `RCON_PASSWORD`     | Password for authenticating incoming RCON commands                                                                                      | RCONPassword          | [a-zA-Z0-9]+           | changeme_rcon |
+| `RCON_PORT`         | Port to listen on for RCON commands                                                                                                     | RCONPort              | (true&vert;false)      | 27015         |
+| `SERVER_NAME`       | Publicly visible Server Name                                                                                                            | PublicName            | [a-zA-Z0-9]+           | ZomboidServer |
+| `SERVER_PASSWORD`   | Server password                                                                                                                         | Password              | [a-zA-Z0-9]+           |               |
+| `UDP_PORT`          | Additional Port for facilitating Client connections                                                                                     | SteamPort1            | 1000 - 65535           | 8766          |
 
 ### Docker
 
 The following are instructions for running the server using the Docker image.
 
 1. Acquire the image locally:
-    * Pull the image from DockerHub:
+
+    - Pull the image from DockerHub:
 
       ```shell
       docker pull renegademaster/zomboid-dedicated-server:<tagname>
       ```
-    * Or alternatively, build the image:
+
+    - Or alternatively, build the image:
 
       ```shell
       git clone https://github.com/Renegade-Master/zomboid-dedicated-server.git \
           && cd zomboid-dedicated-server
 
-      docker build -t renegademaster/zomboid-dedicated-server:<tag> -f docker/zomboid-dedicated-server.Dockerfile .
+      docker build -t docker.io/renegademaster/zomboid-dedicated-server:<tag> -f docker/zomboid-dedicated-server.Dockerfile .
       ```
 
 2. Run the container:
 
-   ***Note**: Arguments inside square brackets are optional. If the default ports are to be overridden, then the
-   `published` ports below must also be changed*
+   **\*Note**: Arguments inside square brackets are optional. If the default ports are to be overridden, then the
+   `published` ports below must also be changed\*
 
    ```shell
    mkdir ZomboidConfig ZomboidDedicatedServer
@@ -194,21 +215,21 @@ The following are instructions for running the server using the Docker image.
    docker run --detach \
        --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
        --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
-       --publish 16261:16261/udp --publish 8766:8766/udp [--publish 27015:27015/tcp] \
+       --publish 16261:16261/udp --publish 16262:16262/udp [--publish 27015:27015/tcp] \
        --name zomboid-server \
-       --user=$(id -u):$(id -g) \
+       [--restart=no] \
        [--env=ADMIN_PASSWORD=<value>] \
        [--env=ADMIN_USERNAME=<value>] \
        [--env=AUTOSAVE_INTERVAL=<value>] \
        [--env=BIND_IP=<value>] \
        [--env=GAME_PORT=<value>] \
        [--env=GAME_VERSION=<value>] \
+       [--env=GC_CONFIG=<value>] \
+       [--env=MAP_NAMES=<value>] \
        [--env=MAX_PLAYERS=<value>] \
        [--env=MAX_RAM=<value>] \
        [--env=MOD_NAMES=<value>] \
        [--env=MOD_WORKSHOP_IDS=<value>] \
-       [--env=NO_CHOWN_CONFIG_DIR=<value>] \
-       [--env=NO_CHOWN_GAME_DIR=<value>] \
        [--env=PAUSE_ON_EMPTY=<value>] \
        [--env=PUBLIC_SERVER=<value>] \
        [--env=QUERY_PORT=<value>] \
@@ -217,8 +238,15 @@ The following are instructions for running the server using the Docker image.
        [--env=SERVER_NAME=<value>] \
        [--env=SERVER_PASSWORD=<value>] \
        [--env=STEAM_VAC=<value>] \
+       [--env=TZ=<value>] \
        [--env=USE_STEAM=<value>] \
-       renegademaster/zomboid-dedicated-server[:<tagname>]
+       docker.io/renegademaster/zomboid-dedicated-server[:<tagname>]
+   ```
+
+3. Optionally, reattach the terminal to the log output (**\*Note**: this is not an Interactive Terminal\*)
+
+   ```shell
+   docker logs --follow zomboid-server
    ```
 
 4. Once you see `LuaNet: Initialization [DONE]` in the console, people can start to join the server.
@@ -237,21 +265,32 @@ The following are instructions for running the server using Docker-Compose.
 2. Make any configuration changes you want to in the `docker-compose.yaml` file. In
    the `services.zomboid-server.environment` section, you can change values for the server configuration.
 
-   ***Note**: If the default ports are to be overridden, then the `published` ports must also be changed*
+   **\*Note**: If the default ports are to be overridden, then the `published` ports must also be changed\*
 
-3. In the `docker-compose.yaml` file, you must change the `service.zomboid-server.user` values to match your local user.
-   To find your local user and group ids, run the following command:
+3. Run the following commands:
+
+    - Make the data and configuration directories:
+
+      ```shell
+      mkdir ZomboidConfig ZomboidDedicatedServer
+      ```
+
+    - Pull the image from DockerHub:
+
+      ```shell
+      docker-compose up --detach
+      ```
+
+    - Or alternatively, build the image:
+
+      ```shell
+      docker-compose up --build --detach
+      ```
+
+4. Optionally, reattach the terminal to the log output (**\*Note**: this is not an Interactive Terminal\*)
 
    ```shell
-   printf "UID: %s\nGID: %s\n" $(id -u) $(id -g)
+   docker-compose logs --follow
    ```
 
-4. Run the following commands:
-
-   ```shell
-   mkdir ZomboidConfig ZomboidDedicatedServer
-
-   docker-compose up --build --detach
-   ```
-
-6. Once you see `LuaNet: Initialization [DONE]` in the console, people can start to join the server.
+5. Once you see `LuaNet: Initialization [DONE]` in the console, people can start to join the server.

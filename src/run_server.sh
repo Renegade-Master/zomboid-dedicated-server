@@ -46,7 +46,7 @@ function start_server() {
         -cachedir="$CONFIG_DIR" \
         -adminusername "$ADMIN_USERNAME" \
         -adminpassword "$ADMIN_PASSWORD" \
-        -ip "$BIND_IP" -port "$QUERY_PORT" \
+        -ip "$BIND_IP" -port "$DEFAULT_PORT" \
         -servername "$SERVER_NAME" \
         -steamvac "$STEAM_VAC" "$USE_STEAM" &
 
@@ -68,14 +68,20 @@ function apply_postinstall_config() {
     # Set the Autosave Interval
     "$EDIT_CONFIG" "$SERVER_CONFIG" "SaveWorldEveryMinutes" "$AUTOSAVE_INTERVAL"
 
-    # Set the Server game Port
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "SteamPort1" "$GAME_PORT"
+    # Set the default Server Port
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "DefaultPort" "$DEFAULT_PORT"
+
+    # Set the default extra UDP Port
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "UDPPort" "$UDP_PORT"
 
     # Set the Max Players
     "$EDIT_CONFIG" "$SERVER_CONFIG" "MaxPlayers" "$MAX_PLAYERS"
 
     # Set the Mod names
     "$EDIT_CONFIG" "$SERVER_CONFIG" "Mods" "$MOD_NAMES"
+
+    # Set the Map names
+    "$EDIT_CONFIG" "$SERVER_CONFIG" "Map" "$MAP_NAMES"
 
     # Set the Mod Workshop IDs
     "$EDIT_CONFIG" "$SERVER_CONFIG" "WorkshopItems" "$MOD_WORKSHOP_IDS"
@@ -85,9 +91,6 @@ function apply_postinstall_config() {
 
     # Set the Server Publicity status
     "$EDIT_CONFIG" "$SERVER_CONFIG" "Open" "$PUBLIC_SERVER"
-
-    # Set the Server query Port
-    "$EDIT_CONFIG" "$SERVER_CONFIG" "DefaultPort" "$QUERY_PORT"
 
     # Set the Server RCON Password
     "$EDIT_CONFIG" "$SERVER_CONFIG" "RCONPassword" "$RCON_PASSWORD"
@@ -102,7 +105,10 @@ function apply_postinstall_config() {
     "$EDIT_CONFIG" "$SERVER_CONFIG" "Password" "$SERVER_PASSWORD"
 
     # Set the maximum amount of RAM for the JVM
-    sed -i "s/-Xmx.*/-Xmx$MAX_RAM\",/g" "$SERVER_VM_CONFIG"
+    sed -i "s/-Xmx.*/-Xmx${MAX_RAM}\",/g" "${SERVER_VM_CONFIG}"
+
+    # Set the GC for the JVM (advanced, some crashes can be fixed with a different GC algorithm)
+    sed -i "s/-XX:+Use.*/-XX:+Use${GC_CONFIG}\",/g" "${SERVER_VM_CONFIG}"
 
     printf "\n### Post Install Configuration applied.\n"
 }
@@ -127,7 +133,7 @@ function test_first_run() {
 function update_server() {
     printf "\n### Updating Project Zomboid Server...\n"
 
-    "$STEAM_PATH" +runscript "$STEAM_INSTALL_FILE"
+    steamcmd.sh +runscript "$STEAM_INSTALL_FILE"
 
     printf "\n### Project Zomboid Server updated.\n"
 }
@@ -140,21 +146,6 @@ function apply_preinstall_config() {
     sed -i "s/beta .* /beta $GAME_VERSION /g" "$STEAM_INSTALL_FILE"
 
     printf "\n### Pre Install Configuration applied.\n"
-}
-
-# Change the folder permissions for install and save directory
-function update_folder_permissions() {
-    printf "\n### Updating Folder Permissions...\n"
-
-    if [[ -z "$NO_CHOWN_GAME_DIR" ]] || [[ "$NO_CHOWN_GAME_DIR" == "false" ]]; then
-        chown -R "$(id -u):$(id -g)" "$BASE_GAME_DIR"
-    fi
-
-    if [[ -z "$NO_CHOWN_CONFIG_DIR" ]] || [[ "$NO_CHOWN_CONFIG_DIR" == "false" ]]; then
-        chown -R "$(id -u):$(id -g)" "$CONFIG_DIR"
-    fi
-
-    printf "\n### Folder Permissions updated.\n"
 }
 
 # Set variables for use in the script
@@ -191,7 +182,10 @@ function set_variables() {
     echo "$BIND_IP" > "$CONFIG_DIR/ip.txt"
 
     # Set the IP Game Port variable
-    GAME_PORT=${GAME_PORT:-"8766"}
+    DEFAULT_PORT=${DEFAULT_PORT:-"16261"}
+
+    # Set the extra UDP Game Port variable
+    UDP_PORT=${UDP_PORT:-"16262"}
 
     # Set the game version variable
     GAME_VERSION=${GAME_VERSION:-"public"}
@@ -202,9 +196,15 @@ function set_variables() {
     # Set the Maximum RAM variable
     MAX_RAM=${MAX_RAM:-"4096m"}
 
+    # Sets GC
+    GC_CONFIG=${GC_CONFIG:-"ZGC"}
+
     # Set the Mods to use from workshop
     MOD_NAMES=${MOD_NAMES:-""}
     MOD_WORKSHOP_IDS=${MOD_WORKSHOP_IDS:-""}
+
+    # Set the Maps to use
+    MAP_NAMES=${MAP_NAMES:-"Muldraugh, KY"}
 
     # Set the Pause on Empty variable
     PAUSE_ON_EMPTY=${PAUSE_ON_EMPTY:-"true"}
@@ -213,7 +213,7 @@ function set_variables() {
     PUBLIC_SERVER=${PUBLIC_SERVER:-"true"}
 
     # Set the IP Query Port variable
-    QUERY_PORT=${QUERY_PORT:-"16261"}
+    DEFAULT_PORT=${DEFAULT_PORT:-"16261"}
 
     # Set the Server name variable
     SERVER_NAME=${SERVER_NAME:-"ZomboidServer"}
@@ -247,7 +247,6 @@ function set_variables() {
 
 ## Main
 set_variables
-update_folder_permissions
 apply_preinstall_config
 update_server
 test_first_run

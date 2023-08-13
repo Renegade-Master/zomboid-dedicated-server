@@ -33,9 +33,12 @@ jobs:
   build-and-run:
     name: Build and Run Server
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        system: [docker, docker-compose, podman]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Variables
         id: variables
@@ -52,23 +55,24 @@ jobs:
       - name: Make Directories
         run: mkdir ZomboidConfig ZomboidDedicatedServer
 
+      #######################
+      # Docker Build System #
+      #######################
       - name: Build the Docker Image
-        if: ${{ success() }}
+        if: ${{ success() && matrix.system == 'docker' }}
         run: |
           docker build \
           --file docker/zomboid-dedicated-server.Dockerfile \
-          --tag renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
-          --build-arg USER_ID=${{ steps.variables.outputs.userid }} \
-          --build-arg GROUP_ID=${{ steps.variables.outputs.groupid }} \
+          --tag docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
           .
 
       - name: Test Run the Docker Image
-        if: ${{ success() }}
+        if: ${{ success() && matrix.system == 'docker' }}
         continue-on-error: true
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: |
           # Start a timed shutdown signal
-          (sleep 270 && docker exec \
+          (sleep 360 && docker exec \
             zomboid-dedicated-server bash -c \
               "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
@@ -76,40 +80,130 @@ jobs:
           docker run \
             --rm \
             --name zomboid-dedicated-server \
-            --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
             --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
             --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
-            --env=GAME_PORT="25496" \
+            --env=DEFAULT_PORT="25496" \
+            --env=GC_CONFIG="G1GC" \
+            --env=MAP_NAMES="BedfordFalls;North;South;West" \
             --env=MAX_PLAYERS="14" \
             --env=MAX_RAM="6144m" \
+            --env=MOD_NAMES="BedfordFalls" \
+            --env=MOD_WORKSHOP_IDS="522891356" \
             --env=PAUSE_ON_EMPTY="true" \
             --env=PUBLIC_SERVER="false" \
-            --env=SERVER_NAME="GitHubActionTest" \
-            --env=SERVER_PASSWORD="github_action_test_password" \
             --env=RCON_PASSWORD="github_action_test_rcon_password" \
             --env=RCON_PORT="27025" \
-            renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+            --env=SERVER_NAME="GitHubActionTest" \
+            --env=SERVER_PASSWORD="github_action_test_password" \
+            --env=UDP_PORT="25499" \
+            docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
             2>&1 | tee ./docker-log.log
 
-      - name: Investigate File Structure on Failure
-        if: ${{ failure() }}
+      ###############################
+      # Docker-Compose Build System #
+      ###############################
+      - name: Update Docker-Compose File
+        if: ${{ success() && matrix.system == 'docker-compose' }}
+        run: |
+          sed -i "s/AUTOSAVE_INTERVAL=.*\"/AUTOSAVE_INTERVAL=16\"/g" "./docker-compose.yaml"
+          sed -i "s/DEFAULT_PORT=.*\"/DEFAULT_PORT=25496\"/g" "./docker-compose.yaml"
+          sed -i "s/GC_CONFIG=.*\"/GC_CONFIG=G1GC\"/g" "./docker-compose.yaml"
+          sed -i "s/MAP_NAMES=.*\"/MAP_NAMES=BedfordFalls;North;South;West\"/g" "./docker-compose.yaml"
+          sed -i "s/MAX_PLAYERS=.*\"/MAX_PLAYERS=14\"/g" "./docker-compose.yaml"
+          sed -i "s/MAX_RAM=.*m\"/MAX_RAM=6144m\"/g" "./docker-compose.yaml"
+          sed -i "s/MOD_NAMES=.*\"/MOD_NAMES=BedfordFalls\"/g" "./docker-compose.yaml"
+          sed -i "s/MOD_WORKSHOP_IDS=.*\"/MOD_WORKSHOP_IDS=522891356\"/g" "./docker-compose.yaml"
+          sed -i "s/PUBLIC_SERVER=.*/PUBLIC_SERVER=false\"/g" "./docker-compose.yaml"
+          sed -i "s/RCON_PASSWORD=.*/RCON_PASSWORD=github_action_test_rcon_password\"/g" "./docker-compose.yaml"
+          sed -i "s/RCON_PORT=.*\"/RCON_PORT=27025\"/g" "./docker-compose.yaml"
+          sed -i "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./docker-compose.yaml"
+          sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./docker-compose.yaml"
+          sed -i "s/UDP_PORT=.*\"/UDP_PORT=25499\"/g" "./docker-compose.yaml"
+
+          cat docker-compose.yaml
+
+      - name: Build the Docker-Compose Image
+        if: ${{ success() && matrix.system == 'docker-compose' }}
+        run: |
+          docker-compose build
+
+      - name: Test Run the Docker-Compose Image
+        if: ${{ success() && matrix.system == 'docker-compose' }}
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          # Start a timed shutdown signal
+          (sleep 360 && docker exec \
+            zomboid-dedicated-server bash -c \
+              "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+
+          # Run the Docker-Compose Image
+          docker-compose up \
+            2>&1 | tee ./docker-log.log
+
+      #######################
+      # Podman Build System #
+      #######################
+      - name: Build the Podman Image
+        if: ${{ success() && matrix.system == 'podman' }}
+        run: |
+          BUILDAH_LAYERS=true buildah bud \
+          --file docker/zomboid-dedicated-server.Dockerfile \
+          --tag docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+          .
+
+      - name: Test Run the Podman Image
+        if: ${{ success() && matrix.system == 'podman' }}
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          # Start a timed shutdown signal
+          (sleep 360 && podman exec \
+            zomboid-dedicated-server bash -c \
+              "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+
+          # Run the Podman Image
+          podman run \
+            --rm \
+            --name zomboid-dedicated-server \
+            --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
+            --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
+            --env=AUTOSAVE_INTERVAL="16" \
+            --env=DEFAULT_PORT="25496" \
+            --env=GC_CONFIG="G1GC" \
+            --env=MAP_NAMES="BedfordFalls;North;South;West" \
+            --env=MAX_PLAYERS="14" \
+            --env=MAX_RAM="6144m" \
+            --env=MOD_NAMES="BedfordFalls" \
+            --env=MOD_WORKSHOP_IDS="522891356" \
+            --env=PAUSE_ON_EMPTY="true" \
+            --env=PUBLIC_SERVER="false" \
+            --env=RCON_PASSWORD="github_action_test_rcon_password" \
+            --env=RCON_PORT="27025" \
+            --env=SERVER_NAME="GitHubActionTest" \
+            --env=SERVER_PASSWORD="github_action_test_password" \
+            --env=UDP_PORT="25499" \
+            docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
+            2>&1 | tee ./docker-log.log
+
+      - name: Investigate File Structure
         run: |
           pwd
           echo ''
-          ls -lAuhFn ./ZomboidDedicatedServer/
+          ls -lAuhFn ./ZomboidDedicatedServer/ > ./dedicated-server-install-listing.txt
           echo ''
-          ls -lAuhFn ./ZomboidConfig/
+          ls -lAuhFn ./ZomboidConfig/ > ./dedicated-server-config-listing.txt
           echo ''
-          tree -aL 4 ./ZomboidDedicatedServer/
+          tree -aL 10 ./ZomboidDedicatedServer/ > ./dedicated-server-install-tree.txt
           echo ''
-          tree -aL 4 ./ZomboidConfig/
+          tree -aL 10 ./ZomboidConfig/ > ./dedicated-server-config-tree.txt
 
       - name: Upload Docker Logs
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: docker-logs
+          name: docker-logs-${{ matrix.system }}
           path: |
             docker-log.log
 
@@ -117,39 +211,47 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: server-configs
+          name: server-configs-${{ matrix.system }}
           path: |
+            docker-compose.yaml
             ZomboidConfig/Server/GitHubActionTest.ini
             ZomboidConfig/Server/GitHubActionTest_SandboxVars.lua
             ZomboidDedicatedServer/ProjectZomboid64.json
+            dedicated-server-install-listing.txt
+            dedicated-server-config-listing.txt
+            dedicated-server-install-tree.txt
+            dedicated-server-config-tree.txt
 
-  test:
+  test-docker:
     name: Test Server
     runs-on: ubuntu-latest
     needs:
       - build-and-run
+    strategy:
+      matrix:
+        system: [docker, docker-compose, podman]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Download Docker Logs
         uses: actions/download-artifact@v2
         with:
-          name: docker-logs
+          name: docker-logs-${{ matrix.system }}
 
       - name: Download Server Configs
         uses: actions/download-artifact@v2
         with:
-          name: server-configs
+          name: server-configs-${{ matrix.system }}
 
       - name: Test - Server Started
         run: |
           check_for_config() {
             if ! grep -q -iE "$1" "./docker-log.log"; then
-              printf "Could not find %s in %s\n" "$1" "./docker-log.log"
+              printf "Could not find [%s] in [%s]\n" "$1" "./docker-log.log"
               exit 1
             else
-              printf "Found %s in %s\n" "$1" "./docker-log.log"
+              printf "Found [%s] in [%s]\n" "$1" "./docker-log.log"
             fi
           }
 
@@ -159,22 +261,22 @@ jobs:
         run: |
           check_for_config() {
             if ! grep -q -iE "$1" "./docker-log.log"; then
-              printf "Could not find %s in %s\n" "$1" "./docker-log.log"
+              printf "Could not find [%s] in [%s]\n" "$1" "./docker-log.log"
               exit 1
             else
-              printf "Found %s in %s\n" "$1" "./docker-log.log"
+              printf "Found [%s] in [%s]\n" "$1" "./docker-log.log"
             fi
           }
 
-          check_for_config "znet: Java_zombie_core_znet_SteamUtils_n_1Shutdown"
+          check_for_config "ZNet: SZombienet -> SSteamSDK: LogOff"
 
       - name: Test - Configuration Completed
         run: |
           check_for_config() {
             if ! grep -q -iE "$1" "./docker-log.log"; then
-              printf "Could not find %s in %s\n" "$1" "./docker-log.log"
+              printf "Could not find [%s] in [%s]\n" "$1" "./docker-log.log"
             else
-              printf "Found %s in %s\n" "$1" "./docker-log.log"
+              printf "Found [%s] in [%s]\n" "$1" "./docker-log.log"
               exit 1
             fi
           }
@@ -186,32 +288,76 @@ jobs:
         run: |
           check_for_config() {
             if ! grep -q -iE "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"; then
-              printf "Could not find %s in %s\n" "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"
+              printf "Could not find [%s] in [%s]\n" "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"
               exit 1
             else
-              printf "Found %s in %s\n" "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"
+              printf "Found [%s] in [%s]\n" "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"
             fi
           }
 
           check_for_config "\-Xmx6144m"
+          check_for_config "\-XX:\+UseG1GC"
 
       - name: Test - Server Configuration Applied
         run: |
+          install_directory="./ZomboidDedicatedServer"
+          workshop_directory="${install_directory}/steamapps/workshop"
+          mods_directory="${workshop_directory}/content/108600/522891356/mods"
+          bedford_maps="${mods_directory}/Bedford Falls/media/maps"
+
+          map_search_string="$(cat << EOF
+          │       ├── content
+          │       │   └── 108600
+          │       │       └── 522891356
+          │       │           └── mods
+          │       │               └── Bedford Falls
+          │       │                   ├── media
+          │       │                   │   ├── lua
+          │       │                   │   │   ├── client
+          EOF
+          )"
+
+          py_script="$(cat << EOF
+          to_find = """${map_search_string}"""
+
+          with open("dedicated-server-install-tree.txt", "r") as file:
+              file_string = file.read()
+
+              if (to_find in file_string):
+                  print("FOUND")
+              else:
+                  print("NOT_FOUND")
+          EOF
+          )"
+
           check_for_config() {
             if ! grep -q -iE "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"; then
-              printf "Could not find %s in %s\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
+              printf "Could not find [%s] in [%s]\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
               exit 1
             else
-              printf "Found %s in %s\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
+              printf "Found [%s] in [%s]\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
             fi
           }
 
-          check_for_config "SaveWorldEveryMinutes=16"
-          check_for_config "SteamPort1=25496"
+          check_for_directory() {
+            if [[ $(python3 -c "${py_script}") == "FOUND" ]]; then
+              printf "Found map directory in [%s]\n" "${bedford_maps}"
+            else
+              printf "Could not find map directory in [%s]\n" "${bedford_maps}"
+              exit 1
+            fi
+          }
+
+          check_for_config "DefaultPort=25496"
+          check_for_config "Map=BedfordFalls;North;South;West"
           check_for_config "MaxPlayers=14"
-          check_for_config "PauseEmpty=true"
           check_for_config "Open=false"
-          check_for_config "PublicName=GitHubActionTest"
           check_for_config "Password=github_action_test_password"
+          check_for_config "PauseEmpty=true"
+          check_for_config "PublicName=GitHubActionTest"
           check_for_config "RCONPassword=github_action_test_rcon_password"
           check_for_config "RCONPort=27025"
+          check_for_config "SaveWorldEveryMinutes=16"
+          check_for_config "UDPPort=25499"
+
+          check_for_directory
