@@ -3,12 +3,12 @@ package internal
 import (
 	"log"
 	"os"
-    "os/exec"
+	"os/exec"
 	"regexp"
 )
 
 const (
-    steamInstallFile = "/home/steam/install_server.scmd"
+	steamInstallFile = "/home/steam/install_server.scmd"
 )
 
 func SetVariables() {
@@ -21,8 +21,8 @@ func SetVariables() {
 
 func ApplyPreInstallConfig() {
 	log.Println("Applying PreInstall Config")
-	
-    gameVersion := os.Getenv("GAME_VERSION")
+
+	gameVersion := os.Getenv("GAME_VERSION")
 	newText := "beta " + gameVersion
 
 	replaceTextInFile(steamInstallFile, "beta .*", newText)
@@ -37,10 +37,10 @@ func ApplyPostInstallConfig() {
 func UpdateServer() {
 	log.Println("Updating Server")
 
-    myCmd := exec.Command("steamcmd", "+runscript", steamInstallFile)
-    if err := myCmd.Run(); err != nil {
-        log.Fatalf("Error executing command [%s]: [%s]\n", myCmd, err)
-    }
+	myCmd := exec.Command("steamcmd", "+runscript", steamInstallFile)
+	if err := myCmd.Run(); err != nil {
+		log.Fatalf("Error executing command [%s]: [%s]\n", myCmd, err)
+	}
 }
 
 func TestFirstRun() {
