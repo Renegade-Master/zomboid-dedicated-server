@@ -22,9 +22,9 @@ services:
   zomboid-dedicated-server:
     build:
       context: .
-      dockerfile: docker/zomboid-dedicated-server.Dockerfile
+      dockerfile: image/zomboid-dedicated-server.Dockerfile
     image: "docker.io/renegademaster/zomboid-dedicated-server:latest"
-    container_name: zomboid-dedicated-server
+    container_name: zomboid-dedicated-server-dedicated-server
     restart: "no"
     environment:
       - "ADMIN_PASSWORD=changeme"
