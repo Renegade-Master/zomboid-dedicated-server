@@ -8,7 +8,9 @@ import (
 )
 
 const (
-	steamInstallFile = "/home/steam/install_server.scmd"
+	steamInstallFile = "/app/install_server.scmd"
+	baseGameDir      = "/home/steam/ZomboidDedicatedServer/"
+	serverFile       = baseGameDir + "start-server.sh"
 )
 
 func SetVariables() {
@@ -30,21 +32,22 @@ func ApplyPreInstallConfig() {
 	log.Println("PreInstall Config set!")
 }
 
-func ApplyPostInstallConfig() {
-	log.Println("Applying PostInstall Config")
-}
-
 func UpdateServer() {
-	log.Println("Updating Server")
+	log.Println("Updating SteamCMD and Zomboid Dedicated Server")
 
-	myCmd := exec.Command("steamcmd", "+runscript", steamInstallFile)
-	if err := myCmd.Run(); err != nil {
-		log.Fatalf("Error executing command [%s]: [%s]\n", myCmd, err)
-	}
+	runShellCmd("steamcmd.sh", "+runscript", steamInstallFile)
+
+	log.Println("Update complete!")
 }
 
 func TestFirstRun() {
 	log.Println("Testing First Run")
+
+	runShellCmd("timeout", serverFile)
+}
+
+func ApplyPostInstallConfig() {
+	log.Println("Applying PostInstall Config")
 }
 
 func StartServer() {
@@ -74,5 +77,15 @@ func replaceTextInFile(fileName string, old string, new string) {
 		if err := os.WriteFile(fileName, []byte(outFile), 0444); err != nil {
 			log.Fatalf("Could not write new content [%s] to file [%s]\n", outFile, fileName)
 		}
+	}
+}
+
+func runShellCmd(cmd string, args ...string) {
+	myCmd := exec.Command(cmd, args...)
+	myCmd.Stdout = os.Stdout
+	myCmd.Stderr = os.Stderr
+
+	if err := myCmd.Run(); err != nil {
+		log.Fatalf("Error executing command [%s]: [%s]\n", myCmd, err)
 	}
 }

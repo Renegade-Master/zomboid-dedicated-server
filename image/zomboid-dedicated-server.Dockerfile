@@ -26,10 +26,13 @@ RUN go build -o /app/out/ ./...
 
 FROM scratch AS final
 
-COPY --from=builder /app/out/ /app/
+ENV LD_LIBRARY_PATH=/usr/local/lib/linux32:$LD_LIBRARY_PATH
+
 COPY --from=steam /app/dnf /
 COPY --from=steam /app/steam/out/linux32/ /usr/local/lib/
-COPY --from=steam /app/steam/out/linux32/steamcmd /usr/local/bin/steamcmd
+#COPY --from=steam /app/steam/out/linux32/steamcmd /usr/local/bin/steamcmd
+COPY --from=builder /app/out/ /app/
+
 COPY --from="docker.io/outdead/rcon:0.10.2" /rcon /usr/local/bin/rcon
 
 COPY static/install_server.scmd /app/
