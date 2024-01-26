@@ -223,7 +223,7 @@ The following are instructions for running the server using the Docker image.
 
       docker build . \
         --tag docker.io/renegademaster/zomboid-dedicated-server:<tag> \
-        --file image/zomboid-dedicated-server.Containerfile
+        --file image/zomboid-server.Containerfile
       ```
 
 2. Run the container:
