@@ -15,9 +15,9 @@ const (
 	testInstallTimeout = "60"
 	badStartMessage    = "ERROR"
 
-	adminUser  = "super"
-	adminPass  = "passw"
-	serverName = "renegade-server"
+	adminUser  = "admin"
+	adminPass  = "changeme"
+	serverName = "zomboid-server"
 )
 
 type captureOut struct {
@@ -76,8 +76,8 @@ func StartServer() {
 	log.Println("Starting Server")
 
 	if output := saveShellCmd(serverFile,
-		"-adminusername ", adminUser,
-		"-adminpassword ", adminPass,
+		"-adminusername ", "\""+adminUser+"\"",
+		"-adminpassword ", "\""+adminPass+"\"",
 		"-servername", serverName); bytes.Contains(output, []byte(badStartMessage)) {
 
 		//log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
@@ -103,7 +103,7 @@ func replaceTextInFile(fileName string, old string, new string) {
 	if file, err := os.ReadFile(fileName); err != nil {
 		log.Fatalf("Could not open File [%s] for editing\n", fileName)
 	} else {
-		re := regexp.MustCompile("beta .*")
+		re := regexp.MustCompile(old)
 		outFile := re.ReplaceAllString(string(file), new)
 
 		if err := os.WriteFile(fileName, []byte(outFile), 0444); err != nil {
@@ -114,8 +114,12 @@ func replaceTextInFile(fileName string, old string, new string) {
 
 func runShellCmd(cmd string, args ...string) {
 	myCmd := exec.Command(cmd, args...)
+
+	myCmd.Stdin = os.Stdin
 	myCmd.Stdout = os.Stdout
 	myCmd.Stderr = os.Stderr
+
+	log.Printf("Executing command: [%s]\n", myCmd)
 
 	if err := myCmd.Run(); err != nil {
 		log.Fatalf("Error executing command [%s]: [%s]\n", myCmd, err)
@@ -126,8 +130,12 @@ func saveShellCmd(cmd string, args ...string) []byte {
 	var cout captureOut
 
 	myCmd := exec.Command(cmd, args...)
+
+	myCmd.Stdin = os.Stdin
 	myCmd.Stdout = &cout
 	myCmd.Stderr = &cout
+
+	log.Printf("Executing command: [%s]\n", myCmd)
 
 	if err := myCmd.Run(); err != nil {
 		log.Fatalf("Error executing command [%s]: [%s]\n", myCmd, err)
