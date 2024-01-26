@@ -117,13 +117,13 @@ func setEnv(key string, value string) {
 
 func replaceTextInFile(fileName string, old string, new string) {
 	if file, err := os.ReadFile(fileName); err != nil {
-		log.Fatalf("Could not open File [%s] for editing\n", fileName)
+		log.Fatalf("Could not open File [%s] for editing. Error:\n%s\n", fileName, err)
 	} else {
 		re := regexp.MustCompile(old)
 		outFile := re.ReplaceAllString(string(file), new)
 
 		if err := os.WriteFile(fileName, []byte(outFile), 0444); err != nil {
-			log.Fatalf("Could not write new content [%s] to file [%s]\n", outFile, fileName)
+			log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", outFile, fileName, err)
 		}
 	}
 }
