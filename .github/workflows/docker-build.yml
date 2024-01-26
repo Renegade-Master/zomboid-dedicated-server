@@ -33,14 +33,14 @@ jobs:
 
       - name: Make Volumes
         run: |
-          docker volume create zomboid-dedicated-server-docker
+          docker volume create zomboid-server-docker
           docker volume create zomboid-config-docker
           
-          docker volume create zomboid-dedicated-server-compose
+          docker volume create zomboid-server-compose
           docker volume create zomboid-config-compose
           
-          docker volume create zomboid-dedicated-server-podman
-          docker volume create zomboid-config-podman
+          podman volume create zomboid-server-podman
+          podman volume create zomboid-config-podman
 
       #######################
       # Docker Build System #
@@ -49,7 +49,7 @@ jobs:
         if: ${{ success() && matrix.system == 'docker' }}
         run: |
           docker build \
-          --file image/zomboid-dedicated-server.Containerfile \
+          --file image/zomboid-server.Containerfile \
           --tag docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
           .
 
@@ -60,15 +60,15 @@ jobs:
         run: |
           # Start a timed shutdown signal
           (sleep 360 && docker exec \
-            zomboid-dedicated-server bash -c \
+            zomboid-server bash -c \
               "rcon -a $(cat ZomboidCofig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
           # Run the Docker Image
           docker run \
             --rm \
             --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
-            --name zomboid-dedicated-server \
-            --volume "zomboid-dedicated-server-docker":/home/steam/ZomboidDedicatedServer \
+            --name zomboid-server \
+            --volume "zomboid-server-docker":/home/steam/ZomboidDedicatedServer \
             --volume "zomboid-config-docker":/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
             --env=DEBUG="true" \
@@ -127,7 +127,7 @@ jobs:
         run: |
           # Start a timed shutdown signal
           (sleep 360 && docker exec \
-            zomboid-dedicated-server bash -c \
+            zomboid-server bash -c \
               "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
           # Run the Podman-Compose Image
@@ -141,7 +141,7 @@ jobs:
         if: ${{ success() && matrix.system == 'podman' }}
         run: |
           BUILDAH_LAYERS=true buildah bud \
-          --file image/zomboid-dedicated-server.Containerfile \
+          --file image/zomboid-server.Containerfile \
           --tag docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
           .
 
@@ -152,15 +152,15 @@ jobs:
         run: |
           # Start a timed shutdown signal
           (sleep 360 && podman exec \
-            zomboid-dedicated-server bash -c \
+            zomboid-server bash -c \
               "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
           # Run the Podman Image
           podman run \
             --rm \
             --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
-            --name zomboid-dedicated-server \
-            --volume "zomboid-dedicated-server-podman":/home/steam/ZomboidDedicatedServer \
+            --name zomboid-server \
+            --volume "zomboid-server-podman":/home/steam/ZomboidDedicatedServer \
             --volume "zomboid-config-podman":/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
             --env=DEBUG="true" \

@@ -68,4 +68,4 @@ COPY --from="docker.io/outdead/rcon:0.10.2" /rcon /usr/local/bin/rcon
 # Copy SteamCMD configuration script
 COPY static/install_server.scmd /app/
 
-ENTRYPOINT [ "/app/zomboid-dedicated-server" ]
+ENTRYPOINT [ "/app/zomboid-server" ]

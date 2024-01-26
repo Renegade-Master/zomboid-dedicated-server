@@ -1,10 +1,10 @@
 version: "3.8"
 
 services:
-  zomboid-dedicated-server:
+  zomboid-server:
     build:
       context: .
-      dockerfile: image/zomboid-dedicated-server.Dockerfile
+      dockerfile: image/zomboid-server.Dockerfile
     image: "docker.io/renegademaster/zomboid-dedicated-server:latest"
     container_name: zomboid-server
     restart: "no"
@@ -42,5 +42,5 @@ services:
         published: 27015
         protocol: tcp
     volumes:
-      - ZomboidDedicatedServer:/home/steam/ZomboidDedicatedServer
-      - ZomboidConfig:/home/steam/Zomboid/
+      - zomboid-server-compose:/home/steam/ZomboidDedicatedServer
+      - zomboid-config-compose:/home/steam/Zomboid/
