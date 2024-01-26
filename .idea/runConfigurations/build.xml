@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="build" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="zomboid-dedicated-server" />
+    <working_directory value="$PROJECT_DIR$" />
+    <kind value="PACKAGE" />
+    <package value="renegade-master/zomboid-dedicated-server/cmd/zomboid-dedicated-server" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/cmd/zomboid-dedicated-server/zomboid-dedicated-server.go" />
+    <output_directory value="$PROJECT_DIR$/out" />
+    <option name="run" value="false" />
+    <method v="2" />
+  </configuration>
+</component>

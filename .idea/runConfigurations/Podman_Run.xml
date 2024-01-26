@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Podman Run" type="docker-deploy" factoryName="docker-image" server-name="Podman">
+    <deployment type="docker-image">
+      <settings>
+        <option name="imageTag" value="localhost/renegademaster/zomboid-dedicated-server:test" />
+        <option name="containerName" value="zomboid-server" />
+        <option name="commandLineOptions" value="--rm" />
+        <option name="volumeBindings">
+          <list>
+            <DockerVolumeBindingImpl>
+              <option name="containerPath" value="$PROJECT_DIR$/../../../steam/ZomboidDedicatedServer/" />
+              <option name="hostPath" value="zomboid-volume" />
+            </DockerVolumeBindingImpl>
+          </list>
+        </option>
+      </settings>
+    </deployment>
+    <method v="2" />
+  </configuration>
+</component>
