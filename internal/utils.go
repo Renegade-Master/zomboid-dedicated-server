@@ -76,8 +76,8 @@ func StartServer() {
 	log.Println("Starting Server")
 
 	if output := saveShellCmd(serverFile,
-		"-adminusername ", "\""+adminUser+"\"",
-		"-adminpassword ", "\""+adminPass+"\"",
+		"-adminusername", adminUser,
+		"-adminpassword", adminPass,
 		"-servername", serverName); bytes.Contains(output, []byte(badStartMessage)) {
 
 		//log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
@@ -115,7 +115,6 @@ func replaceTextInFile(fileName string, old string, new string) {
 func runShellCmd(cmd string, args ...string) {
 	myCmd := exec.Command(cmd, args...)
 
-	myCmd.Stdin = os.Stdin
 	myCmd.Stdout = os.Stdout
 	myCmd.Stderr = os.Stderr
 
@@ -131,7 +130,6 @@ func saveShellCmd(cmd string, args ...string) []byte {
 
 	myCmd := exec.Command(cmd, args...)
 
-	myCmd.Stdin = os.Stdin
 	myCmd.Stdout = &cout
 	myCmd.Stderr = &cout
 
