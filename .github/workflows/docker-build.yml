@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        system: [ podman ]
+        system: [ docker ]
         #system: [ docker, docker-compose, podman ]
     steps:
       - name: Checkout Repository
