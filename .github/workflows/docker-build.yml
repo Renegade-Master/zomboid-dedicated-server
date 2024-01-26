@@ -35,12 +35,18 @@ jobs:
         run: |
           docker volume create zomboid-server-docker
           docker volume create zomboid-config-docker
+          echo "docker-server-dir=$(docker volume inspect zomboid-server-docker | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
+          echo "docker-config-dir=$(docker volume inspect zomboid-config-docker | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
           
           docker volume create zomboid-server-compose
           docker volume create zomboid-config-compose
+          echo "compose-server-dir=$(docker volume inspect zomboid-server-compose | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
+          echo "compose-config-dir=$(docker volume inspect zomboid-config-compose | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
           
           podman volume create zomboid-server-podman
           podman volume create zomboid-config-podman
+          echo "podman-server-dir=$(podman volume inspect zomboid-server-podman | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
+          echo "podman-config-dir=$(podman volume inspect zomboid-config-podman | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
 
       #######################
       # Docker Build System #
