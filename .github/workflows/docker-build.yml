@@ -33,8 +33,14 @@ jobs:
 
       - name: Make Volumes
         run: |
-          docker volume create  ZomboidDedicatedServer
-          docker volume create ZomboidConfig
+          docker volume create zomboid-dedicated-server-docker
+          docker volume create zomboid-config-docker
+          
+          docker volume create zomboid-dedicated-server-compose
+          docker volume create zomboid-config-compose
+          
+          docker volume create zomboid-dedicated-server-podman
+          docker volume create zomboid-config-podman
 
       #######################
       # Docker Build System #
@@ -55,15 +61,15 @@ jobs:
           # Start a timed shutdown signal
           (sleep 360 && docker exec \
             zomboid-dedicated-server bash -c \
-              "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+              "rcon -a $(cat ZomboidCofig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
           # Run the Docker Image
           docker run \
             --rm \
             --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
             --name zomboid-dedicated-server \
-            --volume "ZomboidDedicatedServer":/home/steam/ZomboidDedicatedServer \
-            --volume "ZomboidConfig":/home/steam/Zomboid \
+            --volume "zomboid-dedicated-server-docker":/home/steam/ZomboidDedicatedServer \
+            --volume "zomboid-config-docker":/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
             --env=DEBUG="true" \
             --env=DEFAULT_PORT="25496" \
@@ -84,37 +90,37 @@ jobs:
             2>&1 | tee ./docker-log.log
 
       ###############################
-      # Docker-Compose Build System #
+      # Podman-Compose Build System #
       ###############################
-      - name: Update Docker-Compose File
+      - name: Update Podman-Compose File
         if: ${{ success() && matrix.system == 'docker-compose' }}
         run: |
-          sed -i "s/AUTOSAVE_INTERVAL=.*\"/AUTOSAVE_INTERVAL=16\"/g" "./docker-compose.yaml"
-          sed -i "s/DEBUG=.*\"/DEBUG=true\"/g" "./docker-compose.yaml"
-          sed -i "s/DEFAULT_PORT=.*\"/DEFAULT_PORT=25496\"/g" "./docker-compose.yaml"
-          sed -i "s/GC_CONFIG=.*\"/GC_CONFIG=G1GC\"/g" "./docker-compose.yaml"
-          sed -i "s/MAP_NAMES=.*\"/MAP_NAMES=BedfordFalls;North;South;West\"/g" "./docker-compose.yaml"
-          sed -i "s/MAX_PLAYERS=.*\"/MAX_PLAYERS=14\"/g" "./docker-compose.yaml"
-          sed -i "s/MAX_RAM=.*m\"/MAX_RAM=6144m\"/g" "./docker-compose.yaml"
-          sed -i "s/MOD_NAMES=.*\"/MOD_NAMES=BedfordFalls\"/g" "./docker-compose.yaml"
-          sed -i "s/MOD_WORKSHOP_IDS=.*\"/MOD_WORKSHOP_IDS=522891356\"/g" "./docker-compose.yaml"
-          sed -i "s/PUBLIC_SERVER=.*/PUBLIC_SERVER=false\"/g" "./docker-compose.yaml"
-          sed -i "s/RCON_PASSWORD=.*/RCON_PASSWORD=github_action_test_rcon_password\"/g" "./docker-compose.yaml"
-          sed -i "s/RCON_PORT=.*\"/RCON_PORT=27025\"/g" "./docker-compose.yaml"
-          sed -i "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./docker-compose.yaml"
-          sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./docker-compose.yaml"
-          sed -i "s/UDP_PORT=.*\"/UDP_PORT=25499\"/g" "./docker-compose.yaml"
+          sed -i "s/AUTOSAVE_INTERVAL=.*\"/AUTOSAVE_INTERVAL=16\"/g" "./podman-compose.yaml"
+          sed -i "s/DEBUG=.*\"/DEBUG=true\"/g" "./podman-compose.yaml"
+          sed -i "s/DEFAULT_PORT=.*\"/DEFAULT_PORT=25496\"/g" "./podman-compose.yaml"
+          sed -i "s/GC_CONFIG=.*\"/GC_CONFIG=G1GC\"/g" "./podman-compose.yaml"
+          sed -i "s/MAP_NAMES=.*\"/MAP_NAMES=BedfordFalls;North;South;West\"/g" "./podman-compose.yaml"
+          sed -i "s/MAX_PLAYERS=.*\"/MAX_PLAYERS=14\"/g" "./podman-compose.yaml"
+          sed -i "s/MAX_RAM=.*m\"/MAX_RAM=6144m\"/g" "./podman-compose.yaml"
+          sed -i "s/MOD_NAMES=.*\"/MOD_NAMES=BedfordFalls\"/g" "./podman-compose.yaml"
+          sed -i "s/MOD_WORKSHOP_IDS=.*\"/MOD_WORKSHOP_IDS=522891356\"/g" "./podman-compose.yaml"
+          sed -i "s/PUBLIC_SERVER=.*/PUBLIC_SERVER=false\"/g" "./podman-compose.yaml"
+          sed -i "s/RCON_PASSWORD=.*/RCON_PASSWORD=github_action_test_rcon_password\"/g" "./podman-compose.yaml"
+          sed -i "s/RCON_PORT=.*\"/RCON_PORT=27025\"/g" "./podman-compose.yaml"
+          sed -i "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./podman-compose.yaml"
+          sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./podman-compose.yaml"
+          sed -i "s/UDP_PORT=.*\"/UDP_PORT=25499\"/g" "./podman-compose.yaml"
 
-          echo "    user: ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }}" >> "./docker-compose.yaml"
+          echo "    user: ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }}" >> "./podman-compose.yaml"
 
-          cat docker-compose.yaml
+          cat podman-compose.yaml
 
-      - name: Build the Docker-Compose Image
+      - name: Build the Podman-Compose Image
         if: ${{ success() && matrix.system == 'docker-compose' }}
         run: |
           docker-compose build
 
-      - name: Test Run the Docker-Compose Image
+      - name: Test Run the Podman-Compose Image
         if: ${{ success() && matrix.system == 'docker-compose' }}
         continue-on-error: true
         timeout-minutes: 10
@@ -124,7 +130,7 @@ jobs:
             zomboid-dedicated-server bash -c \
               "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
-          # Run the Docker-Compose Image
+          # Run the Podman-Compose Image
           docker-compose up \
             2>&1 | tee ./docker-log.log
 
@@ -154,8 +160,8 @@ jobs:
             --rm \
             --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
             --name zomboid-dedicated-server \
-            --volume "ZomboidDedicatedServer":/home/steam/ZomboidDedicatedServer \
-            --volume "ZomboidConfig":/home/steam/Zomboid \
+            --volume "zomboid-dedicated-server-podman":/home/steam/ZomboidDedicatedServer \
+            --volume "zomboid-config-podman":/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
             --env=DEBUG="true" \
             --env=DEFAULT_PORT="25496" \
@@ -209,7 +215,7 @@ jobs:
         with:
           name: server-configs-${{ matrix.system }}
           path: |
-            docker-compose.yaml
+            podman-compose.yaml
             ZomboidConfig/Server/GitHubActionTest.ini
             ZomboidConfig/Server/GitHubActionTest_SandboxVars.lua
             ZomboidDedicatedServer/ProjectZomboid64.json
