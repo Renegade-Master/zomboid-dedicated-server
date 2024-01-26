@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"log"
 	"os"
 	"os/exec"
@@ -8,10 +9,26 @@ import (
 )
 
 const (
-	steamInstallFile = "/app/install_server.scmd"
-	baseGameDir      = "/home/steam/ZomboidDedicatedServer/"
-	serverFile       = baseGameDir + "start-server.sh"
+	steamInstallFile   = "/app/install_server.scmd"
+	baseGameDir        = "/home/steam/ZomboidDedicatedServer/"
+	serverFile         = baseGameDir + "start-server.sh"
+	testInstallTimeout = "60"
+	badStartMessage    = "ERROR"
+
+	adminUser  = "super"
+	adminPass  = "passw"
+	serverName = "renegade-server"
 )
+
+type captureOut struct {
+	capturedOutput []byte
+}
+
+func (so *captureOut) Write(p []byte) (n int, err error) {
+	so.capturedOutput = append(so.capturedOutput, p...)
+
+	return os.Stdout.Write(p)
+}
 
 func SetVariables() {
 	log.Println("Setting Environment Variables")
@@ -43,7 +60,12 @@ func UpdateServer() {
 func TestFirstRun() {
 	log.Println("Testing First Run")
 
-	runShellCmd("timeout", serverFile)
+	if output := saveShellCmd("timeout", testInstallTimeout, serverFile); bytes.Contains(output, []byte(badStartMessage)) {
+
+		//log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
+	}
+
+	log.Println("Test Run Complete!")
 }
 
 func ApplyPostInstallConfig() {
@@ -52,6 +74,16 @@ func ApplyPostInstallConfig() {
 
 func StartServer() {
 	log.Println("Starting Server")
+
+	if output := saveShellCmd(serverFile,
+		"-adminusername ", adminUser,
+		"-adminpassword ", adminPass,
+		"-servername", serverName); bytes.Contains(output, []byte(badStartMessage)) {
+
+		//log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
+	}
+
+	log.Println("Server Run Complete!")
 }
 
 // Util functions //
@@ -88,4 +120,18 @@ func runShellCmd(cmd string, args ...string) {
 	if err := myCmd.Run(); err != nil {
 		log.Fatalf("Error executing command [%s]: [%s]\n", myCmd, err)
 	}
+}
+
+func saveShellCmd(cmd string, args ...string) []byte {
+	var cout captureOut
+
+	myCmd := exec.Command(cmd, args...)
+	myCmd.Stdout = &cout
+	myCmd.Stderr = &cout
+
+	if err := myCmd.Run(); err != nil {
+		log.Fatalf("Error executing command [%s]: [%s]\n", myCmd, err)
+	}
+
+	return cout.capturedOutput
 }

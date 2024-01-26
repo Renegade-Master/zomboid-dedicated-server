@@ -7,7 +7,7 @@ FROM ${DOWNLOAD_IMAGE} AS downloader
 
 RUN dnf install --verbose --assumeyes --installroot=/app/dnf/ \
     --disablerepo fedora-cisco-openh264 \
-      glibc.i686 libstdc++.i686 libcurl-minimal.i686
+      glibc.i686 libstdc++.i686 libstdc++.x86_64 libcurl-minimal.i686
 
 WORKDIR /app/steam/
 
@@ -40,7 +40,7 @@ COPY --from=downloader [ \
 ]
 
 # Copy the DNF dependencies
-COPY --from=downloader /app/dnf /
+COPY --from=downloader /app/dnf/ /
 
 # Copy the SteamCMD installation
 COPY --from=downloader /app/steam/out/ /usr/local/bin/
