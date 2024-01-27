@@ -17,8 +17,8 @@
 package internal
 
 import (
-	"bytes"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"regexp"
@@ -27,13 +27,20 @@ import (
 const (
 	steamInstallFile   = "/app/install_server.scmd"
 	baseGameDir        = "/home/steam/ZomboidDedicatedServer/"
+	configDir          = "/home/steam/Zomboid/"
+	modDir             = "/home/steam/ZomboidMods/"
 	serverFile         = baseGameDir + "start-server.sh"
 	testInstallTimeout = "60"
-	badStartMessage    = "ERROR"
 
 	adminUser  = "admin"
 	adminPass  = "changeme"
 	serverName = "zomboid-server"
+	steamPort  = "16261"
+	rakNetPort = "16262"
+	steamVac   = "false"
+	noSteam    = "-nosteam"
+
+	badMsgRegEx = "(unknown option)"
 )
 
 type captureOut struct {
@@ -51,6 +58,9 @@ func SetVariables() {
 
 	setEnv("GAME_VERSION", "public")
 
+	setEnv("BIND_IP", getLocalIp())
+	writeToFile(configDir+"ip.txt", os.Getenv("BIND_IP"))
+
 	log.Println("Environment Variables set!")
 }
 
@@ -58,9 +68,7 @@ func ApplyPreInstallConfig() {
 	log.Println("Applying PreInstall Config")
 
 	gameVersion := os.Getenv("GAME_VERSION")
-	newText := "beta " + gameVersion
-
-	replaceTextInFile(steamInstallFile, "beta .*", newText)
+	replaceTextInFile(steamInstallFile, "beta .*", "beta "+gameVersion)
 
 	log.Println("PreInstall Config set!")
 }
@@ -75,10 +83,10 @@ func UpdateServer() {
 
 func TestFirstRun() {
 	log.Println("Testing First Run")
+	errorMsgs := regexp.MustCompile(badMsgRegEx)
 
-	if output := saveShellCmd("timeout", testInstallTimeout, serverFile); bytes.Contains(output, []byte(badStartMessage)) {
-
-		//log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
+	if output := saveShellCmd("timeout", testInstallTimeout, serverFile); errorMsgs.MatchString(string(output)) {
+		log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
 	}
 
 	log.Println("Test Run Complete!")
@@ -90,13 +98,20 @@ func ApplyPostInstallConfig() {
 
 func StartServer() {
 	log.Println("Starting Server")
+	errorMsgs := regexp.MustCompile(badMsgRegEx)
 
 	if output := saveShellCmd(serverFile,
-		"-adminusername", adminUser,
 		"-adminpassword", adminPass,
-		"-servername", serverName); bytes.Contains(output, []byte(badStartMessage)) {
-
-		//log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
+		"-adminusername", adminUser,
+		"-cachedir", configDir,
+		"-debug",
+		"-ip", os.Getenv("BIND_IP"),
+		"-port", steamPort,
+		"-servername", serverName,
+		"-steamvac", steamVac,
+		"-udpport", rakNetPort,
+	); errorMsgs.MatchString(string(output)) {
+		log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
 	}
 
 	log.Println("Server Run Complete!")
@@ -128,6 +143,12 @@ func replaceTextInFile(fileName string, old string, new string) {
 	}
 }
 
+func writeToFile(fileName string, content string) {
+	if err := os.WriteFile(fileName, []byte(content), 0444); err != nil {
+		log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", content, fileName, err)
+	}
+}
+
 func runShellCmd(cmd string, args ...string) {
 	myCmd := exec.Command(cmd, args...)
 
@@ -156,4 +177,22 @@ func saveShellCmd(cmd string, args ...string) []byte {
 	}
 
 	return cout.capturedOutput
+}
+
+func getLocalIp() string {
+	if addr, err := net.InterfaceAddrs(); err != nil {
+		log.Fatalf("Could not retrieve Network Interface. Error:\n%s\n", err)
+	} else {
+		for _, addr := range addr {
+			if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+				// check if IPv4 or IPv6 is not nil
+				if ipnet.IP.To4() != nil || ipnet.IP.To16 != nil {
+					// print available addresses
+					return ipnet.IP.String()
+				}
+			}
+		}
+	}
+
+	return ""
 }

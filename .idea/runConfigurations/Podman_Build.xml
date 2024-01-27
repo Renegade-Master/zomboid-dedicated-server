@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="image/zomboid-server.Containerfile: Compose Deployment" type="docker-deploy" factoryName="dockerfile" server-name="Podman">
+  <configuration default="false" name="Podman Build" type="docker-deploy" factoryName="dockerfile" server-name="Podman">
     <deployment type="dockerfile">
       <settings>
         <option name="imageTag" value="localhost/renegademaster/zomboid-dedicated-server:test" />

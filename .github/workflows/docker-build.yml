@@ -198,13 +198,13 @@ jobs:
           echo ''
           tree -aL 10 ./src/ | tee ./src-tree.txt
           echo ''
-          ls -lAuhFn ./ZomboidDedicatedServer/ | tee ./dedicated-server-install-listing.txt
+          ls -lAuhFn ${{ steps.variables.outputs.docker-server-dir }} | tee ./dedicated-server-install-listing.txt
           echo ''
-          ls -lAuhFn ./ZomboidConfig/ | tee ./dedicated-server-config-listing.txt
+          ls -lAuhFn ${{ steps.variables.outputs.docker-config-dir }} | tee ./dedicated-server-config-listing.txt
           echo ''
-          tree -aL 10 ./ZomboidDedicatedServer/ | tee ./dedicated-server-install-tree.txt
+          tree -aL 10 ${{ steps.variables.outputs.docker-server-dir }} | tee ./dedicated-server-install-tree.txt
           echo ''
-          tree -aL 10 ./ZomboidConfig/ | tee ./dedicated-server-config-tree.txt
+          tree -aL 10 ${{ steps.variables.outputs.docker-config-dir }} | tee ./dedicated-server-config-tree.txt
 
       - name: Upload Docker Logs
         if: ${{ always() }}

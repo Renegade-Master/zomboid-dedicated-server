@@ -98,6 +98,7 @@ runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/
 
 - [Dedicated Server Wiki](https://pzwiki.net/wiki/Dedicated_Server)
 - [Dedicated Server Configuration](https://pzwiki.net/wiki/Server_Settings)
+- [Dedicated Server Parameters](https://pzwiki.net/wiki/Startup_Parameters#Game_arguments)
 - [Steam DB Page](https://steamdb.info/app/380870/)
 
 ## Prerequisites
