@@ -31,15 +31,12 @@ jobs:
           echo "groupid=$(id -g)" >> $GITHUB_OUTPUT
 
       - name: Make Volumes
+        id: volumes
         run: |
           podman volume create zomboid-server-podman
           podman volume create zomboid-config-podman
           echo "installdir=$(podman volume inspect zomboid-server-podman | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
           echo "configdir=$(podman volume inspect zomboid-config-podman | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
-          podman volume inspect zomboid-server-podman
-          podman volume inspect zomboid-server-podman | jq -r '.[].Mountpoint' -
-          podman volume inspect zomboid-config-podman
-          podman volume inspect zomboid-config-podman | jq -r '.[].Mountpoint' -
 
       #######################
       # Podman Build System #
@@ -62,7 +59,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 10
         env:
-          IP_FILE: ${{ steps.variables.outputs.configdir }}/ip.txt
+          IP_FILE: ${{ steps.volumes.outputs.configdir }}/ip.txt
         run: |
           # Start a timed shutdown signal
           (sleep 360 && podman exec \
@@ -102,13 +99,13 @@ jobs:
           echo ''
           tree -aL 10 ./ | tee ./root-fs-tree.txt
           echo ''
-          ls -lAuhFn ${{ steps.variables.outputs.installdir }} | tee ./dedicated-server-install-listing.txt
+          ls -lAuhFn ${{ steps.volumes.outputs.installdir }} | tee ./dedicated-server-install-listing.txt
           echo ''
-          ls -lAuhFn ${{ steps.variables.outputs.configdir }} | tee ./dedicated-server-config-listing.txt
+          ls -lAuhFn ${{ steps.volumes.outputs.configdir }} | tee ./dedicated-server-config-listing.txt
           echo ''
-          tree -aL 10 ${{ steps.variables.outputs.installdir }} | tee ./dedicated-server-install-tree.txt
+          tree -aL 10 ${{ steps.volumes.outputs.installdir }} | tee ./dedicated-server-install-tree.txt
           echo ''
-          tree -aL 10 ${{ steps.variables.outputs.configdir }} | tee ./dedicated-server-config-tree.txt
+          tree -aL 10 ${{ steps.volumes.outputs.configdir }} | tee ./dedicated-server-config-tree.txt
 
       - name: Upload Docker Logs
         if: ${{ always() }}
@@ -125,8 +122,8 @@ jobs:
           name: server-configs-${{ matrix.system }}
           path: |
             podman-compose.yaml
-            ${{ steps.variables.outputs.configdir }}/Server/GitHubActionTest.ini
-            ${{ steps.variables.outputs.configdir }}/Server/GitHubActionTest_SandboxVars.lua
+            ${{ steps.volumes.outputs.configdir }}/Server/GitHubActionTest.ini
+            ${{ steps.volumes.outputs.configdir }}/Server/GitHubActionTest_SandboxVars.lua
             ZomboidDedicatedServer/ProjectZomboid64.json
             dedicated-server-install-listing.txt
             dedicated-server-config-listing.txt
