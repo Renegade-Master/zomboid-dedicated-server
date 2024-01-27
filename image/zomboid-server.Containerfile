@@ -23,7 +23,9 @@ FROM ${DOWNLOAD_IMAGE} AS downloader
 
 RUN dnf install --verbose --assumeyes --installroot=/app/dnf/ \
     --disablerepo fedora-cisco-openh264 \
-      glibc.i686 libstdc++.i686 libstdc++.x86_64 libcurl-minimal.i686
+      glibc.i686 libstdc++.i686 libcurl-minimal.i686 libstdc++.x86_64 musl-libc.x86_64
+
+RUN rm -rf /app/dnf/var/cache/*
 
 WORKDIR /app/steam/
 
@@ -49,14 +51,41 @@ ENV LD_LIBRARY_PATH=/usr/local/bin/linux32:$LD_LIBRARY_PATH \
 
 # Copy required System Utils
 COPY --from=downloader [ \
+    "/usr/bin/bash", \
     "/usr/bin/basename", \
     "/usr/bin/env", \
     "/usr/bin/uname", \
     "/usr/bin/" \
 ]
 
-# Copy the DNF dependencies
 COPY --from=downloader /app/dnf/ /
+
+# Copy the DNF x32 dependencies
+# COPY --from=downloader [ \
+#     "/app/dnf/usr/lib/ld-musl-x86_64.so.1", \
+#     "/app/dnf/usr/lib/libc.so.6", \
+#     "/app/dnf/usr/lib/libdl.so.2", \
+#     "/app/dnf/usr/lib/libm.so.6", \
+#     "/app/dnf/usr/lib/libpthread.so.0", \
+#     "/app/dnf/usr/lib/librt.so.1", \
+#     "/usr/lib/" \
+# ]
+
+# Copy the DNF x64 dependencies
+# COPY --from=downloader [ \
+#     "/app/dnf/usr/lib64/ld-linux-x86-64.so.2", \
+#     "/app/dnf/usr/lib64/libc.so.6", \
+#     "/app/dnf/usr/lib64/libdl.so.2", \
+#     "/app/dnf/usr/lib64/libgcc_s.so.1", \
+#     "/app/dnf/usr/lib64/libm.so.6", \
+#     "/app/dnf/usr/lib64/libpthread.so.0", \
+#     "/app/dnf/usr/lib64/libresolv.so.2", \
+#     "/app/dnf/usr/lib64/libstdc++.so.6", \
+#     "/app/dnf/usr/lib64/libtinfo.so.6", \
+#     "/usr/lib64/" \
+# ]
+#     "/app/dnf/usr/lib64/libsteam_api.so" \
+#     "/app/dnf/usr/lib64/linux-vdso.so.1" \
 
 # Copy the SteamCMD installation
 COPY --from=downloader /app/steam/out/ /usr/local/bin/

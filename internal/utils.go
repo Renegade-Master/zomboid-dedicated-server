@@ -40,7 +40,7 @@ const (
 	steamVac   = "false"
 	noSteam    = "-nosteam"
 
-	badMsgRegEx = "(unknown option)"
+	badMsgRegEx = ".*(unknown option)|(Connection Startup Failed).*"
 )
 
 type captureOut struct {
@@ -49,6 +49,11 @@ type captureOut struct {
 
 func (so *captureOut) Write(p []byte) (n int, err error) {
 	so.capturedOutput = append(so.capturedOutput, p...)
+
+	errorMsgs := regexp.MustCompile(badMsgRegEx)
+	if errorMsgs.Find(p) != nil {
+		log.Fatalf("Detected that the Server encountered an issue. Log attached below:\n%s\n", p)
+	}
 
 	return os.Stdout.Write(p)
 }
@@ -85,7 +90,7 @@ func TestFirstRun() {
 	log.Println("Testing First Run")
 	errorMsgs := regexp.MustCompile(badMsgRegEx)
 
-	if output := saveShellCmd("timeout", testInstallTimeout, serverFile); errorMsgs.MatchString(string(output)) {
+	if output := saveShellCmd("timeout", testInstallTimeout, serverFile); errorMsgs.Find(output) != nil {
 		log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
 	}
 
@@ -103,14 +108,15 @@ func StartServer() {
 	if output := saveShellCmd(serverFile,
 		"-adminpassword", adminPass,
 		"-adminusername", adminUser,
-		"-cachedir", configDir,
+		"-cachedir=", configDir,
 		"-debug",
 		"-ip", os.Getenv("BIND_IP"),
 		"-port", steamPort,
 		"-servername", serverName,
 		"-steamvac", steamVac,
 		"-udpport", rakNetPort,
-	); errorMsgs.MatchString(string(output)) {
+		noSteam,
+	); errorMsgs.Find(output) != nil {
 		log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
 	}
 
@@ -123,6 +129,7 @@ func StartServer() {
 func setEnv(key string, value string) {
 	if preValue := os.Getenv(key); preValue != "" {
 		log.Printf("Environment Variable [%s] already set to [%s]. Skipping...\n", key, preValue)
+		return
 	}
 
 	if err := os.Setenv(key, value); err != nil {

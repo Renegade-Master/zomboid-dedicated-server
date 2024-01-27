@@ -67,7 +67,7 @@ jobs:
           # Start a timed shutdown signal
           (sleep 360 && docker exec \
             zomboid-server bash -c \
-              "rcon -a $(cat ZomboidCofig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+              "rcon -a $(cat ${{ steps.variables.outputs.docker-config-dir }}/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
           # Run the Docker Image
           docker run \
@@ -133,7 +133,7 @@ jobs:
           # Start a timed shutdown signal
           (sleep 360 && docker exec \
             zomboid-server bash -c \
-              "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+              "rcon -a $(cat ${{ steps.variables.outputs.docker-config-dir }}/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
           # Run the Podman-Compose Image
           docker-compose up \
@@ -158,7 +158,7 @@ jobs:
           # Start a timed shutdown signal
           (sleep 360 && podman exec \
             zomboid-server bash -c \
-              "rcon -a $(cat ZomboidConfig/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+              "rcon -a $(cat ${{ steps.variables.outputs.docker-config-dir }}/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
           # Run the Podman Image
           podman run \
@@ -221,8 +221,8 @@ jobs:
           name: server-configs-${{ matrix.system }}
           path: |
             podman-compose.yaml
-            ZomboidConfig/Server/GitHubActionTest.ini
-            ZomboidConfig/Server/GitHubActionTest_SandboxVars.lua
+            ${{ steps.variables.outputs.docker-config-dir }}/Server/GitHubActionTest.ini
+            ${{ steps.variables.outputs.docker-config-dir }}/Server/GitHubActionTest_SandboxVars.lua
             ZomboidDedicatedServer/ProjectZomboid64.json
             dedicated-server-install-listing.txt
             dedicated-server-config-listing.txt
@@ -342,11 +342,11 @@ jobs:
           )"
 
           check_for_config() {
-            if ! grep -q -iE "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"; then
-              printf "Could not find [%s] in [%s]\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
+            if ! grep -q -iE "$1" "${{ steps.variables.outputs.docker-config-dir }}/Server/GitHubActionTest.ini"; then
+              printf "Could not find [%s] in [%s]\n" "$1" "${{ steps.variables.outputs.docker-config-dir }}/Server/GitHubActionTest.ini"
               exit 1
             else
-              printf "Found [%s] in [%s]\n" "$1" "./ZomboidConfig/Server/GitHubActionTest.ini"
+              printf "Found [%s] in [%s]\n" "$1" "${{ steps.variables.outputs.docker-config-dir }}/Server/GitHubActionTest.ini"
             fi
           }
 
