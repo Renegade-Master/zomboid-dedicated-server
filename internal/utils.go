@@ -18,6 +18,7 @@ package internal
 
 import (
 	"github.com/mitchellh/go-ps"
+	"gopkg.in/ini.v1"
 	"log"
 	"net"
 	"os"
@@ -32,17 +33,19 @@ const (
 	configDir          = "/home/steam/Zomboid/"
 	modDir             = "/home/steam/ZomboidMods/"
 	serverFile         = baseGameDir + "start-server.sh"
-	testInstallTimeout = "60s"
+	testInstallTimeout = "30s"
 
 	// Default configuration variables
-	adminUser   = "superuser"
-	adminPass   = "changeme"
-	serverName  = "zomboid-server"
-	steamPort   = "16261"
-	rakNetPort  = "16262"
-	steamVac    = "true"
-	noSteam     = "-nosteam"
-	gameVersion = "public"
+	adminUser    = "superuser"
+	adminPass    = "changeme"
+	serverName   = "zomboid-server"
+	steamPort    = "16261"
+	rakNetPort   = "16262"
+	steamVac     = "true"
+	noSteam      = "-nosteam"
+	gameVersion  = "public"
+	rconPort     = "27015"
+	rconPassword = "changeme_rcon"
 
 	badMsgRegEx            = ".*(unknown option)|(Connection Startup Failed)|(expected IP address).*"
 	serverProcessNameRegex = "ProjectZomboid6"
@@ -66,9 +69,12 @@ func (so *captureOut) Write(p []byte) (n int, err error) {
 func SetVariables() {
 	log.Println("Setting Environment Variables")
 
-	setEnv("GAME_VERSION", "public")
-
 	setEnv("BIND_IP", "0.0.0.0")
+	setEnv("GAME_VERSION", gameVersion)
+	setEnv("RCON_PASSWORD", rconPassword)
+	setEnv("RCON_PORT", rconPort)
+	setEnv("SERVER_NAME", serverName)
+
 	writeToFile(configDir+"ip.txt", os.Getenv("BIND_IP"))
 
 	log.Println("Environment Variables set!")
@@ -100,8 +106,7 @@ func TestFirstRun() {
 
 		processList, err := ps.Processes()
 		if err != nil {
-			log.Println("ps.Processes() Failed, are you using windows?")
-			return
+			log.Fatal("Call to ps.Processes() failed. Exiting...")
 		}
 
 		processName := regexp.MustCompile(serverProcessNameRegex)
@@ -118,7 +123,6 @@ func TestFirstRun() {
 				break
 			}
 		}
-
 	}()
 
 	StartServer()
@@ -128,6 +132,19 @@ func TestFirstRun() {
 
 func ApplyPostInstallConfig() {
 	log.Println("Applying PostInstall Config")
+	configFile := configDir + "/Server/" + os.Getenv("SERVER_NAME") + ".ini"
+	ini.PrettyFormat = false
+
+	if cfg, err := ini.Load(configFile); err != nil {
+		log.Fatalf("Could not open Server Config File [%s]. Error:\n%s\n", configFile, err)
+	} else {
+		cfg.Section("").Key("RCONPort").SetValue(os.Getenv("RCON_PORT"))
+		cfg.Section("").Key("RCONPassword").SetValue(os.Getenv("RCON_PASSWORD"))
+
+		if err := cfg.SaveTo(configFile); err != nil {
+			log.Fatalf("Could not save changes to Server Config File [%s]. Error:\n%s\n", configFile, err)
+		}
+	}
 
 	log.Println("PostInstall Config Applied!")
 }
