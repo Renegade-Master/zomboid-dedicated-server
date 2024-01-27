@@ -18,8 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        system: [ docker ]
-        #system: [ docker, docker-compose, podman ]
+        system: [ podman ]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -33,115 +32,19 @@ jobs:
 
       - name: Make Volumes
         run: |
-          docker volume create zomboid-server-docker
-          docker volume create zomboid-config-docker
-          echo "docker-server-dir=$(docker volume inspect zomboid-server-docker | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
-          echo "docker-config-dir=$(docker volume inspect zomboid-config-docker | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
-          
-          docker volume create zomboid-server-compose
-          docker volume create zomboid-config-compose
-          echo "compose-server-dir=$(docker volume inspect zomboid-server-compose | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
-          echo "compose-config-dir=$(docker volume inspect zomboid-config-compose | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
-          
           podman volume create zomboid-server-podman
           podman volume create zomboid-config-podman
           echo "podman-server-dir=$(podman volume inspect zomboid-server-podman | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
           echo "podman-config-dir=$(podman volume inspect zomboid-config-podman | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
 
       #######################
-      # Docker Build System #
-      #######################
-      - name: Build the Docker Image
-        if: ${{ success() && matrix.system == 'docker' }}
-        run: |
-          docker build \
-          --file image/zomboid-server.Containerfile \
-          --tag docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
-          .
-
-      - name: Test Run the Docker Image
-        if: ${{ success() && matrix.system == 'docker' }}
-        continue-on-error: true
-        timeout-minutes: 10
-        run: |
-          # Start a timed shutdown signal
-          (sleep 360 && docker exec \
-            zomboid-server bash -c \
-              "rcon -a $(cat ${{ steps.variables.outputs.docker-config-dir }}/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
-
-          # Run the Docker Image
-          docker run \
-            --rm \
-            --name zomboid-server \
-            --volume "zomboid-server-docker":/home/steam/ZomboidDedicatedServer \
-            --volume "zomboid-config-docker":/home/steam/Zomboid \
-            --env=AUTOSAVE_INTERVAL="16" \
-            --env=DEBUG="true" \
-            --env=DEFAULT_PORT="25496" \
-            --env=GC_CONFIG="G1GC" \
-            --env=MAP_NAMES="BedfordFalls;North;South;West" \
-            --env=MAX_PLAYERS="14" \
-            --env=MAX_RAM="6144m" \
-            --env=MOD_NAMES="BedfordFalls" \
-            --env=MOD_WORKSHOP_IDS="522891356" \
-            --env=PAUSE_ON_EMPTY="true" \
-            --env=PUBLIC_SERVER="false" \
-            --env=RCON_PASSWORD="github_action_test_rcon_password" \
-            --env=RCON_PORT="27025" \
-            --env=SERVER_NAME="GitHubActionTest" \
-            --env=SERVER_PASSWORD="github_action_test_password" \
-            --env=UDP_PORT="25499" \
-            docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
-            2>&1 | tee ./docker-log.log
-
-      ###############################
-      # Podman-Compose Build System #
-      ###############################
-      - name: Update Podman-Compose File
-        if: ${{ success() && matrix.system == 'docker-compose' }}
-        run: |
-          sed -i "s/AUTOSAVE_INTERVAL=.*\"/AUTOSAVE_INTERVAL=16\"/g" "./podman-compose.yaml"
-          sed -i "s/DEBUG=.*\"/DEBUG=true\"/g" "./podman-compose.yaml"
-          sed -i "s/DEFAULT_PORT=.*\"/DEFAULT_PORT=25496\"/g" "./podman-compose.yaml"
-          sed -i "s/GC_CONFIG=.*\"/GC_CONFIG=G1GC\"/g" "./podman-compose.yaml"
-          sed -i "s/MAP_NAMES=.*\"/MAP_NAMES=BedfordFalls;North;South;West\"/g" "./podman-compose.yaml"
-          sed -i "s/MAX_PLAYERS=.*\"/MAX_PLAYERS=14\"/g" "./podman-compose.yaml"
-          sed -i "s/MAX_RAM=.*m\"/MAX_RAM=6144m\"/g" "./podman-compose.yaml"
-          sed -i "s/MOD_NAMES=.*\"/MOD_NAMES=BedfordFalls\"/g" "./podman-compose.yaml"
-          sed -i "s/MOD_WORKSHOP_IDS=.*\"/MOD_WORKSHOP_IDS=522891356\"/g" "./podman-compose.yaml"
-          sed -i "s/PUBLIC_SERVER=.*/PUBLIC_SERVER=false\"/g" "./podman-compose.yaml"
-          sed -i "s/RCON_PASSWORD=.*/RCON_PASSWORD=github_action_test_rcon_password\"/g" "./podman-compose.yaml"
-          sed -i "s/RCON_PORT=.*\"/RCON_PORT=27025\"/g" "./podman-compose.yaml"
-          sed -i "s/SERVER_NAME=.*/SERVER_NAME=GitHubActionTest\"/g" "./podman-compose.yaml"
-          sed -i "s/SERVER_PASSWORD=.*/SERVER_PASSWORD=github_action_test_password\"/g" "./podman-compose.yaml"
-          sed -i "s/UDP_PORT=.*\"/UDP_PORT=25499\"/g" "./podman-compose.yaml"
-
-          echo "    user: ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }}" >> "./podman-compose.yaml"
-
-          cat podman-compose.yaml
-
-      - name: Build the Podman-Compose Image
-        if: ${{ success() && matrix.system == 'docker-compose' }}
-        run: |
-          docker-compose build
-
-      - name: Test Run the Podman-Compose Image
-        if: ${{ success() && matrix.system == 'docker-compose' }}
-        continue-on-error: true
-        timeout-minutes: 10
-        run: |
-          # Start a timed shutdown signal
-          (sleep 360 && docker exec \
-            zomboid-server bash -c \
-              "rcon -a $(cat ${{ steps.variables.outputs.docker-config-dir }}/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
-
-          # Run the Podman-Compose Image
-          docker-compose up \
-            2>&1 | tee ./docker-log.log
-
-      #######################
       # Podman Build System #
       #######################
+      - name: Download the latest version of the Image
+        if: ${{ success() && matrix.system == 'podman' }}
+        run: |
+          podman pull docker.io/renegademaster/zomboid-dedicated-server:latest
+
       - name: Build the Podman Image
         if: ${{ success() && matrix.system == 'podman' }}
         run: |
@@ -158,7 +61,7 @@ jobs:
           # Start a timed shutdown signal
           (sleep 360 && podman exec \
             zomboid-server bash -c \
-              "rcon -a $(cat ${{ steps.variables.outputs.docker-config-dir }}/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+              "rcon -a $(cat ${{ steps.variables.outputs.podman-config-dir }}/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
           # Run the Podman Image
           podman run \
@@ -184,7 +87,7 @@ jobs:
             --env=SERVER_PASSWORD="github_action_test_password" \
             --env=UDP_PORT="25499" \
             docker.io/renegademaster/zomboid-dedicated-server:${{ steps.variables.outputs.datetime }} \
-            2>&1 | tee ./docker-log.log
+            2>&1 | tee ./container.log
 
       - name: Investigate File Structure
         run: |
@@ -198,13 +101,13 @@ jobs:
           echo ''
           tree -aL 10 ./src/ | tee ./src-tree.txt
           echo ''
-          ls -lAuhFn ${{ steps.variables.outputs.docker-server-dir }} | tee ./dedicated-server-install-listing.txt
+          ls -lAuhFn ${{ steps.variables.outputs.podman-server-dir }} | tee ./dedicated-server-install-listing.txt
           echo ''
-          ls -lAuhFn ${{ steps.variables.outputs.docker-config-dir }} | tee ./dedicated-server-config-listing.txt
+          ls -lAuhFn ${{ steps.variables.outputs.podman-config-dir }} | tee ./dedicated-server-config-listing.txt
           echo ''
-          tree -aL 10 ${{ steps.variables.outputs.docker-server-dir }} | tee ./dedicated-server-install-tree.txt
+          tree -aL 10 ${{ steps.variables.outputs.podman-server-dir }} | tee ./dedicated-server-install-tree.txt
           echo ''
-          tree -aL 10 ${{ steps.variables.outputs.docker-config-dir }} | tee ./dedicated-server-config-tree.txt
+          tree -aL 10 ${{ steps.variables.outputs.podman-config-dir }} | tee ./dedicated-server-config-tree.txt
 
       - name: Upload Docker Logs
         if: ${{ always() }}
@@ -212,7 +115,7 @@ jobs:
         with:
           name: docker-logs-${{ matrix.system }}
           path: |
-            docker-log.log
+            container.log
 
       - name: Upload Server Configuration
         if: ${{ always() }}
@@ -221,8 +124,8 @@ jobs:
           name: server-configs-${{ matrix.system }}
           path: |
             podman-compose.yaml
-            ${{ steps.variables.outputs.docker-config-dir }}/Server/GitHubActionTest.ini
-            ${{ steps.variables.outputs.docker-config-dir }}/Server/GitHubActionTest_SandboxVars.lua
+            ${{ steps.variables.outputs.podman-config-dir }}/Server/GitHubActionTest.ini
+            ${{ steps.variables.outputs.podman-config-dir }}/Server/GitHubActionTest_SandboxVars.lua
             ZomboidDedicatedServer/ProjectZomboid64.json
             dedicated-server-install-listing.txt
             dedicated-server-config-listing.txt
@@ -240,7 +143,8 @@ jobs:
       - build-and-run
     strategy:
       matrix:
-        system: [ docker, docker-compose, podman ]
+        system: [ podman ]
+        #system: [ docker, docker-compose, podman ]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -258,11 +162,11 @@ jobs:
       - name: Test - Server Started
         run: |
           check_for_config() {
-            if ! grep -q -iE "$1" "./docker-log.log"; then
-              printf "Could not find [%s] in [%s]\n" "$1" "./docker-log.log"
+            if ! grep -q -iE "$1" "./container.log"; then
+              printf "Could not find [%s] in [%s]\n" "$1" "./container.log"
               exit 1
             else
-              printf "Found [%s] in [%s]\n" "$1" "./docker-log.log"
+              printf "Found [%s] in [%s]\n" "$1" "./container.log"
             fi
           }
 
@@ -271,11 +175,11 @@ jobs:
       - name: Test - Server Stopped Gracefully
         run: |
           check_for_config() {
-            if ! grep -q -iE "$1" "./docker-log.log"; then
-              printf "Could not find [%s] in [%s]\n" "$1" "./docker-log.log"
+            if ! grep -q -iE "$1" "./container.log"; then
+              printf "Could not find [%s] in [%s]\n" "$1" "./container.log"
               exit 1
             else
-              printf "Found [%s] in [%s]\n" "$1" "./docker-log.log"
+              printf "Found [%s] in [%s]\n" "$1" "./container.log"
             fi
           }
 
@@ -284,10 +188,10 @@ jobs:
       - name: Test - Configuration Completed
         run: |
           check_for_config() {
-            if ! grep -q -iE "$1" "./docker-log.log"; then
-              printf "Could not find [%s] in [%s]\n" "$1" "./docker-log.log"
+            if ! grep -q -iE "$1" "./container.log"; then
+              printf "Could not find [%s] in [%s]\n" "$1" "./container.log"
             else
-              printf "Found [%s] in [%s]\n" "$1" "./docker-log.log"
+              printf "Found [%s] in [%s]\n" "$1" "./container.log"
               exit 1
             fi
           }
