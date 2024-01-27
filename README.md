@@ -21,6 +21,15 @@ the [GitHub repository](https://github.com/Renegade-Master/zomboid-dedicated-ser
 Dedicated Server for Project Zomboid using Docker, and optionally Docker-Compose.
 Built almost from scratch to be the smallest Project Zomboid Dedicated Server around!
 
+This image is intended to be used with Volumes rather than bind mounts. Bind mounts result in awkward permission issues.
+If access to the installation or config directories is required, the recommendation is to access the mount location of
+the Volume. This can be determined with the following command:
+
+```shell
+docker volume inspect zomboid-install | jq -r '.[].Mountpoint' -
+docker volume inspect zomboid-config | jq -r '.[].Mountpoint' -
+```
+
 Bare-Minimum instructions to get a server running:
 
 ```shell
@@ -34,26 +43,26 @@ podman pull docker.io/renegademaster/zomboid-dedicated-server:latest
 
 ## Make two volumes
 # With Docker
-docker volume create ZomboidDedicatedServer
-docker volume create ZomboidConfig
+docker volume create zomboid-install
+docker volume create zomboid-config
 
 # Or with Podman
-podman volume create ZomboidDedicatedServer
-podman volume create ZomboidConfig
+podman volume create zomboid-install
+podman volume create zomboid-config
 
 ## Run the server (with bare minimum options):
 # With Docker
 docker run --detach \
-    --volume "ZomboidDedicatedServer":/home/steam/ZomboidDedicatedServer \
-    --volume "ZomboidConfig":/home/steam/Zomboid \
+    --volume "zomboid-install":/home/steam/ZomboidDedicatedServer \
+    --volume "zomboid-config":/home/steam/Zomboid \
     --publish 16261:16261/udp --publish 16262:16262/udp \
     --name zomboid-server \
     docker.io/renegademaster/zomboid-dedicated-server:latest
 
 # Or with Podman
 podman run --detach \
-    --volume "ZomboidDedicatedServer":/home/steam/ZomboidDedicatedServer \
-    --volume "ZomboidConfig":/home/steam/Zomboid \
+    --volume "zomboid-install":/home/steam/ZomboidDedicatedServer \
+    --volume "zomboid-config":/home/steam/Zomboid \
     --publish 16261:16261/udp --publish 16262:16262/udp \
     --name zomboid-server \
     docker.io/renegademaster/zomboid-dedicated-server:latest
@@ -105,7 +114,7 @@ runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/
 
 ### Directories
 
-Two directories are required to be present on the host:
+Two Volumes are required to be present on the host:
 
 | Name               | Directory                | Description                                          |
 |--------------------|--------------------------|------------------------------------------------------|

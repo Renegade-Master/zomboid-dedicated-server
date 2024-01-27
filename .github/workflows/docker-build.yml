@@ -57,11 +57,13 @@ jobs:
         if: ${{ success() && matrix.system == 'podman' }}
         continue-on-error: true
         timeout-minutes: 10
+        env:
+          IP_FILE: ${{ steps.variables.outputs.configdir }}/ip.txt
         run: |
           # Start a timed shutdown signal
           (sleep 360 && podman exec \
             zomboid-server bash -c \
-              "rcon -a $(cat ${{ steps.variables.outputs.configdir }}/ip.txt):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
+              "rcon -a $(cat \${IP_FILE}):\${RCON_PORT} -p \${RCON_PASSWORD} quit") &
 
           # Run the Podman Image
           podman run \
