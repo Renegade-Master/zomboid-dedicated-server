@@ -21,15 +21,6 @@ the [GitHub repository](https://github.com/Renegade-Master/zomboid-dedicated-ser
 Dedicated Server for Project Zomboid using Docker, and optionally Docker-Compose.
 Built almost from scratch to be the smallest Project Zomboid Dedicated Server around!
 
-This image is intended to be used with Volumes rather than bind mounts. Bind mounts result in awkward permission issues.
-If access to the installation or config directories is required, the recommendation is to access the mount location of
-the Volume. This can be determined with the following command:
-
-```shell
-docker volume inspect zomboid-install | jq -r '.[].Mountpoint' -
-docker volume inspect zomboid-config | jq -r '.[].Mountpoint' -
-```
-
 Bare-Minimum instructions to get a server running:
 
 ```shell
@@ -116,30 +107,31 @@ runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/
 
 Two Volumes are required to be present on the host:
 
-| Name               | Directory                | Description                                          |
-|--------------------|--------------------------|------------------------------------------------------|
-| Configuration Data | `ZomboidConfig`          | For storing the server configuration and save files. |
-| Installation Data  | `ZomboidDedicatedServer` | For storing the server game data.                    |
+| Name               | Volume Name       | Description                                          |
+|--------------------|-------------------|------------------------------------------------------|
+| Configuration Data | `zomboid-config`  | For storing the server configuration and save files. |
+| Installation Data  | `zomboid-install` | For storing the server game data.                    |
 
-These folders must be created in the directory that you intend to run the Docker image from. This could be a folder that
-you have created in some kind of "server directory", or it could be the root of this repository after you have cloned it
-down. **_If these folders are not present when the Docker image starts, you will get permissions errors_** (
-see [#8](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/8)
-, [#14](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/14)
-, [#17](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/17)) because the Docker engine will create
-the folders at Container runtime. This creates them under the `root` user on the host which causes permissions
-conflicts.
+These Volumes must be created before starting the server.
 
-The 'Configuration Data' folder is where the server configuration and save files are stored. This folder can be opened
+The 'Configuration Data' Volume is where the server configuration and save files are stored. This folder can be opened
 and edited just like if you were running the server without Docker. You can backup your save files, or edit the server
 configuration files. You should start the server once successfully before attempting to edit files in the 'Configuration
 Data' folder. Once the files are generated, it is safe to edit them. Most configuration option changes will require a
 restart of the server to properly take effect. Most of these settings are also configurable from the in-game Admin menu.
 
-The 'Installation Data' folder is where the server game data is stored. This folder can be opened and edited, but a full
+The 'Installation Data' Volume is where the server game data is stored. This folder can be opened and edited, but a full
 restart of the server can sometimes reset changes to this folder during file verification. Therefore, the recommended
 way to change files that would be stored in this folder is to use the Environment Variables in the 'Optional Arguments'
 table provided by the Docker image.
+
+If access to the installation or config directories is required, the recommendation is to access the mount location of
+the Volume. This can be determined with the following command:
+
+```shell
+docker volume inspect zomboid-install | jq -r '.[].Mountpoint' -
+docker volume inspect zomboid-config | jq -r '.[].Mountpoint' -
+```
 
 ### Ports
 

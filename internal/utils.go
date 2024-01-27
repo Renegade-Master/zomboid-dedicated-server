@@ -32,13 +32,15 @@ const (
 	serverFile         = baseGameDir + "start-server.sh"
 	testInstallTimeout = "60"
 
-	adminUser  = "admin"
-	adminPass  = "changeme"
-	serverName = "zomboid-server"
-	steamPort  = "16261"
-	rakNetPort = "16262"
-	steamVac   = "false"
-	noSteam    = "-nosteam"
+	// Default configuration variables
+	adminUser   = "superuser"
+	adminPass   = "changeme"
+	serverName  = "zomboid-server"
+	steamPort   = "16261"
+	rakNetPort  = "16262"
+	steamVac    = "true"
+	noSteam     = "-nosteam"
+	gameVersion = "public"
 
 	badMsgRegEx = ".*(unknown option)|(Connection Startup Failed).*"
 )
