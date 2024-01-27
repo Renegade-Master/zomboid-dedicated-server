@@ -177,7 +177,7 @@ jobs:
             fi
           }
 
-          check_for_config "ZNet: SZombienet -> SSteamSDK: LogOff"
+          check_for_config "ZNet: \[-> CZombienet: RakNetPeerInterface_Shutdown"
 
       - name: Test - Configuration Completed
         run: |
