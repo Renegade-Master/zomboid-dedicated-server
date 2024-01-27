@@ -66,7 +66,6 @@ jobs:
           # Run the Podman Image
           podman run \
             --rm \
-            --user ${{ steps.variables.outputs.userid }}:${{ steps.variables.outputs.groupid }} \
             --name zomboid-server \
             --volume "zomboid-server-podman":/home/steam/ZomboidDedicatedServer \
             --volume "zomboid-config-podman":/home/steam/Zomboid \
