@@ -96,10 +96,6 @@ jobs:
           echo ''
           tree -aL 10 ./ | tee ./root-fs-tree.txt
           echo ''
-          ls -lAuhFn ./src/ | tee ./src-listing.txt
-          echo ''
-          tree -aL 10 ./src/ | tee ./src-tree.txt
-          echo ''
           ls -lAuhFn ${{ steps.variables.outputs.podman-server-dir }} | tee ./dedicated-server-install-listing.txt
           echo ''
           ls -lAuhFn ${{ steps.variables.outputs.podman-config-dir }} | tee ./dedicated-server-config-listing.txt
@@ -129,11 +125,9 @@ jobs:
             dedicated-server-install-listing.txt
             dedicated-server-config-listing.txt
             root-fs-listing.txt
-            src-listing.txt
             dedicated-server-install-tree.txt
             dedicated-server-config-tree.txt
             root-fs-config-tree.txt
-            src-config-tree.txt
 
   test-docker:
     name: Test Server
