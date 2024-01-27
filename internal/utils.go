@@ -17,11 +17,13 @@
 package internal
 
 import (
+	"github.com/mitchellh/go-ps"
 	"log"
 	"net"
 	"os"
 	"os/exec"
 	"regexp"
+	"time"
 )
 
 const (
@@ -30,7 +32,7 @@ const (
 	configDir          = "/home/steam/Zomboid/"
 	modDir             = "/home/steam/ZomboidMods/"
 	serverFile         = baseGameDir + "start-server.sh"
-	testInstallTimeout = "60"
+	testInstallTimeout = "60s"
 
 	// Default configuration variables
 	adminUser   = "superuser"
@@ -42,7 +44,8 @@ const (
 	noSteam     = "-nosteam"
 	gameVersion = "public"
 
-	badMsgRegEx = ".*(unknown option)|(Connection Startup Failed).*"
+	badMsgRegEx            = ".*(unknown option)|(Connection Startup Failed)|(expected IP address).*"
+	serverProcessNameRegex = "ProjectZomboid6"
 )
 
 type captureOut struct {
@@ -83,31 +86,56 @@ func ApplyPreInstallConfig() {
 func UpdateServer() {
 	log.Println("Updating SteamCMD and Zomboid Dedicated Server")
 
-	runShellCmd("steamcmd.sh", "+runscript", steamInstallFile)
+	saveShellCmd("steamcmd.sh", "+runscript", steamInstallFile)
 
 	log.Println("Update complete!")
 }
 
 func TestFirstRun() {
 	log.Println("Testing First Run")
-	errorMsgs := regexp.MustCompile(badMsgRegEx)
 
-	if output := saveShellCmd("timeout", testInstallTimeout, serverFile); errorMsgs.Find(output) != nil {
-		log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
-	}
+	go func() {
+		duration, _ := time.ParseDuration(testInstallTimeout)
+		time.Sleep(duration)
+
+		processList, err := ps.Processes()
+		if err != nil {
+			log.Println("ps.Processes() Failed, are you using windows?")
+			return
+		}
+
+		processName := regexp.MustCompile(serverProcessNameRegex)
+
+		for x := range processList {
+			process := processList[x]
+			if processName.Find([]byte(process.Executable())) != nil {
+				targetProcess, _ := os.FindProcess(process.Pid())
+
+				log.Printf("Killing process [%d]\n", targetProcess.Pid)
+				if err := targetProcess.Kill(); err != nil {
+					log.Fatalf("Failed attempt to kill process [%d]. Exiting...\n", process.Pid)
+				}
+				break
+			}
+		}
+
+	}()
+
+	StartServer()
 
 	log.Println("Test Run Complete!")
 }
 
 func ApplyPostInstallConfig() {
 	log.Println("Applying PostInstall Config")
+
+	log.Println("PostInstall Config Applied!")
 }
 
 func StartServer() {
 	log.Println("Starting Server")
-	errorMsgs := regexp.MustCompile(badMsgRegEx)
 
-	if output := saveShellCmd(serverFile,
+	saveShellCmd(serverFile,
 		"-adminpassword", adminPass,
 		"-adminusername", adminUser,
 		"-cachedir="+configDir,
@@ -117,9 +145,7 @@ func StartServer() {
 		"-steamvac", steamVac,
 		"-udpport", rakNetPort,
 		noSteam,
-	); errorMsgs.Find(output) != nil {
-		log.Fatalf("Detected that the Server failed to start correctly. Log attached below:\n%s\n", output)
-	}
+	)
 
 	log.Println("Server Run Complete!")
 }
@@ -154,19 +180,6 @@ func replaceTextInFile(fileName string, old string, new string) {
 func writeToFile(fileName string, content string) {
 	if err := os.WriteFile(fileName, []byte(content), 0444); err != nil {
 		log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", content, fileName, err)
-	}
-}
-
-func runShellCmd(cmd string, args ...string) {
-	myCmd := exec.Command(cmd, args...)
-
-	myCmd.Stdout = os.Stdout
-	myCmd.Stderr = os.Stderr
-
-	log.Printf("Executing command: [%s]\n", myCmd)
-
-	if err := myCmd.Run(); err != nil {
-		log.Fatalf("Error executing command [%s]: [%s]\n", myCmd, err)
 	}
 }
 

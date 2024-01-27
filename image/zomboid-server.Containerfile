@@ -25,7 +25,7 @@ RUN dnf install --verbose --assumeyes --installroot=/app/dnf/ \
     --disablerepo fedora-cisco-openh264 \
       glibc.i686 libstdc++.i686 libcurl-minimal.i686 libstdc++.x86_64 musl-libc.x86_64
 
-RUN rm -rf /app/dnf/var/cache/*
+RUN rm -rf /app/dnf/var/cache/* /app/dnf/usr/share/*
 
 WORKDIR /app/steam/
 
