@@ -63,7 +63,7 @@ func SetVariables() {
 
 	setEnv("GAME_VERSION", "public")
 
-	setEnv("BIND_IP", getLocalIp())
+	setEnv("BIND_IP", "0.0.0.0")
 	writeToFile(configDir+"ip.txt", os.Getenv("BIND_IP"))
 
 	log.Println("Environment Variables set!")
@@ -108,8 +108,7 @@ func StartServer() {
 	if output := saveShellCmd(serverFile,
 		"-adminpassword", adminPass,
 		"-adminusername", adminUser,
-		"-cachedir=", configDir,
-		"-debug",
+		"-cachedir="+configDir,
 		"-ip", os.Getenv("BIND_IP"),
 		"-port", steamPort,
 		"-servername", serverName,
