@@ -58,7 +58,37 @@ COPY --from=downloader [ \
     "/usr/bin/" \
 ]
 
+# ldd ProjectZomboid64
+#         /lib64/ld-linux-x86-64.so.2 (0x00007f108248c000)
+#         libc.so.6 => /lib64/libc.so.6 (0x00007f1081f19000)
+#         libdl.so.2 => /lib64/libdl.so.2 (0x00007f1082471000)
+#         libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x00007f10820fb000)
+#         libm.so.6 => /lib64/libm.so.6 (0x00007f108211f000)
+#         libstdc++.so.6 => /lib64/libstdc++.so.6 (0x00007f1082200000)
+#         libsteam_api.so => not found
+#         linux-vdso.so.1 (0x00007ffcfb9d6000)
+
+# ldd steamclient.so
+#         /lib64/ld-linux-x86-64.so.2 (0x00007fb4773fd000)
+#         libc.so.6 => /lib64/libc.so.6 (0x00007fb474db5000)
+#         libdl.so.2 => /lib64/libdl.so.2 (0x00007fb47508f000)
+#         libm.so.6 => /lib64/libm.so.6 (0x00007fb474fa7000)
+#         libpthread.so.0 => /lib64/libpthread.so.0 (0x00007fb474fa2000)
+#         librt.so.1 => /lib64/librt.so.1 (0x00007fb47508a000)
+#         linux-vdso.so.1 (0x00007ffdbdfe8000)
+
+# ldd steamcmd
+#         /lib/ld-linux.so.2 (0xf7f96000)
+#         libc.so.6 => /lib/libc.so.6 (0xf7640000)
+#         libdl.so.2 => /lib/libdl.so.2 (0xf7918000)
+#         libm.so.6 => /lib/libm.so.6 (0xf783f000)
+#         libpthread.so.0 => /lib/libpthread.so.0 (0xf783a000)
+#         librt.so.1 => /lib/librt.so.1 (0xf7913000)
+#         linux-gate.so.1 (0xf7f94000)
+
 COPY --from=downloader /app/dnf/ /
+
+
 
 # Copy the DNF x32 dependencies
 # COPY --from=downloader [ \

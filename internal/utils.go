@@ -69,7 +69,10 @@ func (so *captureOut) Write(p []byte) (n int, err error) {
 func SetVariables() {
 	log.Println("Setting Environment Variables")
 
+	setEnv("ADMIN_PASSWORD", adminPass)
+	setEnv("ADMIN_USERNAME", adminUser)
 	setEnv("BIND_IP", "0.0.0.0")
+	setEnv("DEFAULT_PORT", steamPort)
 	setEnv("GAME_VERSION", gameVersion)
 	setEnv("RCON_PASSWORD", rconPassword)
 	setEnv("RCON_PORT", rconPort)
@@ -132,7 +135,7 @@ func TestFirstRun() {
 
 func ApplyPostInstallConfig() {
 	log.Println("Applying PostInstall Config")
-	configFile := configDir + "/Server/" + os.Getenv("SERVER_NAME") + ".ini"
+	configFile := configDir + "Server/" + os.Getenv("SERVER_NAME") + ".ini"
 	ini.PrettyFormat = false
 
 	if cfg, err := ini.Load(configFile); err != nil {
@@ -153,12 +156,12 @@ func StartServer() {
 	log.Println("Starting Server")
 
 	saveShellCmd(serverFile,
-		"-adminpassword", adminPass,
-		"-adminusername", adminUser,
+		"-adminpassword", os.Getenv("ADMIN_PASSWORD"),
+		"-adminusername", os.Getenv("ADMIN_USERNAME"),
 		"-cachedir="+configDir,
 		"-ip", os.Getenv("BIND_IP"),
-		"-port", steamPort,
-		"-servername", serverName,
+		"-port", os.Getenv("DEFAULT_PORT"),
+		"-servername", os.Getenv("SERVER_NAME"),
 		"-steamvac", steamVac,
 		"-udpport", rakNetPort,
 		noSteam,
