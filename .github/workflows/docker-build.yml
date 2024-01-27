@@ -36,8 +36,10 @@ jobs:
           podman volume create zomboid-config-podman
           echo "installdir=$(podman volume inspect zomboid-server-podman | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
           echo "configdir=$(podman volume inspect zomboid-config-podman | jq -r '.[].Mountpoint' -)" >> $GITHUB_OUTPUT
-          echo ${{ steps.variables.outputs.installdir }}
-          echo ${{ steps.variables.outputs.configdir }}
+          podman volume inspect zomboid-server-podman
+          podman volume inspect zomboid-server-podman | jq -r '.[].Mountpoint' -
+          podman volume inspect zomboid-config-podman
+          podman volume inspect zomboid-config-podman | jq -r '.[].Mountpoint' -
 
       #######################
       # Podman Build System #
