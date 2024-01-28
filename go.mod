@@ -3,6 +3,7 @@ module renegade-master/zomboid-dedicated-server
 go 1.21.0
 
 require (
+	github.com/buger/jsonparser v1.1.1
 	github.com/mitchellh/go-ps v1.0.0
 	gopkg.in/ini.v1 v1.67.0
 )

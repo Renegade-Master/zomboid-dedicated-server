@@ -17,6 +17,7 @@
 package internal
 
 import (
+	"github.com/buger/jsonparser"
 	"github.com/mitchellh/go-ps"
 	"gopkg.in/ini.v1"
 	"log"
@@ -135,18 +136,44 @@ func TestFirstRun() {
 
 func ApplyPostInstallConfig() {
 	log.Println("Applying PostInstall Config")
-	configFile := configDir + "Server/" + os.Getenv("SERVER_NAME") + ".ini"
+	serverConfigFile := configDir + "Server/" + os.Getenv("SERVER_NAME") + ".ini"
+	jvmConfigFile := baseGameDir + "ProjectZomboid64.json"
 	ini.PrettyFormat = false
 
-	if cfg, err := ini.Load(configFile); err != nil {
-		log.Fatalf("Could not open Server Config File [%s]. Error:\n%s\n", configFile, err)
+	if cfg, err := ini.Load(serverConfigFile); err != nil {
+		log.Fatalf("Could not open Server Config File [%s]. Error:\n%s\n", serverConfigFile, err)
 	} else {
 		cfg.Section("").Key("RCONPort").SetValue(os.Getenv("RCON_PORT"))
 		cfg.Section("").Key("RCONPassword").SetValue(os.Getenv("RCON_PASSWORD"))
 
-		if err := cfg.SaveTo(configFile); err != nil {
-			log.Fatalf("Could not save changes to Server Config File [%s]. Error:\n%s\n", configFile, err)
+		if err := cfg.SaveTo(serverConfigFile); err != nil {
+			log.Fatalf("Could not save changes to Server Config File [%s]. Error:\n%s\n", serverConfigFile, err)
 		}
+	}
+
+	values := map[string]string{
+		"-Xmx.*": "-Xmx" + os.Getenv("MAX_RAM"),
+	}
+
+	if file, err := os.ReadFile(jvmConfigFile); err != nil {
+		log.Fatalf("Could not open File [%s] for editing. Error:\n%s\n", jvmConfigFile, err)
+	} else {
+		idx := 0
+
+		if offset, err := jsonparser.ArrayEach(file, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			log.Printf("Found Key: [%s] at Index [%d] position [%d]\n", value, idx, offset)
+			jsonparser.Set(file)
+
+			idx++
+		}, "vmArgs"); err != nil {
+			log.Fatalf("Error encountered when Parsing JSON:\n%s\n", err)
+		} else {
+			log.Printf("Found Key at position [%d]\n", offset)
+		}
+
+		//if err := os.WriteFile(jvmConfigFile, newFile, 0444); err != nil {
+		//	log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", newFile, jvmConfigFile, err)
+		//}
 	}
 
 	log.Println("PostInstall Config Applied!")

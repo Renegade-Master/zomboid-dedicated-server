@@ -122,7 +122,7 @@ jobs:
             podman-compose.yaml
             ${{ steps.volumes.outputs.configdir }}/Server/GitHubActionTest.ini
             ${{ steps.volumes.outputs.configdir }}/Server/GitHubActionTest_SandboxVars.lua
-            ZomboidDedicatedServer/ProjectZomboid64.json
+            ${{ steps.volumes.outputs.installdir }}/ProjectZomboid64.json
             dedicated-server-install-listing.txt
             dedicated-server-config-listing.txt
             root-fs-listing.txt
@@ -138,7 +138,6 @@ jobs:
     strategy:
       matrix:
         system: [ podman ]
-        #system: [ docker, docker-compose, podman ]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -196,11 +195,11 @@ jobs:
       - name: Test - Server JVM Configuration Applied
         run: |
           check_for_config() {
-            if ! grep -q -iE "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"; then
-              printf "Could not find [%s] in [%s]\n" "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"
+            if ! grep -q -iE "$1" "${{ steps.volumes.outputs.installdir }}/ProjectZomboid64.json"; then
+              printf "Could not find [%s] in [%s]\n" "$1" "${{ steps.volumes.outputs.installdir }}/ProjectZomboid64.json"
               exit 1
             else
-              printf "Found [%s] in [%s]\n" "$1" "./ZomboidDedicatedServer/ProjectZomboid64.json"
+              printf "Found [%s] in [%s]\n" "$1" "${{ steps.volumes.outputs.installdir }}/ProjectZomboid64.json"
             fi
           }
 
@@ -209,7 +208,7 @@ jobs:
 
       - name: Test - Server Configuration Applied
         run: |
-          install_directory="./ZomboidDedicatedServer"
+          install_directory="${{ steps.volumes.outputs.installdir }}"
           workshop_directory="${install_directory}/steamapps/workshop"
           mods_directory="${workshop_directory}/content/108600/522891356/mods"
           bedford_maps="${mods_directory}/Bedford Falls/media/maps"
