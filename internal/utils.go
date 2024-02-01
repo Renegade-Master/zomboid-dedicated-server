@@ -19,8 +19,8 @@ package internal
 import (
 	"github.com/buger/jsonparser"
 	"github.com/mitchellh/go-ps"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
-	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -47,6 +47,8 @@ const (
 	gameVersion  = "public"
 	rconPort     = "27015"
 	rconPassword = "changeme_rcon"
+	maxRam       = "8192m"
+	gcConfig     = "ZGC"
 
 	badMsgRegEx            = ".*(unknown option)|(Connection Startup Failed)|(expected IP address).*"
 	serverProcessNameRegex = "ProjectZomboid6"
@@ -67,42 +69,70 @@ func (so *captureOut) Write(p []byte) (n int, err error) {
 	return os.Stdout.Write(p)
 }
 
+func getLogLevel(name string) log.Level {
+	var lvl log.Level
+
+	switch name {
+	case "DEBUG":
+		lvl = log.DebugLevel
+	case "INFO":
+		lvl = log.InfoLevel
+	case "Error":
+		lvl = log.ErrorLevel
+	default:
+		lvl = log.InfoLevel
+	}
+
+	return lvl
+}
+
+func init() {
+	if value, present := os.LookupEnv("LOG_LEVEL"); present {
+		log.SetLevel(getLogLevel(value))
+	} else {
+		log.SetLevel(log.InfoLevel)
+		log.Info("Log Level not supplied, or supplied incorrectly.")
+	}
+}
+
 func SetVariables() {
-	log.Println("Setting Environment Variables")
+	log.Infoln("Setting Environment Variables")
 
 	setEnv("ADMIN_PASSWORD", adminPass)
 	setEnv("ADMIN_USERNAME", adminUser)
 	setEnv("BIND_IP", "0.0.0.0")
 	setEnv("DEFAULT_PORT", steamPort)
 	setEnv("GAME_VERSION", gameVersion)
+	setEnv("GC_CONFIG", gcConfig)
+	setEnv("MAX_RAM", maxRam)
 	setEnv("RCON_PASSWORD", rconPassword)
 	setEnv("RCON_PORT", rconPort)
 	setEnv("SERVER_NAME", serverName)
 
 	writeToFile(configDir+"ip.txt", os.Getenv("BIND_IP"))
 
-	log.Println("Environment Variables set!")
+	log.Infoln("Environment Variables set!")
 }
 
 func ApplyPreInstallConfig() {
-	log.Println("Applying PreInstall Config")
+	log.Infoln("Applying PreInstall Config")
 
 	gameVersion := os.Getenv("GAME_VERSION")
 	replaceTextInFile(steamInstallFile, "beta .*", "beta "+gameVersion)
 
-	log.Println("PreInstall Config set!")
+	log.Infoln("PreInstall Config set!")
 }
 
 func UpdateServer() {
-	log.Println("Updating SteamCMD and Zomboid Dedicated Server")
+	log.Infoln("Updating SteamCMD and Zomboid Dedicated Server")
 
 	saveShellCmd("steamcmd.sh", "+runscript", steamInstallFile)
 
-	log.Println("Update complete!")
+	log.Infoln("Update complete!")
 }
 
 func TestFirstRun() {
-	log.Println("Testing First Run")
+	log.Infoln("Testing First Run")
 
 	go func() {
 		duration, _ := time.ParseDuration(testInstallTimeout)
@@ -120,7 +150,7 @@ func TestFirstRun() {
 			if processName.Find([]byte(process.Executable())) != nil {
 				targetProcess, _ := os.FindProcess(process.Pid())
 
-				log.Printf("Killing process [%d]\n", targetProcess.Pid)
+				log.Infof("Killing process [%d]\n", targetProcess.Pid)
 				if err := targetProcess.Kill(); err != nil {
 					log.Fatalf("Failed attempt to kill process [%d]. Exiting...\n", process.Pid)
 				}
@@ -131,11 +161,11 @@ func TestFirstRun() {
 
 	StartServer()
 
-	log.Println("Test Run Complete!")
+	log.Infoln("Test Run Complete!")
 }
 
 func ApplyPostInstallConfig() {
-	log.Println("Applying PostInstall Config")
+	log.Infoln("Applying PostInstall Config")
 	serverConfigFile := configDir + "Server/" + os.Getenv("SERVER_NAME") + ".ini"
 	jvmConfigFile := baseGameDir + "ProjectZomboid64.json"
 	ini.PrettyFormat = false
@@ -151,8 +181,9 @@ func ApplyPostInstallConfig() {
 		}
 	}
 
-	values := map[string]string{
-		"-Xmx.*": "-Xmx" + os.Getenv("MAX_RAM"),
+	jvmConfig := map[*regexp.Regexp]string{
+		regexp.MustCompile("-Xmx.*"):     "-Xmx" + os.Getenv("MAX_RAM"),
+		regexp.MustCompile("-XX:+Use.*"): "-XX:+Use" + os.Getenv("GC_CONFIG"),
 	}
 
 	if file, err := os.ReadFile(jvmConfigFile); err != nil {
@@ -161,26 +192,35 @@ func ApplyPostInstallConfig() {
 		idx := 0
 
 		if offset, err := jsonparser.ArrayEach(file, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			log.Printf("Found Key: [%s] at Index [%d] position [%d]\n", value, idx, offset)
-			jsonparser.Set(file)
+			log.Debugf("Found Key: [%s] at Index [%d] position [%d]\n", value, idx, offset)
+
+			// See if this entry is in the list of interesting jvmConfigs
+			for regexString, replacement := range jvmConfig {
+				if regexString.Match(value) {
+					index := "[" + string(idx) + "]"
+
+					log.Debugf("Replacing ")
+					file, err = jsonparser.Set(file, []byte(replacement), "vmArgs", index)
+				}
+			}
 
 			idx++
 		}, "vmArgs"); err != nil {
 			log.Fatalf("Error encountered when Parsing JSON:\n%s\n", err)
 		} else {
-			log.Printf("Found Key at position [%d]\n", offset)
+			log.Infof("Found Key at position [%d]\n", offset)
 		}
 
-		//if err := os.WriteFile(jvmConfigFile, newFile, 0444); err != nil {
-		//	log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", newFile, jvmConfigFile, err)
-		//}
+		if err := os.WriteFile(jvmConfigFile, file, 0444); err != nil {
+			log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", file, jvmConfigFile, err)
+		}
 	}
 
-	log.Println("PostInstall Config Applied!")
+	log.Infoln("PostInstall Config Applied!")
 }
 
 func StartServer() {
-	log.Println("Starting Server")
+	log.Infoln("Starting Server")
 
 	saveShellCmd(serverFile,
 		"-adminpassword", os.Getenv("ADMIN_PASSWORD"),
@@ -194,7 +234,7 @@ func StartServer() {
 		noSteam,
 	)
 
-	log.Println("Server Run Complete!")
+	log.Infoln("Server Run Complete!")
 }
 
 // Util functions //
@@ -202,12 +242,14 @@ func StartServer() {
 // setEnv Set an Environment Variable
 func setEnv(key string, value string) {
 	if preValue := os.Getenv(key); preValue != "" {
-		log.Printf("Environment Variable [%s] already set to [%s]. Skipping...\n", key, preValue)
+		log.Debugf("Operator set Environment Variable [%s] to [%s]. Skipping...\n", key, preValue)
 		return
 	}
 
 	if err := os.Setenv(key, value); err != nil {
 		log.Fatalf("Failed to set Environment Variable [%s] with Value [%s]\n", key, value)
+	} else {
+		log.Debugf("Setting Environment Variable [%s] to [%s].\n", key, value)
 	}
 }
 
@@ -238,7 +280,7 @@ func saveShellCmd(cmd string, args ...string) []byte {
 	myCmd.Stdout = &cout
 	myCmd.Stderr = &cout
 
-	log.Printf("Executing command: [%s]\n", myCmd)
+	log.Infof("Executing command: [%s]\n", myCmd)
 
 	if err := myCmd.Run(); err != nil {
 		log.Fatalf("Error executing command [%s]: [%s]\n", myCmd, err)
