@@ -71,7 +71,7 @@ jobs:
             --volume "zomboid-server-podman":/home/steam/ZomboidDedicatedServer \
             --volume "zomboid-config-podman":/home/steam/Zomboid \
             --env=AUTOSAVE_INTERVAL="16" \
-            --env=DEBUG="true" \
+            --env LOG_LEVEL=DEBUG \
             --env=DEFAULT_PORT="25496" \
             --env=GC_CONFIG="G1GC" \
             --env=MAP_NAMES="BedfordFalls;North;South;West" \

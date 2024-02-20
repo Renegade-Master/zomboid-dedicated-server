@@ -28,42 +28,6 @@ import (
 	"time"
 )
 
-const (
-	steamInstallFile   = "/app/install_server.scmd"
-	baseGameDir        = "/home/steam/ZomboidDedicatedServer/"
-	configDir          = "/home/steam/Zomboid/"
-	modDir             = "/home/steam/ZomboidMods/"
-	serverFile         = baseGameDir + "start-server.sh"
-	testInstallTimeout = "30s"
-
-	// Default configuration variables
-	adminUser    = "superuser"
-	adminPass    = "changeme"
-	serverName   = "zomboid-server"
-	steamPort    = "16261"
-	rakNetPort   = "16262"
-	steamVac     = "true"
-	noSteam      = "-nosteam"
-	gameVersion  = "public"
-	rconPort     = "27015"
-	rconPassword = "changeme_rcon"
-	maxRam       = "8192m"
-	gcConfig     = "ZGC"
-
-	badMsgRegEx            = ".*(unknown option)|(Connection Startup Failed)|(expected IP address).*"
-	serverProcessNameRegex = "ProjectZomboid6"
-)
-
-type zomboidJvmConfig struct {
-	MainClass string   `json:"mainClass"`
-	Classpath []string `json:"classpath"`
-	VMArgs    []string `json:"vmArgs"`
-}
-
-type captureOut struct {
-	capturedOutput []byte
-}
-
 func (so *captureOut) Write(p []byte) (n int, err error) {
 	so.capturedOutput = append(so.capturedOutput, p...)
 
@@ -101,151 +65,6 @@ func init() {
 	}
 }
 
-func SetVariables() {
-	log.Infoln("Setting Environment Variables")
-
-	setEnv("ADMIN_PASSWORD", adminPass)
-	setEnv("ADMIN_USERNAME", adminUser)
-	setEnv("BIND_IP", "0.0.0.0")
-	setEnv("DEFAULT_PORT", steamPort)
-	setEnv("GAME_VERSION", gameVersion)
-	setEnv("GC_CONFIG", gcConfig)
-	setEnv("MAX_RAM", maxRam)
-	setEnv("RCON_PASSWORD", rconPassword)
-	setEnv("RCON_PORT", rconPort)
-	setEnv("SERVER_NAME", serverName)
-
-	writeToFile(configDir+"ip.txt", os.Getenv("BIND_IP"))
-
-	log.Infoln("Environment Variables set!")
-}
-
-func ApplyPreInstallConfig() {
-	log.Infoln("Applying PreInstall Config")
-
-	gameVersion := os.Getenv("GAME_VERSION")
-	replaceTextInFile(steamInstallFile, "beta .*", "beta "+gameVersion)
-
-	log.Infoln("PreInstall Config set!")
-}
-
-func UpdateServer() {
-	log.Infoln("Updating SteamCMD and Zomboid Dedicated Server")
-
-	saveShellCmd("steamcmd.sh", "+runscript", steamInstallFile)
-
-	log.Infoln("Update complete!")
-}
-
-func TestFirstRun() {
-	log.Infoln("Testing First Run")
-
-	go func() {
-		duration, _ := time.ParseDuration(testInstallTimeout)
-		time.Sleep(duration)
-
-		processList, err := ps.Processes()
-		if err != nil {
-			log.Fatal("Call to ps.Processes() failed. Exiting...")
-		}
-
-		processName := regexp.MustCompile(serverProcessNameRegex)
-
-		for x := range processList {
-			process := processList[x]
-			if processName.Find([]byte(process.Executable())) != nil {
-				targetProcess, _ := os.FindProcess(process.Pid())
-
-				log.Infof("Killing process [%d]\n", targetProcess.Pid)
-				if err := targetProcess.Kill(); err != nil {
-					log.Fatalf("Failed attempt to kill process [%d]. Exiting...\n", process.Pid)
-				}
-				break
-			}
-		}
-	}()
-
-	StartServer()
-
-	log.Infoln("Test Run Complete!")
-}
-
-func ApplyPostInstallConfig() {
-	log.Infoln("Applying PostInstall Config")
-	serverConfigFile := configDir + "Server/" + os.Getenv("SERVER_NAME") + ".ini"
-	jvmConfigFile := baseGameDir + "ProjectZomboid64.json"
-	ini.PrettyFormat = false
-
-	if cfg, err := ini.Load(serverConfigFile); err != nil {
-		log.Fatalf("Could not open Server Config File [%s]. Error:\n%s\n", serverConfigFile, err)
-	} else {
-		cfg.Section("").Key("RCONPort").SetValue(os.Getenv("RCON_PORT"))
-		cfg.Section("").Key("RCONPassword").SetValue(os.Getenv("RCON_PASSWORD"))
-
-		if err := cfg.SaveTo(serverConfigFile); err != nil {
-			log.Fatalf("Could not save changes to Server Config File [%s]. Error:\n%s\n", serverConfigFile, err)
-		}
-	}
-
-	jvmConfig := map[*regexp.Regexp]string{
-		regexp.MustCompile("-Xmx.*"):     "-Xmx" + os.Getenv("MAX_RAM"),
-		regexp.MustCompile("-XX:+Use.*"): "-XX:+Use" + os.Getenv("GC_CONFIG"),
-	}
-
-	// Open the JSON Configuration file for editing
-	if file, err := os.ReadFile(jvmConfigFile); err != nil {
-		log.Fatalf("Could not open File [%s] for editing. Error:\n%s\n", jvmConfigFile, err)
-	} else {
-		var objMap zomboidJvmConfig
-
-		if err := json.Unmarshal(file, &objMap); err != nil {
-			log.Fatalf("Error encountered when Parsing JSON:\n%s\n", err)
-		}
-
-		// Iterate through the VM Args, and replace any ones that have been configured
-		for idx, arg := range objMap.VMArgs {
-			for regexString, replacement := range jvmConfig {
-				if regexString.Match([]byte(arg)) {
-
-					log.Debugf("Replacing [%s] with [%s]", arg, replacement)
-					objMap.VMArgs[idx] = replacement
-				}
-			}
-		}
-
-		// Write the changed document back to the File
-		if bytes, err := json.MarshalIndent(objMap, "", "    "); err != nil {
-			log.Fatalf("Could not marshal new content [%s] to JSON structure. Error:\n%s\n", bytes, err)
-		} else {
-			if err := os.WriteFile(jvmConfigFile, bytes, 0444); err != nil {
-				log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", bytes, jvmConfigFile, err)
-			}
-		}
-	}
-
-	log.Infoln("PostInstall Config Applied!")
-}
-
-func StartServer() {
-	log.Infoln("Starting Server")
-
-	saveShellCmd(serverFile,
-		"-adminpassword", os.Getenv("ADMIN_PASSWORD"),
-		"-adminusername", os.Getenv("ADMIN_USERNAME"),
-		"-cachedir="+configDir,
-		"-ip", os.Getenv("BIND_IP"),
-		"-port", os.Getenv("DEFAULT_PORT"),
-		"-servername", os.Getenv("SERVER_NAME"),
-		"-steamvac", steamVac,
-		"-udpport", rakNetPort,
-		noSteam,
-	)
-
-	log.Infoln("Server Run Complete!")
-}
-
-// Util functions //
-
 // setEnv Set an Environment Variable
 func setEnv(key string, value string) {
 	if preValue := os.Getenv(key); preValue != "" {
@@ -267,14 +86,12 @@ func replaceTextInFile(fileName string, old string, new string) {
 		re := regexp.MustCompile(old)
 		outFile := re.ReplaceAllString(string(file), new)
 
-		if err := os.WriteFile(fileName, []byte(outFile), 0444); err != nil {
-			log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", outFile, fileName, err)
-		}
+		writeToFile(fileName, []byte(outFile))
 	}
 }
 
-func writeToFile(fileName string, content string) {
-	if err := os.WriteFile(fileName, []byte(content), 0444); err != nil {
+func writeToFile(fileName string, content []byte) {
+	if err := os.WriteFile(fileName, content, 0444); err != nil {
 		log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", content, fileName, err)
 	}
 }
@@ -312,4 +129,82 @@ func getLocalIp() string {
 	}
 
 	return ""
+}
+
+func applyJvmConfigChanges() {
+	jvmConfigFile := baseGameDir + "ProjectZomboid64.json"
+
+	jvmConfig := map[*regexp.Regexp]string{
+		regexp.MustCompile("-Xmx.*"):     "-Xmx" + os.Getenv("MAX_RAM"),
+		regexp.MustCompile("-XX:+Use.*"): "-XX:+Use" + os.Getenv("GC_CONFIG"),
+	}
+
+	// Open the JSON Configuration file for editing
+	if file, err := os.ReadFile(jvmConfigFile); err != nil {
+		log.Fatalf("Could not open File [%s] for editing. Error:\n%s\n", jvmConfigFile, err)
+	} else {
+		var objMap zomboidJvmConfig
+
+		if err := json.Unmarshal(file, &objMap); err != nil {
+			log.Fatalf("Error encountered when Parsing JSON:\n%s\n", err)
+		}
+
+		// Iterate through the VM Args, and replace any ones that have been configured
+		for idx, arg := range objMap.VMArgs {
+			for regexString, replacement := range jvmConfig {
+				if regexString.Match([]byte(arg)) {
+					log.Debugf("Replacing [%s] with [%s]", arg, replacement)
+					objMap.VMArgs[idx] = replacement
+				}
+			}
+		}
+
+		// Write the changed document back to the File
+		if bytes, err := json.MarshalIndent(objMap, "", "    "); err != nil {
+			log.Fatalf("Could not marshal new content [%s] to JSON structure. Error:\n%s\n", bytes, err)
+		} else {
+			writeToFile(jvmConfigFile, bytes)
+		}
+	}
+}
+
+func applyServerConfigChanges() {
+	ini.PrettyFormat = false
+	serverConfigFile := configDir + "Server/" + os.Getenv("SERVER_NAME") + ".ini"
+
+	if cfg, err := ini.Load(serverConfigFile); err != nil {
+		log.Fatalf("Could not open Server Config File [%s]. Error:\n%s\n", serverConfigFile, err)
+	} else {
+		cfg.Section("").Key("RCONPort").SetValue(os.Getenv("RCON_PORT"))
+		cfg.Section("").Key("RCONPassword").SetValue(os.Getenv("RCON_PASSWORD"))
+
+		if err := cfg.SaveTo(serverConfigFile); err != nil {
+			log.Fatalf("Could not save changes to Server Config File [%s]. Error:\n%s\n", serverConfigFile, err)
+		}
+	}
+}
+
+func startServerKillProcess() {
+	duration, _ := time.ParseDuration(testInstallTimeout)
+	time.Sleep(duration)
+
+	processList, err := ps.Processes()
+	if err != nil {
+		log.Fatal("Call to ps.Processes() failed. Exiting...")
+	}
+
+	processName := regexp.MustCompile(serverProcessNameRegex)
+
+	for x := range processList {
+		process := processList[x]
+		if processName.Find([]byte(process.Executable())) != nil {
+			targetProcess, _ := os.FindProcess(process.Pid())
+
+			log.Infof("Killing process [%d]\n", targetProcess.Pid)
+			if err := targetProcess.Kill(); err != nil {
+				log.Fatalf("Failed attempt to kill process [%d]. Exiting...\n", process.Pid)
+			}
+			break
+		}
+	}
 }
