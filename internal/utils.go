@@ -17,7 +17,7 @@
 package internal
 
 import (
-	"github.com/buger/jsonparser"
+	"encoding/json"
 	"github.com/mitchellh/go-ps"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
@@ -53,6 +53,12 @@ const (
 	badMsgRegEx            = ".*(unknown option)|(Connection Startup Failed)|(expected IP address).*"
 	serverProcessNameRegex = "ProjectZomboid6"
 )
+
+type zomboidJvmConfig struct {
+	MainClass string   `json:"mainClass"`
+	Classpath []string `json:"classpath"`
+	VMArgs    []string `json:"vmArgs"`
+}
 
 type captureOut struct {
 	capturedOutput []byte
@@ -186,33 +192,34 @@ func ApplyPostInstallConfig() {
 		regexp.MustCompile("-XX:+Use.*"): "-XX:+Use" + os.Getenv("GC_CONFIG"),
 	}
 
+	// Open the JSON Configuration file for editing
 	if file, err := os.ReadFile(jvmConfigFile); err != nil {
 		log.Fatalf("Could not open File [%s] for editing. Error:\n%s\n", jvmConfigFile, err)
 	} else {
-		idx := 0
+		var objMap zomboidJvmConfig
 
-		if offset, err := jsonparser.ArrayEach(file, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			log.Debugf("Found Key: [%s] at Index [%d] position [%d]\n", value, idx, offset)
-
-			// See if this entry is in the list of interesting jvmConfigs
-			for regexString, replacement := range jvmConfig {
-				if regexString.Match(value) {
-					index := "[" + string(idx) + "]"
-
-					log.Debugf("Replacing ")
-					file, err = jsonparser.Set(file, []byte(replacement), "vmArgs", index)
-				}
-			}
-
-			idx++
-		}, "vmArgs"); err != nil {
+		if err := json.Unmarshal(file, &objMap); err != nil {
 			log.Fatalf("Error encountered when Parsing JSON:\n%s\n", err)
-		} else {
-			log.Infof("Found Key at position [%d]\n", offset)
 		}
 
-		if err := os.WriteFile(jvmConfigFile, file, 0444); err != nil {
-			log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", file, jvmConfigFile, err)
+		// Iterate through the VM Args, and replace any ones that have been configured
+		for idx, arg := range objMap.VMArgs {
+			for regexString, replacement := range jvmConfig {
+				if regexString.Match([]byte(arg)) {
+
+					log.Debugf("Replacing [%s] with [%s]", arg, replacement)
+					objMap.VMArgs[idx] = replacement
+				}
+			}
+		}
+
+		// Write the changed document back to the File
+		if bytes, err := json.MarshalIndent(objMap, "", "    "); err != nil {
+			log.Fatalf("Could not marshal new content [%s] to JSON structure. Error:\n%s\n", bytes, err)
+		} else {
+			if err := os.WriteFile(jvmConfigFile, bytes, 0444); err != nil {
+				log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", bytes, jvmConfigFile, err)
+			}
 		}
 	}
 
