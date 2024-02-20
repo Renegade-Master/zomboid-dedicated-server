@@ -18,17 +18,17 @@ package main
 
 import (
 	log "github.com/sirupsen/logrus"
-	utils "renegade-master/zomboid-dedicated-server/internal"
+	server "renegade-master/zomboid-dedicated-server/internal"
 )
 
 func main() {
 	log.Println("Initialising Renegade-Master: Project Zomboid Dedicated Server")
-	utils.SetVariables()
+	server.SetVariables()
 
-	utils.ApplyPreInstallConfig()
-	utils.UpdateServer()
-	utils.TestFirstRun()
-	utils.ApplyPostInstallConfig()
+	server.ApplyPreInstallConfig()
+	server.UpdateServer()
+	server.TestFirstRun()
+	server.ApplyPostInstallConfig()
 
-	utils.StartServer()
+	server.StartManagedServer()
 }

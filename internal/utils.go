@@ -25,6 +25,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"syscall"
 	"time"
 )
 
@@ -104,7 +105,7 @@ func saveShellCmd(cmd string, args ...string) []byte {
 	myCmd.Stdout = &cout
 	myCmd.Stderr = &cout
 
-	log.Infof("Executing command: [%s]\n", myCmd)
+	log.Debugf("Executing command: [%s]\n", myCmd)
 
 	if err := myCmd.Run(); err != nil {
 		log.Fatalf("Error executing command [%s]: [%s]\n", myCmd, err)
@@ -200,11 +201,13 @@ func startServerKillProcess() {
 		if processName.Find([]byte(process.Executable())) != nil {
 			targetProcess, _ := os.FindProcess(process.Pid())
 
-			log.Infof("Killing process [%d]\n", targetProcess.Pid)
-			if err := targetProcess.Kill(); err != nil {
+			log.Debugf("Killing process [%d]\n", targetProcess.Pid)
+			if err := targetProcess.Signal(syscall.SIGTERM); err != nil {
 				log.Fatalf("Failed attempt to kill process [%d]. Exiting...\n", process.Pid)
 			}
 			break
 		}
 	}
+
+	log.Debugln("Process killed successfully!")
 }

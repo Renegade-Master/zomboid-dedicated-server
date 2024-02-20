@@ -17,12 +17,14 @@
 package internal
 
 import (
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func SetVariables() {
-	logrus.Infoln("Setting Environment Variables")
+	log.Infoln("Setting Environment Variables")
 
 	setEnv("ADMIN_PASSWORD", adminPass)
 	setEnv("ADMIN_USERNAME", adminUser)
@@ -37,48 +39,81 @@ func SetVariables() {
 
 	writeToFile(configDir+"ip.txt", []byte(os.Getenv("BIND_IP")))
 
-	logrus.Infoln("Environment Variables set!")
+	log.Infoln("Environment Variables set!")
 }
 
 func ApplyPreInstallConfig() {
-	logrus.Infoln("Applying PreInstall Config")
+	log.Infoln("Applying PreInstall Config")
 
 	gameVersion := os.Getenv("GAME_VERSION")
 	replaceTextInFile(steamInstallFile, "beta .*", "beta "+gameVersion)
 
-	logrus.Infoln("PreInstall Config set!")
+	log.Infoln("PreInstall Config set!")
 }
 
 func UpdateServer() {
-	logrus.Infoln("Updating SteamCMD and Zomboid Dedicated Server")
+	log.Infoln("Updating SteamCMD and Zomboid Dedicated Server")
 
 	saveShellCmd("steamcmd.sh", "+runscript", steamInstallFile)
 
-	logrus.Infoln("Update complete!")
+	log.Infoln("Update complete!")
 }
 
 func TestFirstRun() {
-	logrus.Infoln("Testing First Run")
+	log.Infoln("Testing First Run")
+
+	done := make(chan bool, 1)
 
 	go startServerKillProcess()
 
-	StartServer()
+	go startServer(done)
 
-	logrus.Infoln("Test Run Complete!")
+	<-done
+
+	log.Infoln("Test Run Complete!")
 }
 
 func ApplyPostInstallConfig() {
-	logrus.Infoln("Applying PostInstall Config")
+	log.Infoln("Applying PostInstall Config")
 
 	applyServerConfigChanges()
 
 	applyJvmConfigChanges()
 
-	logrus.Infoln("PostInstall Config Applied!")
+	log.Infoln("PostInstall Config Applied!")
 }
 
-func StartServer() {
-	logrus.Infoln("Starting Server")
+func StartManagedServer() {
+	log.Infoln("Starting Server wit Signal Handling. Press CTRL+C to quit.")
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	done := make(chan bool, 1)
+
+	go func() {
+		sig := <-sigs
+
+		log.Warnf("Received Signal [%s]. Beginning shutdown using RCON...\n", sig)
+
+		rconAddress := "127.0.0.1:" + os.Getenv("RCON_PORT")
+		saveShellCmd(rcon,
+			"--address", rconAddress,
+			"--password", os.Getenv("RCON_PASSWORD"),
+			"quit")
+
+		done <- true
+	}()
+
+	startServer(done)
+
+	<-done
+
+	log.Infoln("Server stopped!")
+}
+
+func startServer(done chan bool) {
+	log.Infoln("Starting Server")
 
 	saveShellCmd(serverFile,
 		"-adminpassword", os.Getenv("ADMIN_PASSWORD"),
@@ -92,5 +127,6 @@ func StartServer() {
 		noSteam,
 	)
 
-	logrus.Infoln("Server Run Complete!")
+	log.Infoln("Server Run Complete!")
+	done <- true
 }

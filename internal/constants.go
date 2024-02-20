@@ -40,4 +40,6 @@ const (
 
 	badMsgRegEx            = ".*(unknown option)|(Connection Startup Failed)|(expected IP address).*"
 	serverProcessNameRegex = "ProjectZomboid6"
+
+	rcon = "/usr/local/bin/rcon"
 )
