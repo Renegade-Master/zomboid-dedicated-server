@@ -23,6 +23,7 @@ import (
 	"syscall"
 )
 
+// SetVariables will set the required Environment Variables
 func SetVariables() {
 	log.Infoln("Setting Environment Variables")
 
@@ -42,6 +43,7 @@ func SetVariables() {
 	log.Infoln("Environment Variables set!")
 }
 
+// ApplyPreInstallConfig will set the Game version in the SteamCMD file
 func ApplyPreInstallConfig() {
 	log.Infoln("Applying PreInstall Config")
 
@@ -51,6 +53,7 @@ func ApplyPreInstallConfig() {
 	log.Infoln("PreInstall Config set!")
 }
 
+// UpdateServer will use SteamCMD to install or update the Server
 func UpdateServer() {
 	log.Infoln("Updating SteamCMD and Zomboid Dedicated Server")
 
@@ -59,6 +62,7 @@ func UpdateServer() {
 	log.Infoln("Update complete!")
 }
 
+// TestFirstRun will start the Server with a timeout so that the Server files are generated
 func TestFirstRun() {
 	log.Infoln("Testing First Run")
 
@@ -73,6 +77,7 @@ func TestFirstRun() {
 	log.Infoln("Test Run Complete!")
 }
 
+// ApplyPostInstallConfig applies the Server configuration options that use
 func ApplyPostInstallConfig() {
 	log.Infoln("Applying PostInstall Config")
 
@@ -83,6 +88,7 @@ func ApplyPostInstallConfig() {
 	log.Infoln("PostInstall Config Applied!")
 }
 
+// StartManagedServer starts the Server with handling for interrupts
 func StartManagedServer() {
 	log.Infoln("Starting Server wit Signal Handling. Press CTRL+C to quit.")
 

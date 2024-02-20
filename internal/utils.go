@@ -151,20 +151,24 @@ func applyJvmConfigChanges() {
 		}
 
 		// Iterate through the VM Args, and replace any ones that have been configured
-		for idx, arg := range objMap.VMArgs {
-			for regexString, replacement := range jvmConfig {
-				if regexString.Match([]byte(arg)) {
-					log.Debugf("Replacing [%s] with [%s]", arg, replacement)
-					objMap.VMArgs[idx] = replacement
-				}
-			}
-		}
+		replaceJsonValues(objMap, jvmConfig)
 
 		// Write the changed document back to the File
 		if bytes, err := json.MarshalIndent(objMap, "", "    "); err != nil {
 			log.Fatalf("Could not marshal new content [%s] to JSON structure. Error:\n%s\n", bytes, err)
 		} else {
 			writeToFile(jvmConfigFile, bytes)
+		}
+	}
+}
+
+func replaceJsonValues(objMap zomboidJvmConfig, jvmConfig map[*regexp.Regexp]string) {
+	for idx, arg := range objMap.VMArgs {
+		for regexString, replacement := range jvmConfig {
+			if regexString.Match([]byte(arg)) {
+				log.Debugf("Replacing [%s] with [%s]", arg, replacement)
+				objMap.VMArgs[idx] = replacement
+			}
 		}
 	}
 }
