@@ -15,7 +15,7 @@
 #
 
 ARG BUILDER_IMAGE="docker.io/golang:1.21.6-bullseye"
-ARG DOWNLOAD_IMAGE="docker.io/fedora:40"
+ARG DOWNLOAD_IMAGE="docker.io/fedora:41"
 ARG RCON_IMAGE="docker.io/outdead/rcon:0.10.2"
 
 ## DNF and Steam Layer
