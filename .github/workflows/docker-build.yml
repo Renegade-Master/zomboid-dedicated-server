@@ -108,6 +108,14 @@ jobs:
           echo ''
           tree -aL 10 ${{ steps.volumes.outputs.configdir }} | tee ./dedicated-server-config-tree.txt
 
+      - name: Copy Server Files to Upload Directory
+        run: |
+          mkdir ZomboidServerInfo
+          cp ${{ steps.volumes.outputs.configdir }}/Server/GitHubActionTest.ini \
+            ${{ steps.volumes.outputs.configdir }}/Server/GitHubActionTest_SandboxVars.lua \
+            ${{ steps.volumes.outputs.installdir }}/ProjectZomboid64.json \
+            ./ZomboidServerInfo
+
       - name: Upload Docker Logs
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -123,9 +131,9 @@ jobs:
           name: server-configs-${{ matrix.system }}
           path: |
             podman-compose.yaml
-            ${{ steps.volumes.outputs.configdir }}/Server/GitHubActionTest.ini
-            ${{ steps.volumes.outputs.configdir }}/Server/GitHubActionTest_SandboxVars.lua
-            ${{ steps.volumes.outputs.installdir }}/ProjectZomboid64.json
+            ./ZomboidServerInfo/Server/GitHubActionTest.ini
+            ./ZomboidServerInfo/Server/GitHubActionTest_SandboxVars.lua
+            ./ZomboidServerInfo/ProjectZomboid64.json
             dedicated-server-install-listing.txt
             dedicated-server-config-listing.txt
             root-fs-listing.txt
@@ -201,11 +209,11 @@ jobs:
       - name: Test - Server JVM Configuration Applied
         run: |
           check_for_config() {
-            if ! grep -q -iE "$1" "${INSTALLDIR}/ProjectZomboid64.json"; then
-              printf "Could not find [%s] in [%s]\n" "$1" "${INSTALLDIR}/ProjectZomboid64.json"
+            if ! grep -q -iE "$1" "./ZomboidServerInfo/ProjectZomboid64.json"; then
+              printf "Could not find [%s] in [%s]\n" "$1" "./ZomboidServerInfo/ProjectZomboid64.json"
               exit 1
             else
-              printf "Found [%s] in [%s]\n" "$1" "${INSTALLDIR}/ProjectZomboid64.json"
+              printf "Found [%s] in [%s]\n" "$1" "./ZomboidServerInfo/ProjectZomboid64.json"
             fi
           }
 
@@ -214,7 +222,7 @@ jobs:
 
       - name: Test - Server Configuration Applied
         run: |
-          install_directory="${INSTALLDIR}"
+          install_directory="./ZomboidServerInfo"
           workshop_directory="${install_directory}/steamapps/workshop"
           mods_directory="${workshop_directory}/content/108600/522891356/mods"
           bedford_maps="${mods_directory}/Bedford Falls/media/maps"
@@ -245,11 +253,11 @@ jobs:
           )"
 
           check_for_config() {
-            if ! grep -q -iE "$1" "${CONFIGDIR}/Server/GitHubActionTest.ini"; then
-              printf "Could not find [%s] in [%s]\n" "$1" "${CONFIGDIR}/Server/GitHubActionTest.ini"
+            if ! grep -q -iE "$1" "./ZomboidServerInfo/Server/GitHubActionTest.ini"; then
+              printf "Could not find [%s] in [%s]\n" "$1" "./ZomboidServerInfo/Server/GitHubActionTest.ini"
               exit 1
             else
-              printf "Found [%s] in [%s]\n" "$1" "${CONFIGDIR}/Server/GitHubActionTest.ini"
+              printf "Found [%s] in [%s]\n" "$1" "./ZomboidServerInfo/Server/GitHubActionTest.ini"
             fi
           }
 

@@ -69,17 +69,20 @@ func init() {
 // setEnv Set an Environment Variable
 func setEnv(key string, value string) {
 	if preValue := os.Getenv(key); preValue != "" {
-		log.Debugf("Operator set Environment Variable [%s] to [%s]. Skipping...\n", key, preValue)
+		log.Debugf("Setting Environment Variable [%s] to Operator value of [%s].\n", key, preValue)
 		return
 	}
 
 	if err := os.Setenv(key, value); err != nil {
 		log.Fatalf("Failed to set Environment Variable [%s] with Value [%s]\n", key, value)
 	} else {
-		log.Debugf("Setting Environment Variable [%s] to [%s].\n", key, value)
+		log.Debugf("Setting Environment Variable [%s] to Default value of [%s].\n", key, value)
 	}
 }
 
+// replaceTextInFile will find all instances of a given String in a file, and
+// replace them. The modified file is then saved over the original file using
+// the writeToFile function.
 func replaceTextInFile(fileName string, old string, new string) {
 	if file, err := os.ReadFile(fileName); err != nil {
 		log.Fatalf("Could not open File [%s] for editing. Error:\n%s\n", fileName, err)
@@ -91,6 +94,7 @@ func replaceTextInFile(fileName string, old string, new string) {
 	}
 }
 
+// writeToFile will write the content of the Byte array to the file location specified by fileName
 func writeToFile(fileName string, content []byte) {
 	if err := os.WriteFile(fileName, content, 0444); err != nil {
 		log.Fatalf("Could not write new content [%s] to file [%s]. Error:\n%s\n", content, fileName, err)
