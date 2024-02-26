@@ -27,16 +27,7 @@ import (
 func SetVariables() {
 	log.Infoln("Setting Environment Variables")
 
-	setEnv("ADMIN_PASSWORD", adminPass)
-	setEnv("ADMIN_USERNAME", adminUser)
-	setEnv("BIND_IP", "0.0.0.0")
-	setEnv("DEFAULT_PORT", steamPort)
-	setEnv("GAME_VERSION", gameVersion)
-	setEnv("GC_CONFIG", gcConfig)
-	setEnv("MAX_RAM", maxRam)
-	setEnv("RCON_PASSWORD", rconPassword)
-	setEnv("RCON_PORT", rconPort)
-	setEnv("SERVER_NAME", serverName)
+	setEnvVariables()
 
 	writeToFile(configDir+"ip.txt", []byte(os.Getenv("BIND_IP")))
 
@@ -130,7 +121,7 @@ func startServer(done chan bool) {
 		"-servername", os.Getenv("SERVER_NAME"),
 		"-steamvac", steamVac,
 		"-udpport", rakNetPort,
-		noSteam,
+		getSteamUse(),
 	)
 
 	log.Infoln("Server Run Complete!")

@@ -48,7 +48,7 @@ func getLogLevel(name string) log.Level {
 		lvl = log.DebugLevel
 	case "INFO":
 		lvl = log.InfoLevel
-	case "Error":
+	case "ERROR":
 		lvl = log.ErrorLevel
 	default:
 		lvl = log.InfoLevel
@@ -136,6 +136,30 @@ func getLocalIp() string {
 	return ""
 }
 
+func setEnvVariables() {
+	setEnv("ADMIN_PASSWORD", adminPass)
+	setEnv("ADMIN_USERNAME", adminUser)
+	setEnv("AUTOSAVE_INTERVAL", autoSaveInterval)
+	setEnv("BIND_IP", "0.0.0.0")
+	setEnv("DEFAULT_PORT", steamPort)
+	setEnv("GAME_VERSION", gameVersion)
+	setEnv("GC_CONFIG", gcConfig)
+	setEnv("MAP_NAMES", mapNames)
+	setEnv("MAX_PLAYERS", maxPlayers)
+	setEnv("MAX_RAM", maxRam)
+	setEnv("MOD_NAMES", modNames)
+	setEnv("MOD_WORKSHOP_IDS", modWorkshopIds)
+	setEnv("PAUSE_ON_EMPTY", pauseOnEmpty)
+	setEnv("PUBLIC_SERVER", publicServer)
+	setEnv("RCON_PASSWORD", rconPassword)
+	setEnv("RCON_PORT", rconPort)
+	setEnv("SERVER_NAME", serverName)
+	setEnv("SERVER_PASSWORD", serverPassword)
+	setEnv("STEAM_VAC", steamVac)
+	setEnv("UDP_PORT", udpPort)
+	setEnv("USE_STEAM", useSteam)
+}
+
 func applyJvmConfigChanges() {
 	jvmConfigFile := baseGameDir + "ProjectZomboid64.json"
 
@@ -184,8 +208,19 @@ func applyServerConfigChanges() {
 	if cfg, err := ini.Load(serverConfigFile); err != nil {
 		log.Fatalf("Could not open Server Config File [%s]. Error:\n%s\n", serverConfigFile, err)
 	} else {
-		cfg.Section("").Key("RCONPort").SetValue(os.Getenv("RCON_PORT"))
+		cfg.Section("").Key("DefaultPort").SetValue(os.Getenv("DEFAULT_PORT"))
+		cfg.Section("").Key("Map").SetValue(os.Getenv("MAP_NAMES"))
+		cfg.Section("").Key("MaxPlayers").SetValue(os.Getenv("MAX_PLAYERS"))
+		cfg.Section("").Key("Mods").SetValue(os.Getenv("MOD_NAMES"))
+		cfg.Section("").Key("Open").SetValue(os.Getenv("PUBLIC_SERVER"))
+		cfg.Section("").Key("Password").SetValue(os.Getenv("SERVER_PASSWORD"))
+		cfg.Section("").Key("PauseEmpty").SetValue(os.Getenv("PAUSE_ON_EMPTY"))
+		cfg.Section("").Key("PublicName").SetValue(os.Getenv("SERVER_NAME"))
 		cfg.Section("").Key("RCONPassword").SetValue(os.Getenv("RCON_PASSWORD"))
+		cfg.Section("").Key("RCONPort").SetValue(os.Getenv("RCON_PORT"))
+		cfg.Section("").Key("SaveWorldEveryMinutes").SetValue(os.Getenv("AUTOSAVE_INTERVAL"))
+		cfg.Section("").Key("UDPPort").SetValue(os.Getenv("UDP_PORT"))
+		cfg.Section("").Key("WorkshopItems").SetValue(os.Getenv("MOD_WORKSHOP_IDS"))
 
 		if err := cfg.SaveTo(serverConfigFile); err != nil {
 			log.Fatalf("Could not save changes to Server Config File [%s]. Error:\n%s\n", serverConfigFile, err)
@@ -218,4 +253,16 @@ func startServerKillProcess() {
 	}
 
 	log.Debugln("Process killed successfully!")
+}
+
+func getSteamUse() string {
+	if os.Getenv("USE_STEAM") == "true" || os.Getenv("USE_STEAM") == "TRUE" {
+		if os.Getenv("STEAM_VAC") == "true" || os.Getenv("STEAM_VAC") == "TRUE" {
+			return "-steamvac true"
+		} else {
+			return "-steamvac false"
+		}
+	} else {
+		return "-nosteam"
+	}
 }
