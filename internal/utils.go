@@ -140,8 +140,8 @@ func applyJvmConfigChanges() {
 	jvmConfigFile := baseGameDir + "ProjectZomboid64.json"
 
 	jvmConfig := map[*regexp.Regexp]string{
-		regexp.MustCompile("-Xmx.*"):     "-Xmx" + os.Getenv("MAX_RAM"),
-		regexp.MustCompile("-XX:+Use.*"): "-XX:+Use" + os.Getenv("GC_CONFIG"),
+		regexp.MustCompile(`-Xmx.*`):      "-Xmx" + os.Getenv("MAX_RAM"),
+		regexp.MustCompile(`-XX:\+Use.*`): "-XX:+Use" + os.Getenv("GC_CONFIG"),
 	}
 
 	// Open the JSON Configuration file for editing
