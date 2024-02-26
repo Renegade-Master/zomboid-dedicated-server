@@ -23,7 +23,7 @@ FROM ${DOWNLOAD_IMAGE} AS downloader
 
 RUN dnf install --verbose --assumeyes --installroot=/app/dnf/ \
     --disablerepo fedora-cisco-openh264 \
-      glibc.i686 libstdc++.i686 libcurl-minimal.i686 libstdc++.x86_64 musl-libc.x86_64
+      glibc.i686 libstdc++.i686 libcurl-minimal.i686 libstdc++.x86_64
 
 RUN rm -rf /app/dnf/usr/sbin/* /app/dnf/var/cache/* /app/dnf/usr/share/* /app/dnf/usr/lib64/python*
 
@@ -123,6 +123,7 @@ COPY --from=builder /app/out/ /app/
 
 # Copy server utilities
 COPY --from="docker.io/outdead/rcon:0.10.2" /rcon /usr/local/bin/rcon
+COPY --from="docker.io/outdead/rcon:0.10.2" /lib/ld-musl-x86_64.so.1 /lib/ld-musl-x86_64.so.1
 
 # Copy SteamCMD configuration script
 COPY static/install_server.scmd /app/
