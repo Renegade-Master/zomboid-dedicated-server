@@ -131,9 +131,7 @@ jobs:
           name: server-configs-${{ matrix.system }}
           path: |
             podman-compose.yaml
-            ./ZomboidServerInfo/Server/GitHubActionTest.ini
-            ./ZomboidServerInfo/Server/GitHubActionTest_SandboxVars.lua
-            ./ZomboidServerInfo/ProjectZomboid64.json
+            ZomboidServerInfo/
             dedicated-server-install-listing.txt
             dedicated-server-config-listing.txt
             root-fs-listing.txt
