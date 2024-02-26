@@ -251,11 +251,11 @@ jobs:
           )"
 
           check_for_config() {
-            if ! grep -q -iE "$1" "./ZomboidServerInfo/Server/GitHubActionTest.ini"; then
-              printf "Could not find [%s] in [%s]\n" "$1" "./ZomboidServerInfo/Server/GitHubActionTest.ini"
+            if ! grep -q -iE "$1" "./ZomboidServerInfo/GitHubActionTest.ini"; then
+              printf "Could not find [%s] in [%s]\n" "$1" "./ZomboidServerInfo/GitHubActionTest.ini"
               exit 1
             else
-              printf "Found [%s] in [%s]\n" "$1" "./ZomboidServerInfo/Server/GitHubActionTest.ini"
+              printf "Found [%s] in [%s]\n" "$1" "./ZomboidServerInfo/GitHubActionTest.ini"
             fi
           }
 
