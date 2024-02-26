@@ -16,6 +16,9 @@ jobs:
   build-and-run:
     name: Build and Run Server
     runs-on: ubuntu-latest
+    outputs:
+      installdir: ${{ steps.volumes.outputs.installdir }}
+      configdir: ${{ steps.volumes.outputs.configdir }}
     strategy:
       matrix:
         system: [ podman ]
@@ -107,7 +110,7 @@ jobs:
 
       - name: Upload Docker Logs
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: docker-logs-${{ matrix.system }}
           path: |
@@ -115,7 +118,7 @@ jobs:
 
       - name: Upload Server Configuration
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: server-configs-${{ matrix.system }}
           path: |
@@ -138,17 +141,20 @@ jobs:
     strategy:
       matrix:
         system: [ podman ]
+    env:
+      INSTALLDIR: ${{needs.build-and-run.outputs.installdir}}
+      CONFIGDIR: ${{needs.build-and-run.outputs.configdir}}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Download Docker Logs
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: docker-logs-${{ matrix.system }}
 
       - name: Download Server Configs
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: server-configs-${{ matrix.system }}
 
@@ -195,11 +201,11 @@ jobs:
       - name: Test - Server JVM Configuration Applied
         run: |
           check_for_config() {
-            if ! grep -q -iE "$1" "${{ steps.volumes.outputs.installdir }}/ProjectZomboid64.json"; then
-              printf "Could not find [%s] in [%s]\n" "$1" "${{ steps.volumes.outputs.installdir }}/ProjectZomboid64.json"
+            if ! grep -q -iE "$1" "${INSTALLDIR}/ProjectZomboid64.json"; then
+              printf "Could not find [%s] in [%s]\n" "$1" "${INSTALLDIR}/ProjectZomboid64.json"
               exit 1
             else
-              printf "Found [%s] in [%s]\n" "$1" "${{ steps.volumes.outputs.installdir }}/ProjectZomboid64.json"
+              printf "Found [%s] in [%s]\n" "$1" "${INSTALLDIR}/ProjectZomboid64.json"
             fi
           }
 
@@ -208,7 +214,7 @@ jobs:
 
       - name: Test - Server Configuration Applied
         run: |
-          install_directory="${{ steps.volumes.outputs.installdir }}"
+          install_directory="${INSTALLDIR}"
           workshop_directory="${install_directory}/steamapps/workshop"
           mods_directory="${workshop_directory}/content/108600/522891356/mods"
           bedford_maps="${mods_directory}/Bedford Falls/media/maps"
@@ -239,11 +245,11 @@ jobs:
           )"
 
           check_for_config() {
-            if ! grep -q -iE "$1" "${{ steps.variables.outputs.docker-config-dir }}/Server/GitHubActionTest.ini"; then
-              printf "Could not find [%s] in [%s]\n" "$1" "${{ steps.variables.outputs.docker-config-dir }}/Server/GitHubActionTest.ini"
+            if ! grep -q -iE "$1" "${CONFIGDIR}/Server/GitHubActionTest.ini"; then
+              printf "Could not find [%s] in [%s]\n" "$1" "${CONFIGDIR}/Server/GitHubActionTest.ini"
               exit 1
             else
-              printf "Found [%s] in [%s]\n" "$1" "${{ steps.variables.outputs.docker-config-dir }}/Server/GitHubActionTest.ini"
+              printf "Found [%s] in [%s]\n" "$1" "${CONFIGDIR}/Server/GitHubActionTest.ini"
             fi
           }
 
