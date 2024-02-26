@@ -46,7 +46,7 @@ RUN go build -o /app/out/ ./...
 FROM scratch AS final
 
 # Include the Steam dependencies in the Library Path
-ENV LD_LIBRARY_PATH=/usr/local/bin/linux32:$LD_LIBRARY_PATH \
+ENV LD_LIBRARY_PATH=/usr/local/bin/linux32:/home/steam/ZomboidDedicatedServer/linux64:$LD_LIBRARY_PATH \
   PATH=/usr/local/bin/linux32/:$PATH
 
 # Copy required System Utils
@@ -59,36 +59,34 @@ COPY --from=downloader [ \
 ]
 
 # ldd ProjectZomboid64
-#         /lib64/ld-linux-x86-64.so.2 (0x00007f108248c000)
-#         libc.so.6 => /lib64/libc.so.6 (0x00007f1081f19000)
-#         libdl.so.2 => /lib64/libdl.so.2 (0x00007f1082471000)
-#         libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x00007f10820fb000)
-#         libm.so.6 => /lib64/libm.so.6 (0x00007f108211f000)
-#         libstdc++.so.6 => /lib64/libstdc++.so.6 (0x00007f1082200000)
+#         /lib64/ld-linux-x86-64.so.2 (0x00007fa1d27b1000)
+#         libc.so.6 => /lib64/libc.so.6 (0x00007fa1d2246000)
+#         libdl.so.2 => /lib64/libdl.so.2 (0x00007fa1d27a8000)
+#         libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x00007fa1d2435000)
+#         libm.so.6 => /lib64/libm.so.6 (0x00007fa1d2462000)
+#         libstdc++.so.6 => /lib64/libstdc++.so.6 (0x00007fa1d2545000)
 #         libsteam_api.so => not found
-#         linux-vdso.so.1 (0x00007ffcfb9d6000)
+#         linux-vdso.so.1 (0x00007ffcf6ed0000)
 
 # ldd steamclient.so
-#         /lib64/ld-linux-x86-64.so.2 (0x00007fb4773fd000)
-#         libc.so.6 => /lib64/libc.so.6 (0x00007fb474db5000)
-#         libdl.so.2 => /lib64/libdl.so.2 (0x00007fb47508f000)
-#         libm.so.6 => /lib64/libm.so.6 (0x00007fb474fa7000)
-#         libpthread.so.0 => /lib64/libpthread.so.0 (0x00007fb474fa2000)
-#         librt.so.1 => /lib64/librt.so.1 (0x00007fb47508a000)
-#         linux-vdso.so.1 (0x00007ffdbdfe8000)
+#         /lib/ld-linux.so.2 (0xf7ed4000)
+#         libc.so.6 => /lib/libc.so.6 (0xf56e5000)
+#         libdl.so.2 => /lib/libdl.so.2 (0xf59bc000)
+#         libm.so.6 => /lib/libm.so.6 (0xf58e3000)
+#         libpthread.so.0 => /lib/libpthread.so.0 (0xf58de000)
+#         librt.so.1 => /lib/librt.so.1 (0xf59b7000)
+#         linux-gate.so.1 (0xf7ed2000)
 
 # ldd steamcmd
-#         /lib/ld-linux.so.2 (0xf7f96000)
-#         libc.so.6 => /lib/libc.so.6 (0xf7640000)
-#         libdl.so.2 => /lib/libdl.so.2 (0xf7918000)
-#         libm.so.6 => /lib/libm.so.6 (0xf783f000)
-#         libpthread.so.0 => /lib/libpthread.so.0 (0xf783a000)
-#         librt.so.1 => /lib/librt.so.1 (0xf7913000)
-#         linux-gate.so.1 (0xf7f94000)
+#        /lib/ld-linux.so.2 (0xf7f26000)
+#        libc.so.6 => /lib/libc.so.6 (0xf7802000)
+#        libdl.so.2 => /lib/libdl.so.2 (0xf7ad4000)
+#        libm.so.6 => /lib/libm.so.6 (0xf79fb000)
+#        libpthread.so.0 => /lib/libpthread.so.0 (0xf7acf000)
+#        librt.so.1 => /lib/librt.so.1 (0xf7ad9000)
+#        linux-gate.so.1 (0xf7f24000)
 
 COPY --from=downloader /app/dnf/ /
-
-
 
 # Copy the DNF x32 dependencies
 # COPY --from=downloader [ \

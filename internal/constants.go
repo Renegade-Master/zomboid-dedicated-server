@@ -44,7 +44,6 @@ const (
 	serverPassword   = ""
 	steamPort        = "16261"
 	steamVac         = "true"
-	udpPort          = "16262"
 	useSteam         = "true"
 
 	badMsgRegEx            = ".*(unknown option)|(Connection Startup Failed)|(expected IP address).*"

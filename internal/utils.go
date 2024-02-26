@@ -140,7 +140,7 @@ func setEnvVariables() {
 	setEnv("ADMIN_PASSWORD", adminPass)
 	setEnv("ADMIN_USERNAME", adminUser)
 	setEnv("AUTOSAVE_INTERVAL", autoSaveInterval)
-	setEnv("BIND_IP", "0.0.0.0")
+	setEnv("BIND_IP", getLocalIp())
 	setEnv("DEFAULT_PORT", steamPort)
 	setEnv("GAME_VERSION", gameVersion)
 	setEnv("GC_CONFIG", gcConfig)
@@ -156,7 +156,7 @@ func setEnvVariables() {
 	setEnv("SERVER_NAME", serverName)
 	setEnv("SERVER_PASSWORD", serverPassword)
 	setEnv("STEAM_VAC", steamVac)
-	setEnv("UDP_PORT", udpPort)
+	setEnv("UDP_PORT", rakNetPort)
 	setEnv("USE_STEAM", useSteam)
 }
 
@@ -219,6 +219,7 @@ func applyServerConfigChanges() {
 		cfg.Section("").Key("RCONPassword").SetValue(os.Getenv("RCON_PASSWORD"))
 		cfg.Section("").Key("RCONPort").SetValue(os.Getenv("RCON_PORT"))
 		cfg.Section("").Key("SaveWorldEveryMinutes").SetValue(os.Getenv("AUTOSAVE_INTERVAL"))
+		cfg.Section("").Key("server_browser_announced_ip").SetValue(os.Getenv("BIND_IP"))
 		cfg.Section("").Key("UDPPort").SetValue(os.Getenv("UDP_PORT"))
 		cfg.Section("").Key("WorkshopItems").SetValue(os.Getenv("MOD_WORKSHOP_IDS"))
 
@@ -255,14 +256,14 @@ func startServerKillProcess() {
 	log.Debugln("Process killed successfully!")
 }
 
-func getSteamUse() string {
+func getSteamUse() []string {
 	if os.Getenv("USE_STEAM") == "true" || os.Getenv("USE_STEAM") == "TRUE" {
 		if os.Getenv("STEAM_VAC") == "true" || os.Getenv("STEAM_VAC") == "TRUE" {
-			return "-steamvac true"
+			return []string{"-steamvac", "true"}
 		} else {
-			return "-steamvac false"
+			return []string{"-steamvac", "false"}
 		}
 	} else {
-		return "-nosteam"
+		return []string{"-nosteam", ""}
 	}
 }

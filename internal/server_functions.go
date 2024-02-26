@@ -93,7 +93,7 @@ func StartManagedServer() {
 
 		log.Warnf("Received Signal [%s]. Beginning shutdown using RCON...\n", sig)
 
-		rconAddress := "127.0.0.1:" + os.Getenv("RCON_PORT")
+		rconAddress := os.Getenv("BIND_IP") + ":" + os.Getenv("RCON_PORT")
 		saveShellCmd(rcon,
 			"--address", rconAddress,
 			"--password", os.Getenv("RCON_PASSWORD"),
@@ -119,9 +119,8 @@ func startServer(done chan bool) {
 		"-ip", os.Getenv("BIND_IP"),
 		"-port", os.Getenv("DEFAULT_PORT"),
 		"-servername", os.Getenv("SERVER_NAME"),
-		"-steamvac", steamVac,
 		"-udpport", rakNetPort,
-		getSteamUse(),
+		getSteamUse()[0], getSteamUse()[1],
 	)
 
 	log.Infoln("Server Run Complete!")
