@@ -46,17 +46,8 @@ RUN go build -o /app/out/ ./...
 FROM scratch AS final
 
 # Include the Steam dependencies in the Library Path
-ENV LD_LIBRARY_PATH=/usr/local/bin/linux32/:/home/steam/ZomboidDedicatedServer/linux64/:/usr/lib/:/usr/lib64/:$LD_LIBRARY_PATH \
+ENV LD_LIBRARY_PATH=/usr/local/bin/linux32/:/home/steam/ZomboidDedicatedServer/linux64/:/lib/:/lib64/:$LD_LIBRARY_PATH \
   PATH=/usr/local/bin/linux32/:/app/$PATH
-
-# Copy required System Utils
-COPY --from=downloader [ \
-    "/usr/bin/bash", \
-    "/usr/bin/basename", \
-    "/usr/bin/env", \
-    "/usr/bin/uname", \
-    "/usr/bin/" \
-]
 
 # ldd /home/steam/ZomboidDedicatedServer/ProjectZomboid64 | cut  -d ' ' -f 1 | xargs -I {} find / -iname "*{}*"
 # ldd ProjectZomboid64
@@ -76,7 +67,7 @@ COPY --from=downloader [ \
 #     "/app/dnf/usr/lib64/libm.so.6", \
 #     "/app/dnf/usr/lib64/libstdc++.so.6", \
 #     "/app/dnf/usr/lib64/libstdc++.so.6.0.33", \
-#     "/usr/lib64/" \
+#     "/lib64/" \
 # ]
 
 # ldd /usr/local/bin/linux32/steamclient.so | cut  -d ' ' -f 1 | xargs -I {} find / -iname "*{}*"
@@ -95,7 +86,7 @@ COPY --from=downloader [ \
 #     "/app/dnf/usr/lib/libm.so.6", \
 #     "/app/dnf/usr/lib/libpthread.so.0", \
 #     "/app/dnf/usr/lib/librt.so.1", \
-#     "/usr/lib/" \
+#     "/lib/" \
 # ]
 
 # ldd /usr/local/bin/linux32/steamcmd | cut  -d ' ' -f 1 | xargs -I {} find / -iname "*{}*"
@@ -118,9 +109,36 @@ COPY --from=downloader [ \
 # COPY --from=downloader [ \
 #     "/app/dnf/usr/lib64/libpthread.so.0", \
 #     "/app/dnf/usr/lib64/libresolv.so.2", \
-#     "/usr/lib64/" \
+#     "/lib64/" \
 # ]
 
+# ldd /usr/bin/bash | cut  -d ' ' -f 1 | xargs -I {} find / -iname "*{}*"
+# ldd bash
+#         /lib64/ld-linux-x86-64.so.2 (0x00007f95a1079000)
+#         libc.so.6 => /usr/lib64/libc.so.6 (0x00007f95a0cff000)
+#         libtinfo.so.6 => /usr/lib64/libtinfo.so.6 (0x00007f95a0eec000)
+#         linux-vdso.so.1 (0x00007ffe8c2c0000)
+# COPY --from=downloader [ \
+#     "/app/dnf/usr/lib64/libtinfo.so.6", \
+#     "/app/dnf/usr/lib64/libtinfo.so.6.4", \
+#     "/lib64/" \
+# ]
+# COPY --from=downloader [ \
+#     "/usr/lib64/libtinfo.so.6", \
+#     "/lib/" \
+# ]
+
+# Copy required System Utils
+COPY --from=downloader [ \
+    "/usr/bin/bash", \
+    "/usr/bin/basename", \
+    "/usr/bin/env", \
+    "/usr/bin/uname", \
+    "/usr/bin/" \
+]
+
+# COPY --from=downloader  /etc/pki/ /etc/pki/
+# COPY --from=downloader  /etc/ssl/ /etc/ssl/
 COPY --from=downloader /app/dnf/ /
 
 # Copy the SteamCMD installation
