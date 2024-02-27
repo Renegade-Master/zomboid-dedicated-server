@@ -32,6 +32,7 @@ jobs:
           echo "datetime=$(date +%Y%m%dT%H%M%SZ)" >> $GITHUB_OUTPUT
           echo "userid=$(id -u)" >> $GITHUB_OUTPUT
           echo "groupid=$(id -g)" >> $GITHUB_OUTPUT
+          echo "hostip=$(hostname -I)" >> $GITHUB_OUTPUT
 
       - name: Make Volumes
         id: volumes
