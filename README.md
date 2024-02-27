@@ -21,33 +21,53 @@ the [GitHub repository](https://github.com/Renegade-Master/zomboid-dedicated-ser
 Dedicated Server for Project Zomboid using Docker, and optionally Docker-Compose.
 Built almost from scratch to be the smallest Project Zomboid Dedicated Server around!
 
-**Note:** This Image is "rootless", and therefore should not be run as the `root` user.
-Attempting to do so will prevent the server from starting (
-see [#8](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/8)
-, [#14](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/14)).
-
 Bare-Minimum instructions to get a server running:
 
 ```shell
-# Pull the latest image:
-docker pull renegademaster/zomboid-dedicated-server:latest
+## Pull the latest image:
+# With Docker
+docker pull docker.io/renegademaster/zomboid-dedicated-server:latest
 
-# Make two folders
-mkdir ZomboidConfig ZomboidDedicatedServer
+# Or with Podman
+podman pull docker.io/renegademaster/zomboid-dedicated-server:latest
 
-# Run the server (with bare minimum options):
+
+## Make two volumes
+# With Docker
+docker volume create zomboid-install
+docker volume create zomboid-config
+
+# Or with Podman
+podman volume create zomboid-install
+podman volume create zomboid-config
+
+## Run the server (with bare minimum options):
+# With Docker
 docker run --detach \
-    --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
-    --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
+    --volume "zomboid-install":/home/steam/ZomboidDedicatedServer \
+    --volume "zomboid-config":/home/steam/Zomboid \
+    --publish 16261:16261/udp --publish 16262:16262/udp \
+    --name zomboid-server \
+    docker.io/renegademaster/zomboid-dedicated-server:latest
+
+# Or with Podman
+podman run --detach \
+    --volume "zomboid-install":/home/steam/ZomboidDedicatedServer \
+    --volume "zomboid-config":/home/steam/Zomboid \
     --publish 16261:16261/udp --publish 16262:16262/udp \
     --name zomboid-server \
     docker.io/renegademaster/zomboid-dedicated-server:latest
 ```
 
-The default behaviour of the Container is not to automatically restart after a crash to give the user time to investigate the cause of the issue. You may however want to change the [restart policy](https://docs.docker.com/engine/reference/run/#restart-policies---restart) to automatically recover from an unexpected failure. The following options will help to recover from such a situation:
+The default behaviour of the Container is not to automatically restart after a crash to give the user time to
+investigate the cause of the issue. You may however want to change
+the [restart policy](https://docs.docker.com/engine/reference/run/#restart-policies---restart) to automatically recover
+from an unexpected failure. The following options will help to recover from such a situation:
 
-- `--restart=unless-stopped` will restart the container every time that it exits unless the Container is stopped using the Docker/Podman API.
-- `--restart=on-failure[:max-retries]` will restart the container only if it exits with a non-zero exit code. Optionally, it can also be configured to only restart a fixed number of times to help prevent crash-loops.
+- `--restart=unless-stopped` will restart the container every time that it exits unless the Container is stopped using
+  the Docker/Podman API.
+- `--restart=on-failure[:max-retries]` will restart the container only if it exits with a non-zero exit code.
+  Optionally, it can also be configured to only restart a fixed number of times to help prevent crash-loops.
 
 These same options can be set in the `docker-compose.yaml` file.
 
@@ -69,7 +89,7 @@ runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/
 ### Images:
 
 | Provider                                                                                                               | Image                                               | Pull Command                                                                                                                                     |
-| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+|------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
 | [GitHub Packages](https://github.com/Renegade-Master/zomboid-dedicated-server/pkgs/container/zomboid-dedicated-server) | `ghcr.io/renegade-master/zomboid-dedicated-server`  | `docker pull ghcr.io/renegade-master/zomboid-dedicated-server:x.y.z`<br/>`docker pull ghcr.io/renegade-master/zomboid-dedicated-server:latest`   |
 | [DockerHub](https://hub.docker.com/r/renegademaster/zomboid-dedicated-server)                                          | `docker.io/renegademaster/zomboid-dedicated-server` | `docker pull docker.io/renegademaster/zomboid-dedicated-server:x.y.z`<br/>`docker pull docker.io/renegademaster/zomboid-dedicated-server:latest` |
 | [Red Hat Quay](https://quay.io/repository/renegade_master/zomboid-dedicated-server)                                    | `quay.io/renegade_master/zomboid-dedicated-server`  | `docker pull quay.io/renegade_master/zomboid-dedicated-server:x.y.z`<br/>`docker pull quay.io/renegade_master/zomboid-dedicated-server:latest`   |
@@ -78,45 +98,47 @@ runs [here](https://github.com/Renegade-Master/zomboid-dedicated-server/actions/
 
 - [Dedicated Server Wiki](https://pzwiki.net/wiki/Dedicated_Server)
 - [Dedicated Server Configuration](https://pzwiki.net/wiki/Server_Settings)
+- [Dedicated Server Parameters](https://pzwiki.net/wiki/Startup_Parameters#Game_arguments)
 - [Steam DB Page](https://steamdb.info/app/380870/)
 
 ## Prerequisites
 
 ### Directories
 
-Two directories are required to be present on the host:
+Two Volumes are required to be present on the host:
 
-| Name               | Directory                | Description                                          |
-| ------------------ | ------------------------ | ---------------------------------------------------- |
-| Configuration Data | `ZomboidConfig`          | For storing the server configuration and save files. |
-| Installation Data  | `ZomboidDedicatedServer` | For storing the server game data.                    |
+| Name               | Volume Name       | Description                                          |
+|--------------------|-------------------|------------------------------------------------------|
+| Configuration Data | `zomboid-config`  | For storing the server configuration and save files. |
+| Installation Data  | `zomboid-install` | For storing the server game data.                    |
 
-These folders must be created in the directory that you intend to run the Docker image from. This could be a folder that
-you have created in some kind of "server directory", or it could be the root of this repository after you have cloned it
-down. **_If these folders are not present when the Docker image starts, you will get permissions errors_** (
-see [#8](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/8)
-, [#14](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/14)
-, [#17](https://github.com/Renegade-Master/zomboid-dedicated-server/issues/17)) because the Docker engine will create
-the folders at Container runtime. This creates them under the `root` user on the host which causes permissions
-conflicts.
+These Volumes must be created before starting the server.
 
-The 'Configuration Data' folder is where the server configuration and save files are stored. This folder can be opened
+The 'Configuration Data' Volume is where the server configuration and save files are stored. This folder can be opened
 and edited just like if you were running the server without Docker. You can backup your save files, or edit the server
 configuration files. You should start the server once successfully before attempting to edit files in the 'Configuration
 Data' folder. Once the files are generated, it is safe to edit them. Most configuration option changes will require a
 restart of the server to properly take effect. Most of these settings are also configurable from the in-game Admin menu.
 
-The 'Installation Data' folder is where the server game data is stored. This folder can be opened and edited, but a full
+The 'Installation Data' Volume is where the server game data is stored. This folder can be opened and edited, but a full
 restart of the server can sometimes reset changes to this folder during file verification. Therefore, the recommended
 way to change files that would be stored in this folder is to use the Environment Variables in the 'Optional Arguments'
 table provided by the Docker image.
+
+If access to the installation or config directories is required, the recommendation is to access the mount location of
+the Volume. This can be determined with the following command:
+
+```shell
+docker volume inspect zomboid-install | jq -r '.[].Mountpoint' -
+docker volume inspect zomboid-config | jq -r '.[].Mountpoint' -
+```
 
 ### Ports
 
 There are a total of three ports that can be utilised by the server, but only two are strictly required:
 
 | Name           | Default Port | Description                                                          | Required |
-|----------------|--------------|----------------------------------------------------------------------| -------- |
+|----------------|--------------|----------------------------------------------------------------------|----------|
 | `DEFAULT_PORT` | `16261`      | Port used by the server to listen for connections.                   | yes      |
 | `RCON_PORT`    | `27015`      | Port used by the server to listen for RCON connections/commands.     | no       |
 | `UDP_PORT`     | `16262`      | Additional Port used by the server to facilitate Client connections. | yes      |
@@ -147,7 +169,7 @@ recommended for ease of configuration.
 ### Optional environment variables
 
 | Argument         | Description                                  | Values            | Default       |
-| ---------------- | -------------------------------------------- | ----------------- | ------------- |
+|------------------|----------------------------------------------|-------------------|---------------|
 | `ADMIN_PASSWORD` | Server Admin account password                | [a-zA-Z0-9]+      | changeme      |
 | `ADMIN_USERNAME` | Server Admin account username                | [a-zA-Z0-9]+      | superuser     |
 | `BIND_IP`        | IP to bind the server to                     | 0.0.0.0           | 0.0.0.0       |
@@ -169,7 +191,7 @@ the configured environment variable.
 Any other values *can* and *should* be edited directly in the .ini file.
 
 | Argument            | Description                                                                                                                             | .ini variable         | Values                 | Default       |
-|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------| --------------------- | ---------------------- | ------------- |
+|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------|-----------------------|------------------------|---------------|
 | `AUTOSAVE_INTERVAL` | Interval between autosaves in minutes                                                                                                   | SaveWorldEveryMinutes | [0-9]+                 | 15m           |
 | `DEFAULT_PORT`      | Port for other players to connect to                                                                                                    | DefaultPort           | 1000 - 65535           | 16261         |
 | `MAX_PLAYERS`       | Maximum players allowed in the Server                                                                                                   | MaxPlayers            | [0-9]+                 | 16            |
@@ -192,7 +214,7 @@ The following are instructions for running the server using the Docker image.
     - Pull the image from DockerHub:
 
       ```shell
-      docker pull renegademaster/zomboid-dedicated-server:<tagname>
+      docker pull docker.io/renegademaster/zomboid-dedicated-server:<tagname>
       ```
 
     - Or alternatively, build the image:
@@ -201,7 +223,9 @@ The following are instructions for running the server using the Docker image.
       git clone https://github.com/Renegade-Master/zomboid-dedicated-server.git \
           && cd zomboid-dedicated-server
 
-      docker build -t docker.io/renegademaster/zomboid-dedicated-server:<tag> -f docker/zomboid-dedicated-server.Dockerfile .
+      docker build . \
+        --tag docker.io/renegademaster/zomboid-dedicated-server:<tag> \
+        --file image/zomboid-server.Containerfile
       ```
 
 2. Run the container:
@@ -210,11 +234,12 @@ The following are instructions for running the server using the Docker image.
    `published` ports below must also be changed\*
 
    ```shell
-   mkdir ZomboidConfig ZomboidDedicatedServer
-
+   docker volume create ZomboidDedicatedServer
+   docker volume create ZomboidConfig
+   
    docker run --detach \
-       --mount type=bind,source="$(pwd)/ZomboidDedicatedServer",target=/home/steam/ZomboidDedicatedServer \
-       --mount type=bind,source="$(pwd)/ZomboidConfig",target=/home/steam/Zomboid \
+       --volume "ZomboidDedicatedServer":/home/steam/ZomboidDedicatedServer \
+       --volume "ZomboidConfig":/home/steam/Zomboid \
        --publish 16261:16261/udp --publish 16262:16262/udp [--publish 27015:27015/tcp] \
        --name zomboid-server \
        [--restart=no] \
@@ -272,7 +297,8 @@ The following are instructions for running the server using Docker-Compose.
     - Make the data and configuration directories:
 
       ```shell
-      mkdir ZomboidConfig ZomboidDedicatedServer
+      docker volume create ZomboidDedicatedServer
+      docker volume create ZomboidConfig
       ```
 
     - Pull the image from DockerHub:
