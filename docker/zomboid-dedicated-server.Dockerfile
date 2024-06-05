@@ -22,7 +22,7 @@
 #######################################################################
 
 # Base Image
-ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:1.1.2"
+ARG BASE_IMAGE="docker.io/renegademaster/steamcmd-minimal:2.0.0-root"
 
 FROM ${BASE_IMAGE}
 
@@ -36,7 +36,9 @@ LABEL com.renegademaster.zomboid-dedicated-server.authors="Renegade-Master" \
 COPY src /home/steam/
 
 # Install Python, and take ownership of rcon binary
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN sed -i 's|http://[^ ]*|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list \
+    && apt-get update && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
         python3-minimal iputils-ping tzdata \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
